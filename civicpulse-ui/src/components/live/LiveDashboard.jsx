@@ -68,13 +68,14 @@ export default function LiveDashboard({ session }) {
             style={{ flex: 1, minHeight: 0 }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-              {/* Bites list — scrollable */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {/* Bites list — scrollable, newest at bottom, justify to bottom */}
+              <div ref={el => { if (el) el.scrollTop = el.scrollHeight; }} style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'flex-end' }}>
                 {Array.from(session.topics.values())
                   .filter(t => t.category === 'motion' || t.state !== 'EVICTED')
-                  .map((topic, i) => {
+                  .map((topic, i, arr) => {
                     const isActive = topic.state === 'ACTIVE' || topic.state === 'DETECTED';
                     const isCarried = topic.state === 'EXPIRED';
+                    const isNewest = i === arr.length - 1;
                     return (
                       <div key={topic.normalized_id || topic.label} style={{
                         background: isActive ? '#fafaff' : '#f8fafc',
@@ -82,6 +83,7 @@ export default function LiveDashboard({ session }) {
                         borderRadius: 10, padding: '10px 14px',
                         display: 'flex', alignItems: 'flex-start', gap: 10,
                         transition: 'all .2s',
+                        animation: isNewest ? 'slideUp .4s cubic-bezier(.22,1,.36,1)' : 'none',
                       }}>
                         <div style={{
                           width: 24, height: 24, borderRadius: '50%',
@@ -179,6 +181,12 @@ export default function LiveDashboard({ session }) {
 
       {/* Bottom: Slim session controls */}
       <SessionControls session={session} />
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
