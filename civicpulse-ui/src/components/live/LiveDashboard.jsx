@@ -136,7 +136,7 @@ export default function LiveDashboard({ session }) {
             icon={iconNotes}
             style={{ minHeight: 0 }}
           >
-            <ClerkNotes startTime={session.startTime} />
+            <ClerkNotes />
           </BentoPanel>
 
           {/* Topics — compact */}

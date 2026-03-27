@@ -1,31 +1,29 @@
 import { useState, useRef, useEffect } from 'react';
 import { COLORS } from '../../styles/tokens';
 
-function formatElapsed(startTime) {
-  if (!startTime) return '00:00';
-  const secs = Math.floor((Date.now() - startTime) / 1000);
-  const m = Math.floor(secs / 60);
-  const s = secs % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+function getTimeOfDay() {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
-export default function ClerkNotes({ startTime }) {
+export default function ClerkNotes() {
   const [notes, setNotes] = useState([]);
   const [input, setInput] = useState('');
-  const [currentTime, setCurrentTime] = useState('00:00');
+  const [clock, setClock] = useState(getTimeOfDay());
   const scrollRef = useRef(null);
 
-  // Update current time every second
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(formatElapsed(startTime));
-    }, 1000);
+    const interval = setInterval(() => setClock(getTimeOfDay()), 10000);
     return () => clearInterval(interval);
-  }, [startTime]);
+  }, []);
 
   function addNote() {
     if (!input.trim()) return;
-    setNotes(prev => [...prev, { text: input.trim(), time: currentTime }]);
+    setNotes(prev => [...prev, { text: input.trim(), time: getTimeOfDay() }]);
     setInput('');
     setTimeout(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -67,7 +65,6 @@ export default function ClerkNotes({ startTime }) {
         ))}
       </div>
 
-      {/* Input */}
       <div style={{
         padding: '8px 12px', borderTop: `1px solid ${COLORS.subtleBorder}`,
         display: 'flex', gap: 6, flexShrink: 0,
@@ -90,7 +87,7 @@ export default function ClerkNotes({ startTime }) {
           fontSize: 10, fontWeight: 600, color: COLORS.primaryBorder,
           display: 'flex', alignItems: 'center', fontVariantNumeric: 'tabular-nums',
         }}>
-          {currentTime}
+          {clock}
         </span>
       </div>
     </div>
