@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { COLORS } from '../../styles/tokens';
 import ProcedureRules from './ProcedureRules';
+import RuleAlert from './RuleAlert';
 
 const STATUS_STYLES = {
   pending:   { bg: '#f8fafc', color: '#94a3b8', border: '#e2e8f0', label: 'Pending' },
@@ -8,7 +9,7 @@ const STATUS_STYLES = {
   discussed: { bg: '#f0fdf4', color: '#22c55e', border: '#bbf7d0', label: 'Discussed' },
 };
 
-export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, embedded }) {
+export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, transcript = [], embedded }) {
   const [viewMode, setViewMode] = useState('agenda'); // 'agenda' | 'rules'
   const total = agendaItems.length;
   const discussed = agendaItems.filter(i => i.status === 'discussed').length;
@@ -156,6 +157,9 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, 
 
       {/* Procedure Rules view */}
       {viewMode === 'rules' && <ProcedureRules />}
+
+      {/* Rule alerts — always visible at bottom */}
+      <RuleAlert topics={topics} transcript={transcript} />
     </div>
   );
 }

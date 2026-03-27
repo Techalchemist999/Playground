@@ -139,6 +139,7 @@ export default function LiveDashboard({ session }) {
               agendaItems={session.agendaItems}
               currentAgendaItem={session.currentAgendaItem}
               topics={session.topics}
+              transcript={session.transcript}
               embedded
             />
           </BentoPanel>
