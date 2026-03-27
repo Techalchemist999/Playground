@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { COLORS, CATEGORY_COLORS, TOPIC_STATE_COLORS } from '../../styles/tokens';
 import Spinner from '../shared/Spinner';
+import TopicCard from './TopicCard';
 
 const BUBBLE_STYLES = {
   topic:        { ring: '#a5b4fc', glow: 'rgba(99,102,241,0.12)',  text: '#6366f1' },
@@ -120,6 +121,7 @@ function TopicBubble({ topic, compact, locked, isNew, onToggleLock }) {
 export default function TopicBubbles({ topics, status, compact }) {
   const [lockedIds, setLockedIds] = useState(new Set());
   const [newIds, setNewIds] = useState(new Set());
+  const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' | 'cards'
   const seenRef = useRef(new Set());
   const fadeTimers = useRef(new Map());
 
@@ -161,24 +163,65 @@ export default function TopicBubbles({ topics, status, compact }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+      {/* View toggle — top right */}
+      <div style={{
+        display: 'flex', justifyContent: 'flex-end',
+        padding: '6px 10px 0', flexShrink: 0,
+      }}>
+        <div style={{
+          display: 'flex', background: '#f1f5f9', borderRadius: 6, padding: 2,
+        }}>
+          <button
+            onClick={() => setViewMode('bubbles')}
+            aria-label="Bubble view"
+            style={{
+              padding: '3px 8px', border: 'none', borderRadius: 4, cursor: 'pointer',
+              background: viewMode === 'bubbles' ? '#fff' : 'transparent',
+              boxShadow: viewMode === 'bubbles' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              display: 'flex', alignItems: 'center', gap: 3,
+              fontSize: 9, fontWeight: 600, color: viewMode === 'bubbles' ? COLORS.primary : COLORS.mutedText,
+              transition: 'all .15s',
+            }}
+          >
+            <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+          </button>
+          <button
+            onClick={() => setViewMode('cards')}
+            aria-label="Card view"
+            style={{
+              padding: '3px 8px', border: 'none', borderRadius: 4, cursor: 'pointer',
+              background: viewMode === 'cards' ? '#fff' : 'transparent',
+              boxShadow: viewMode === 'cards' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              display: 'flex', alignItems: 'center', gap: 3,
+              fontSize: 9, fontWeight: 600, color: viewMode === 'cards' ? COLORS.primary : COLORS.mutedText,
+              transition: 'all .15s',
+            }}
+          >
+            <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Content area */}
       <div
         role="list"
-        aria-label="Detected meeting topics. Click a bubble to pin it."
+        aria-label="Detected meeting topics"
         style={{
           flex: 1,
           display: 'flex',
-          flexWrap: 'wrap',
-          gap: compact ? 10 : 14,
-          padding: compact ? '12px 14px' : '16px 20px',
-          alignContent: 'flex-start',
-          justifyContent: 'center',
+          flexWrap: viewMode === 'bubbles' ? 'wrap' : 'nowrap',
+          flexDirection: viewMode === 'cards' ? 'column' : 'row',
+          gap: viewMode === 'cards' ? 5 : (compact ? 10 : 14),
+          padding: viewMode === 'cards' ? '6px 8px' : (compact ? '8px 14px' : '16px 20px'),
+          alignContent: viewMode === 'bubbles' ? 'flex-start' : undefined,
+          justifyContent: viewMode === 'bubbles' ? 'center' : undefined,
           overflowY: 'auto',
         }}
       >
         {isConnecting && (
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-            padding: '20px 0',
+            padding: '20px 0', width: '100%',
           }}>
             <Spinner size={20} label="Detecting topics" />
             <span style={{ fontSize: 11, fontWeight: 500, color: COLORS.mutedText }}>Analyzing audio...</span>
@@ -187,7 +230,7 @@ export default function TopicBubbles({ topics, status, compact }) {
         {!isConnecting && topicsArray.length === 0 && (
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            color: COLORS.mutedText, padding: '20px 0',
+            color: COLORS.mutedText, padding: '20px 0', width: '100%',
           }}>
             <svg width={compact ? 24 : 32} height={compact ? 24 : 32} fill="none" stroke={COLORS.cardBorder} strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: 6 }} aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
@@ -196,7 +239,9 @@ export default function TopicBubbles({ topics, status, compact }) {
             <span style={{ fontSize: 11, fontWeight: 500 }}>Topics appear as detected...</span>
           </div>
         )}
-        {topicsArray.map((topic) => {
+
+        {/* Bubble view */}
+        {viewMode === 'bubbles' && topicsArray.map((topic) => {
           const id = topic.normalized_id || topic.label;
           return (
             <TopicBubble
@@ -209,6 +254,11 @@ export default function TopicBubbles({ topics, status, compact }) {
             />
           );
         })}
+
+        {/* Card view */}
+        {viewMode === 'cards' && topicsArray.map((topic) => (
+          <TopicCard key={topic.normalized_id || topic.label} topic={topic} />
+        ))}
       </div>
 
       {topicsArray.length > 0 && (

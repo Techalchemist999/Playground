@@ -65,14 +65,14 @@ export default function LiveDashboard({ session }) {
           <BentoPanel
             title="Procedural Bites"
             icon={iconBites}
-            badge={`${session.topics.size} detected`}
+            badge={`${Array.from(session.topics.values()).filter(t => t.category === 'motion').length} motions`}
             style={{ flex: 1, minHeight: 0 }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
               {/* Bites list — scrollable, newest at bottom */}
               <div ref={el => { if (el) el.scrollTop = el.scrollHeight; }} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'flex-end' }}>
                 {Array.from(session.topics.values())
-                  .filter(t => t.state !== 'EVICTED')
+                  .filter(t => t.state !== 'EVICTED' && t.category === 'motion')
                   .map((topic, i, arr) => (
                     <BiteCard
                       key={topic.normalized_id || topic.label}
@@ -81,7 +81,7 @@ export default function LiveDashboard({ session }) {
                       isNewest={i === arr.length - 1}
                     />
                   ))}
-                {session.topics.size === 0 && (
+                {Array.from(session.topics.values()).filter(t => t.category === 'motion').length === 0 && (
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flex: 1, color: COLORS.mutedText, fontSize: 12, fontStyle: 'italic',
