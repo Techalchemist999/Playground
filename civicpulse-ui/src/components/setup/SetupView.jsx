@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { COLORS, SPACING } from '../../styles/tokens';
-import { gradientButtonStyle, cardStyle, outlineButtonStyle } from '../../styles/shared';
+import { gradientButtonStyle, cardStyle } from '../../styles/shared';
 import Spinner from '../shared/Spinner';
 import SourcePicker from './SourcePicker';
 import AgendaPicker from './AgendaPicker';
@@ -8,7 +8,7 @@ import AgendaPicker from './AgendaPicker';
 export default function SetupView({ session }) {
   const [agendaId, setAgendaId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [testLoading, setTestLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
 
   async function handleStart() {
     setLoading(true);
@@ -19,36 +19,13 @@ export default function SetupView({ session }) {
     }
   }
 
-  async function handleQuickTest() {
-    setTestLoading(true);
+  async function handleDemo() {
+    setDemoLoading(true);
     try {
-      // 1. Ingest a YouTube URL
       await session.ingest('youtube', 'https://youtube.com/watch?v=demo-council-meeting');
-      // 2. Start with first agenda
       await session.start('agenda-2025-08-27');
-      // 3. Let it run ~12 seconds to accumulate topics and transcript, then auto-stop
-      setTimeout(async () => {
-        try {
-          await session.stop();
-        } catch (e) { /* session may already be transitioning */ }
-      }, 12000);
     } catch (e) {
-      setTestLoading(false);
-    }
-  }
-
-  async function handleSkipToResults() {
-    setTestLoading(true);
-    try {
-      // 1. Ingest
-      await session.ingest('youtube', 'https://youtube.com/watch?v=demo-council-meeting');
-      // 2. Start with agenda
-      await session.start('agenda-2025-08-27');
-      // 3. Immediately stop — backend generates minutes on stop
-      await new Promise(r => setTimeout(r, 2000)); // brief pause for SSE to deliver a few events
-      await session.stop();
-    } catch (e) {
-      setTestLoading(false);
+      setDemoLoading(false);
     }
   }
 
@@ -88,59 +65,38 @@ export default function SetupView({ session }) {
         </div>
 
         <div style={{ padding: '20px 28px 24px' }}>
-          {/* Quick Test Buttons */}
-          <div style={{
-            background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10,
-            padding: '14px 16px', marginBottom: 18,
-          }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', color: '#92400e', marginBottom: 8 }}>
-              UI Testing
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                onClick={handleQuickTest}
-                disabled={testLoading}
-                style={{
-                  ...outlineButtonStyle,
-                  flex: 1,
-                  padding: '9px 12px',
-                  fontSize: 12,
-                  borderColor: '#fde68a',
-                  color: '#92400e',
-                  background: '#fff',
-                }}
-              >
-                {testLoading ? <Spinner size={12} color="#92400e" /> : (
-                  <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <polygon points="5,3 19,12 5,21" fill="currentColor" stroke="none" />
-                  </svg>
-                )}
-                Quick Test (12s live)
-              </button>
-              <button
-                onClick={handleSkipToResults}
-                disabled={testLoading}
-                style={{
-                  ...gradientButtonStyle,
-                  flex: 1,
-                  padding: '9px 12px',
-                  fontSize: 12,
-                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                  boxShadow: '0 2px 8px rgba(245,158,11,.25)',
-                }}
-              >
-                {testLoading ? <Spinner size={12} color="#fff" /> : (
-                  <svg width="12" height="12" fill="none" stroke="#fff" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <polygon points="13,19 22,12 13,5" fill="#fff" stroke="none" />
-                    <polygon points="2,19 11,12 2,5" fill="#fff" stroke="none" />
-                  </svg>
-                )}
-                Skip to Minutes
-              </button>
-            </div>
-            <div style={{ fontSize: 10.5, color: '#b45309', marginTop: 6, lineHeight: 1.5 }}>
-              Quick Test runs 12s of simulated audio then auto-stops. Skip to Minutes jumps straight to the minutes workspace.
-            </div>
+          {/* Demo shortcut */}
+          <button
+            onClick={handleDemo}
+            disabled={demoLoading}
+            style={{
+              width: '100%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              padding: '11px 16px',
+              background: '#fff',
+              border: `1.5px solid ${COLORS.primaryBorder}`,
+              borderRadius: 10,
+              fontSize: 13, fontWeight: 600, color: COLORS.primary,
+              marginBottom: 16,
+              transition: 'all .15s',
+            }}
+          >
+            {demoLoading ? (
+              <><Spinner size={14} color={COLORS.primary} /> Starting demo...</>
+            ) : (
+              <>
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <polygon points="5,3 19,12 5,21" fill="currentColor" stroke="none" />
+                </svg>
+                Run Saved Demo (Aug 27 RCM)
+              </>
+            )}
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <div style={{ flex: 1, height: 1, background: COLORS.cardBorder }} />
+            <span style={{ fontSize: 10, fontWeight: 600, color: COLORS.mutedText }}>OR</span>
+            <div style={{ flex: 1, height: 1, background: COLORS.cardBorder }} />
           </div>
 
           <SourcePicker onIngest={session.ingest} loading={false} />
@@ -159,7 +115,6 @@ export default function SetupView({ session }) {
                   width: '100%',
                   padding: '12px',
                   fontSize: 14,
-                  opacity: loading ? 0.6 : 1,
                 }}
               >
                 {loading ? (
