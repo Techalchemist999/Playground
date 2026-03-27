@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { COLORS, CATEGORY_COLORS, TOPIC_STATE_COLORS } from '../../styles/tokens';
 import Spinner from '../shared/Spinner';
 
@@ -15,7 +15,6 @@ const BUBBLE_STYLES = {
   person:       { ring: '#cbd5e1', glow: 'rgba(100,116,139,0.08)', text: '#475569' },
 };
 
-// 30 second linger time before fade-out
 const LINGER_MS = 30000;
 
 function getBubbleSize(mentionCount, compact) {
@@ -25,7 +24,7 @@ function getBubbleSize(mentionCount, compact) {
   return Math.min(max, base + (mentionCount || 1) * scale);
 }
 
-function TopicBubble({ topic, compact, locked, onToggleLock }) {
+function TopicBubble({ topic, compact, locked, isNew, onToggleLock }) {
   const bs = BUBBLE_STYLES[topic.category] || BUBBLE_STYLES.topic;
   const stateColor = TOPIC_STATE_COLORS[topic.state] || TOPIC_STATE_COLORS.DETECTED;
   const size = getBubbleSize(topic.mention_count, compact);
@@ -52,14 +51,10 @@ function TopicBubble({ topic, compact, locked, onToggleLock }) {
         justifyContent: 'center',
         position: 'relative',
         cursor: 'pointer',
-        // Smooth transitions for everything — buttery
-        transition: 'all 1.2s cubic-bezier(.22,1,.36,1), opacity 2s cubic-bezier(.22,1,.36,1)',
-        // Centre bloom entrance
-        animation: topic._isNew ? 'centreBloom 1.8s cubic-bezier(.22,1,.36,1) both' : 'none',
-        // Fade out smoothly when expired and not locked
+        transition: 'width 1s cubic-bezier(.22,1,.36,1), height 1s cubic-bezier(.22,1,.36,1), opacity 2s cubic-bezier(.22,1,.36,1), transform 2s cubic-bezier(.22,1,.36,1), box-shadow 0.8s ease',
+        animation: isNew ? 'centreBloom 1.8s cubic-bezier(.22,1,.36,1) both' : 'none',
         opacity: isFading ? 0 : 1,
         transform: isFading ? 'scale(0.4)' : 'scale(1)',
-        // Ring + glow + lock ring
         boxShadow: [
           `0 0 0 2.5px ${locked ? '#6366f1' : bs.ring}`,
           `0 0 0 ${locked ? '5px' : '4px'} ${locked ? '#6366f130' : bs.ring + '20'}`,
@@ -69,7 +64,6 @@ function TopicBubble({ topic, compact, locked, onToggleLock }) {
         flexShrink: 0,
       }}
     >
-      {/* Lock indicator */}
       {locked && (
         <div aria-hidden="true" style={{
           position: 'absolute', top: -2, right: -2,
@@ -86,7 +80,6 @@ function TopicBubble({ topic, compact, locked, onToggleLock }) {
         </div>
       )}
 
-      {/* State dot (only when not locked) */}
       {!locked && (
         <div aria-hidden="true" style={{
           position: 'absolute', top: 1, right: 1,
@@ -126,89 +119,51 @@ function TopicBubble({ topic, compact, locked, onToggleLock }) {
 
 export default function TopicBubbles({ topics, status, compact }) {
   const [lockedIds, setLockedIds] = useState(new Set());
-  const [visibleIds, setVisibleIds] = useState(new Set());
-  const timersRef = useRef(new Map());
-  const prevSizeRef = useRef(0);
+  const [newIds, setNewIds] = useState(new Set());
+  const seenRef = useRef(new Set());
+  const fadeTimers = useRef(new Map());
 
-  // Track which topics are visible (stays for 30s after going inactive)
+  // Track new arrivals for bloom animation
   useEffect(() => {
-    const topicsArray = Array.from(topics.values());
-
-    topicsArray.forEach(topic => {
-      const id = topic.normalized_id || topic.label;
-      const isActive = topic.state === 'ACTIVE' || topic.state === 'DETECTED' || topic.state === 'REAPPEARED';
-
-      if (isActive) {
-        // Show it, clear any pending fade timer
-        setVisibleIds(prev => new Set(prev).add(id));
-        if (timersRef.current.has(id)) {
-          clearTimeout(timersRef.current.get(id));
-          timersRef.current.delete(id);
-        }
-      } else if (topic.state === 'EXPIRED' && !lockedIds.has(id)) {
-        // Start 30s countdown to fade out (unless locked)
-        if (!timersRef.current.has(id)) {
-          const timer = setTimeout(() => {
-            setVisibleIds(prev => {
-              const next = new Set(prev);
-              next.delete(id);
-              return next;
-            });
-            timersRef.current.delete(id);
-          }, LINGER_MS);
-          timersRef.current.set(id, timer);
-        }
-        // Still visible during linger
-        setVisibleIds(prev => new Set(prev).add(id));
+    const currentIds = new Set();
+    topics.forEach((t, key) => {
+      const id = t.normalized_id || t.label || key;
+      currentIds.add(id);
+      if (!seenRef.current.has(id)) {
+        seenRef.current.add(id);
+        setNewIds(prev => new Set(prev).add(id));
+        // Remove "new" flag after animation completes
+        setTimeout(() => {
+          setNewIds(prev => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        }, 2000);
       }
     });
+  }, [topics]);
 
-    return () => {};
-  }, [topics, lockedIds]);
-
-  // Mark new topics for bloom animation
-  const topicsArray = Array.from(topics.values())
-    .filter(t => t.state !== 'EVICTED')
-    .map(t => {
-      const id = t.normalized_id || t.label;
-      return { ...t, _isNew: !visibleIds.has(id) || topics.size > prevSizeRef.current };
-    });
-
-  useEffect(() => {
-    prevSizeRef.current = topics.size;
-  }, [topics.size]);
-
-  // Filter: show if active, or still in linger window, or locked
-  const displayed = topicsArray.filter(t => {
-    const id = t.normalized_id || t.label;
-    return visibleIds.has(id) || lockedIds.has(id) ||
-      t.state === 'ACTIVE' || t.state === 'DETECTED' || t.state === 'REAPPEARED';
-  });
-
-  const isConnecting = status === 'ACTIVE' && displayed.length === 0;
-
-  function toggleLock(id) {
+  const toggleLock = useCallback((id) => {
     setLockedIds(prev => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-        // Clear any fade timer when locking
-        if (timersRef.current.has(id)) {
-          clearTimeout(timersRef.current.get(id));
-          timersRef.current.delete(id);
-        }
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
-  }
+  }, []);
+
+  const topicsArray = Array.from(topics.values())
+    .filter(t => t.state !== 'EVICTED')
+    .sort((a, b) => (b.decay_score || 0) - (a.decay_score || 0));
+
+  const isConnecting = status === 'ACTIVE' && topicsArray.length === 0;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
       <div
         role="list"
-        aria-label="Detected meeting topics"
+        aria-label="Detected meeting topics. Click a bubble to pin it."
         style={{
           flex: 1,
           display: 'flex',
@@ -229,7 +184,7 @@ export default function TopicBubbles({ topics, status, compact }) {
             <span style={{ fontSize: 11, fontWeight: 500, color: COLORS.mutedText }}>Analyzing audio...</span>
           </div>
         )}
-        {!isConnecting && displayed.length === 0 && (
+        {!isConnecting && topicsArray.length === 0 && (
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             color: COLORS.mutedText, padding: '20px 0',
@@ -241,18 +196,22 @@ export default function TopicBubbles({ topics, status, compact }) {
             <span style={{ fontSize: 11, fontWeight: 500 }}>Topics appear as detected...</span>
           </div>
         )}
-        {displayed.map((topic) => (
-          <TopicBubble
-            key={topic.normalized_id || topic.label}
-            topic={topic}
-            compact={compact}
-            locked={lockedIds.has(topic.normalized_id || topic.label)}
-            onToggleLock={toggleLock}
-          />
-        ))}
+        {topicsArray.map((topic) => {
+          const id = topic.normalized_id || topic.label;
+          return (
+            <TopicBubble
+              key={id}
+              topic={topic}
+              compact={compact}
+              locked={lockedIds.has(id)}
+              isNew={newIds.has(id)}
+              onToggleLock={toggleLock}
+            />
+          );
+        })}
       </div>
 
-      {displayed.length > 0 && (
+      {topicsArray.length > 0 && (
         <div style={{
           padding: '6px 14px 8px',
           borderTop: `1px solid ${COLORS.subtleBorder}`,
@@ -260,7 +219,7 @@ export default function TopicBubbles({ topics, status, compact }) {
           alignItems: 'center',
         }}>
           {Object.entries(BUBBLE_STYLES)
-            .filter(([cat]) => displayed.some(t => t.category === cat))
+            .filter(([cat]) => topicsArray.some(t => t.category === cat))
             .map(([cat, bs]) => (
               <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <div style={{
@@ -284,10 +243,11 @@ export default function TopicBubbles({ topics, status, compact }) {
       <style>{`
         @keyframes centreBloom {
           0%   { transform: scale(0); opacity: 0; }
-          25%  { opacity: 0.3; transform: scale(0.3); }
-          55%  { opacity: 0.8; transform: scale(0.9); }
-          75%  { opacity: 0.95; transform: scale(1.04); }
-          90%  { transform: scale(0.98); }
+          20%  { opacity: 0.2; transform: scale(0.2); }
+          45%  { opacity: 0.6; transform: scale(0.7); }
+          65%  { opacity: 0.85; transform: scale(0.95); }
+          80%  { opacity: 0.95; transform: scale(1.04); }
+          90%  { transform: scale(0.99); }
           100% { opacity: 1; transform: scale(1); }
         }
       `}</style>
