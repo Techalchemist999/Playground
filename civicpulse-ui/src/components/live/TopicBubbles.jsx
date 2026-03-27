@@ -1,5 +1,6 @@
 import { COLORS, CATEGORY_COLORS, TOPIC_STATE_COLORS } from '../../styles/tokens';
 import { cardStyle } from '../../styles/shared';
+import Spinner from '../shared/Spinner';
 
 function getBubbleSize(mentionCount) {
   return Math.min(120, 48 + (mentionCount || 1) * 10);
@@ -18,6 +19,8 @@ function TopicBubble({ topic }) {
 
   return (
     <div
+      role="listitem"
+      aria-label={`Topic: ${topic.label}, Category: ${topic.category}, State: ${topic.state}, Mentions: ${topic.mention_count || 1}`}
       style={{
         width: displaySize,
         height: displaySize,
@@ -36,49 +39,31 @@ function TopicBubble({ topic }) {
           : isReappeared
           ? `0 0 0 3px #f59e0b60, 0 4px 12px ${cat.color}20`
           : `0 4px 12px ${cat.color}20`,
-        cursor: 'default',
         flexShrink: 0,
       }}
-      title={`${topic.label}\nCategory: ${topic.category}\nState: ${topic.state}\nConfidence: ${((topic.confidence || 0) * 100).toFixed(0)}%\nMentions: ${topic.mention_count || 1}\nDecay: ${(topic.decay_score || 0).toFixed(2)}`}
     >
-      {/* State indicator dot */}
-      <div style={{
-        position: 'absolute',
-        top: 3,
-        right: 3,
-        width: 8,
-        height: 8,
-        borderRadius: '50%',
+      <div aria-hidden="true" style={{
+        position: 'absolute', top: 3, right: 3,
+        width: 8, height: 8, borderRadius: '50%',
         background: stateColor,
         border: '1.5px solid rgba(255,255,255,0.8)',
       }} />
 
       <span style={{
-        fontSize,
-        fontWeight: 700,
-        color: '#fff',
+        fontSize, fontWeight: 700, color: '#fff',
         textShadow: '0 1px 3px rgba(0,0,0,0.3)',
-        textAlign: 'center',
-        padding: '0 6px',
-        lineHeight: 1.2,
-        maxWidth: displaySize - 12,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
+        textAlign: 'center', padding: '0 6px',
+        lineHeight: 1.2, maxWidth: displaySize - 12,
+        overflow: 'hidden', textOverflow: 'ellipsis',
         display: '-webkit-box',
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical',
+        WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
         wordBreak: 'break-word',
       }}>
         {topic.label}
       </span>
 
       {topic.mention_count > 1 && (
-        <span style={{
-          fontSize: 8,
-          fontWeight: 600,
-          color: 'rgba(255,255,255,0.8)',
-          marginTop: 1,
-        }}>
+        <span style={{ fontSize: 8, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginTop: 1 }}>
           x{topic.mention_count}
         </span>
       )}
@@ -86,12 +71,13 @@ function TopicBubble({ topic }) {
   );
 }
 
-export default function TopicBubbles({ topics }) {
+export default function TopicBubbles({ topics, status }) {
   const topicsArray = Array.from(topics.values())
     .filter(t => t.state !== 'EVICTED')
     .sort((a, b) => (b.decay_score || 0) - (a.decay_score || 0));
 
   const activeCount = topicsArray.filter(t => t.state === 'ACTIVE' || t.state === 'DETECTED' || t.state === 'REAPPEARED').length;
+  const isConnecting = status === 'ACTIVE' && topicsArray.length === 0;
 
   return (
     <div style={{
@@ -110,7 +96,7 @@ export default function TopicBubbles({ topics }) {
         flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <svg width="14" height="14" fill="none" stroke={COLORS.primary} strokeWidth="2" viewBox="0 0 24 24">
+          <svg width="14" height="14" fill="none" stroke={COLORS.primary} strokeWidth="2" viewBox="0 0 24 24" role="img" aria-label="Topics">
             <circle cx="12" cy="12" r="10" />
             <circle cx="12" cy="12" r="4" />
           </svg>
@@ -126,22 +112,35 @@ export default function TopicBubbles({ topics }) {
         <span style={{ fontSize: 10, color: COLORS.mutedText }}>{topicsArray.length} total</span>
       </div>
 
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 12,
-        padding: 16,
-        alignContent: 'center',
-        justifyContent: 'center',
-        overflowY: 'auto',
-      }}>
-        {topicsArray.length === 0 && (
+      <div
+        role="list"
+        aria-label="Detected meeting topics"
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 12,
+          padding: 16,
+          alignContent: 'center',
+          justifyContent: 'center',
+          overflowY: 'auto',
+        }}
+      >
+        {isConnecting && (
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+          }}>
+            <Spinner size={24} label="Detecting topics" />
+            <span style={{ fontSize: 12, fontWeight: 500, color: COLORS.mutedText }}>Analyzing meeting audio...</span>
+            <span style={{ fontSize: 10.5, color: COLORS.mutedText }}>Topics are extracted from the discussion in real-time</span>
+          </div>
+        )}
+        {!isConnecting && topicsArray.length === 0 && (
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             color: COLORS.mutedText,
           }}>
-            <svg width="36" height="36" fill="none" stroke={COLORS.cardBorder} strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: 8 }}>
+            <svg width="36" height="36" fill="none" stroke={COLORS.cardBorder} strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: 8 }} aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
               <circle cx="12" cy="12" r="4" />
             </svg>
@@ -153,21 +152,17 @@ export default function TopicBubbles({ topics }) {
         ))}
       </div>
 
-      {/* Category legend */}
       {topicsArray.length > 0 && (
         <div style={{
           padding: '8px 16px 10px',
           borderTop: `1px solid ${COLORS.subtleBorder}`,
-          display: 'flex',
-          gap: 10,
-          flexWrap: 'wrap',
-          flexShrink: 0,
+          display: 'flex', gap: 10, flexWrap: 'wrap', flexShrink: 0,
         }}>
           {Object.entries(CATEGORY_COLORS)
             .filter(([cat]) => topicsArray.some(t => t.category === cat))
             .map(([cat, colors]) => (
               <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: colors.color }} />
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: colors.color }} aria-hidden="true" />
                 <span style={{ fontSize: 9.5, color: COLORS.mutedText, textTransform: 'capitalize' }}>{cat}</span>
               </div>
             ))}

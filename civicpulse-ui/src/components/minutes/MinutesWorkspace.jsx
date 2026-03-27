@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { COLORS, SPACING, CATEGORY_COLORS } from '../../styles/tokens';
+import Spinner from '../shared/Spinner';
 import { useMinutes } from '../../hooks/useMinutes';
 import SectionCard from './SectionCard';
 import ExportBar from './ExportBar';
@@ -42,15 +43,16 @@ export default function MinutesWorkspace({ session }) {
         saving={saving}
       />
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div className="minutes-layout" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Main: Section editor */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px 40px' }}>
           {minutes.loading ? (
             <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              height: '100%', color: COLORS.mutedText, fontSize: 13,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              height: '100%', gap: 10,
             }}>
-              Loading minutes...
+              <Spinner size={28} label="Loading minutes" />
+              <span style={{ fontSize: 13, color: COLORS.mutedText }}>Generating meeting minutes...</span>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 800 }}>
@@ -68,7 +70,7 @@ export default function MinutesWorkspace({ session }) {
         </div>
 
         {/* Right: Meeting Summary Sidebar */}
-        <div style={{
+        <div className="minutes-sidebar" style={{
           width: SPACING.sidebarWidth,
           borderLeft: `1px solid ${COLORS.cardBorder}`,
           background: '#fff',

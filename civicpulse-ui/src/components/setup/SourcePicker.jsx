@@ -6,7 +6,7 @@ const SOURCES = [
   {
     id: 'youtube',
     label: 'YouTube URL',
-    desc: 'Paste a YouTube link to a council meeting recording',
+    desc: 'Best for archived recordings — paste a YouTube link',
     icon: (
       <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
         <rect x="2" y="4" width="20" height="16" rx="4" />
@@ -17,7 +17,7 @@ const SOURCES = [
   {
     id: 'upload',
     label: 'File Upload',
-    desc: 'Upload an audio or video recording',
+    desc: 'Best for local files — drag and drop audio or video',
     icon: (
       <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
         <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -30,7 +30,7 @@ const SOURCES = [
   {
     id: 'mic',
     label: 'Microphone',
-    desc: 'Stream live audio from your microphone',
+    desc: 'Best for live meetings — stream from your mic',
     icon: (
       <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
         <path d="M12 1a4 4 0 0 0-4 4v7a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4z" />
@@ -45,11 +45,23 @@ const SOURCES = [
 export default function SourcePicker({ onIngest, loading }) {
   const [selected, setSelected] = useState(null);
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [urlError, setUrlError] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [ingestResult, setIngestResult] = useState(null);
 
+  function validateUrl(url) {
+    if (!url.trim()) return 'URL is required';
+    try { new URL(url); } catch { return 'Please enter a valid URL'; }
+    return '';
+  }
+
   async function handleIngest() {
     if (!selected) return;
+    if (selected === 'youtube') {
+      const err = validateUrl(youtubeUrl);
+      if (err) { setUrlError(err); return; }
+      setUrlError('');
+    }
     try {
       let result;
       if (selected === 'youtube') result = await onIngest('youtube', youtubeUrl);
@@ -107,31 +119,37 @@ export default function SourcePicker({ onIngest, loading }) {
       </div>
 
       {selected === 'youtube' && !ingestResult && (
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          <input
-            value={youtubeUrl}
-            onChange={(e) => setYoutubeUrl(e.target.value)}
-            placeholder="https://youtube.com/watch?v=..."
-            style={{
-              flex: 1, fontSize: 13, color: COLORS.headingText,
-              background: '#f8fafc', border: `1px solid ${COLORS.cardBorder}`,
-              borderRadius: 8, padding: '9px 12px', outline: 'none',
-            }}
-            onFocus={(e) => e.target.style.borderColor = COLORS.primaryBorder}
-            onBlur={(e) => e.target.style.borderColor = COLORS.cardBorder}
-          />
-          <button
-            onClick={handleIngest}
-            disabled={!youtubeUrl || loading}
-            style={{
-              ...gradientButtonStyle,
-              opacity: !youtubeUrl || loading ? 0.5 : 1,
-              padding: '9px 16px',
-            }}
-          >
-            {loading ? 'Loading...' : 'Load'}
-          </button>
-        </div>
+        <>
+          <div style={{ display: 'flex', gap: 8, marginBottom: urlError ? 4 : 12 }}>
+            <input
+              value={youtubeUrl}
+              onChange={(e) => { setYoutubeUrl(e.target.value); if (urlError) setUrlError(''); }}
+              placeholder="https://youtube.com/watch?v=..."
+              aria-label="YouTube URL"
+              aria-invalid={!!urlError}
+              style={{
+                flex: 1, fontSize: 13, color: COLORS.headingText,
+                background: '#f8fafc', border: `1px solid ${urlError ? '#dc2626' : COLORS.cardBorder}`,
+                borderRadius: 8, padding: '9px 12px', outline: 'none',
+              }}
+              onFocus={(e) => e.target.style.borderColor = urlError ? '#dc2626' : COLORS.primaryBorder}
+              onBlur={(e) => e.target.style.borderColor = urlError ? '#dc2626' : COLORS.cardBorder}
+            />
+            <button
+              onClick={handleIngest}
+              disabled={!youtubeUrl || loading}
+              style={{
+                ...gradientButtonStyle,
+                padding: '9px 16px',
+              }}
+            >
+              {loading ? 'Loading...' : 'Load'}
+            </button>
+          </div>
+          {urlError && (
+            <div role="alert" style={{ fontSize: 11.5, color: '#dc2626', marginBottom: 8 }}>{urlError}</div>
+          )}
+        </>
       )}
 
       {selected === 'upload' && !ingestResult && (

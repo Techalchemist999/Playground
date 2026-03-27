@@ -15,7 +15,7 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics }
 
   if (agendaItems.length === 0) {
     return (
-      <div style={{
+      <div className="sidebar-right" style={{
         width: SPACING.sidebarWidth,
         borderLeft: `1px solid ${COLORS.cardBorder}`,
         background: '#fff',
@@ -40,7 +40,7 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics }
   }
 
   return (
-    <div style={{
+    <div className="sidebar-right" style={{
       width: SPACING.sidebarWidth,
       borderLeft: `1px solid ${COLORS.cardBorder}`,
       background: '#fff',

@@ -22,7 +22,7 @@ export default function SetupView({ session }) {
       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: 20, overflowY: 'auto',
     }}>
-      <div style={{ ...cardStyle, maxWidth: 560, width: '100%', padding: 0 }}>
+      <div className="setup-card" style={{ ...cardStyle, maxWidth: 560, width: '100%', padding: 0 }}>
         <div style={{
           background: 'linear-gradient(135deg, #eef2ff 0%, #f5f3ff 55%, #f0fdf4 100%)',
           padding: '24px 28px 20px',

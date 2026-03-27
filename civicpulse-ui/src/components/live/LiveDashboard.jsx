@@ -6,15 +6,15 @@ import SessionControls from './SessionControls';
 export default function LiveDashboard({ session }) {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', gap: 0 }}>
+      <div className="live-columns" style={{ flex: 1, display: 'flex', overflow: 'hidden', gap: 0 }}>
         {/* Left: Transcript */}
         <div style={{ flex: 1, display: 'flex', padding: '12px 0 12px 12px', minWidth: 0 }}>
-          <TranscriptPanel transcript={session.transcript} />
+          <TranscriptPanel transcript={session.transcript} status={session.status} />
         </div>
 
         {/* Center: Topic Bubbles */}
         <div style={{ flex: 1.5, display: 'flex', padding: 12, minWidth: 0 }}>
-          <TopicBubbles topics={session.topics} />
+          <TopicBubbles topics={session.topics} status={session.status} />
         </div>
 
         {/* Right: Agenda Sidebar */}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSession } from './hooks/useSession';
+import { ToastProvider } from './components/shared/Toast';
 import PageShell from './components/layout/PageShell';
 import TopBar from './components/layout/TopBar';
 import SetupView from './components/setup/SetupView';
@@ -19,15 +20,17 @@ export default function App() {
   }, [session.status, session.startTime]);
 
   return (
-    <PageShell>
-      <TopBar
-        status={session.status}
-        elapsed={elapsed}
-        sessionId={session.sessionId}
-      />
-      {session.view === 'setup' && <SetupView session={session} />}
-      {session.view === 'live' && <LiveDashboard session={session} />}
-      {session.view === 'minutes' && <MinutesWorkspace session={session} />}
-    </PageShell>
+    <ToastProvider>
+      <PageShell>
+        <TopBar
+          status={session.status}
+          elapsed={elapsed}
+          sessionId={session.sessionId}
+        />
+        {session.view === 'setup' && <SetupView session={session} />}
+        {session.view === 'live' && <LiveDashboard session={session} />}
+        {session.view === 'minutes' && <MinutesWorkspace session={session} />}
+      </PageShell>
+    </ToastProvider>
   );
 }

@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { COLORS, SPACING } from '../../styles/tokens';
 import { cardStyle } from '../../styles/shared';
+import Spinner from '../shared/Spinner';
 
 function formatTs(seconds) {
   if (!seconds && seconds !== 0) return '';
@@ -9,7 +10,7 @@ function formatTs(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export default function TranscriptPanel({ transcript }) {
+export default function TranscriptPanel({ transcript, status }) {
   const scrollRef = useRef(null);
   const [autoScroll, setAutoScroll] = useState(true);
 
@@ -25,6 +26,8 @@ export default function TranscriptPanel({ transcript }) {
     setAutoScroll(scrollHeight - scrollTop - clientHeight < 50);
   }
 
+  const isConnecting = status === 'ACTIVE' && transcript.length === 0;
+
   return (
     <div style={{
       ...cardStyle,
@@ -33,6 +36,7 @@ export default function TranscriptPanel({ transcript }) {
       minWidth: 280,
       flex: 1,
       overflow: 'hidden',
+      position: 'relative',
     }}>
       <div style={{
         padding: '12px 16px 10px',
@@ -43,7 +47,7 @@ export default function TranscriptPanel({ transcript }) {
         flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <svg width="14" height="14" fill="none" stroke={COLORS.primary} strokeWidth="2" viewBox="0 0 24 24">
+          <svg width="14" height="14" fill="none" stroke={COLORS.primary} strokeWidth="2" viewBox="0 0 24 24" role="img" aria-label="Transcript">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
           <span style={{ fontWeight: 700, fontSize: 13, color: COLORS.headingText }}>Transcript</span>
@@ -60,18 +64,31 @@ export default function TranscriptPanel({ transcript }) {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
+        role="log"
+        aria-label="Live transcript"
+        aria-live="polite"
         style={{
           flex: 1,
           overflowY: 'auto',
           padding: '8px 16px 16px',
         }}
       >
-        {transcript.length === 0 && (
+        {isConnecting && (
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', height: '100%', gap: 10,
+          }}>
+            <Spinner size={24} label="Connecting to audio stream" />
+            <span style={{ fontSize: 12, fontWeight: 500, color: COLORS.mutedText }}>Connecting to audio stream...</span>
+            <span style={{ fontSize: 10.5, color: COLORS.mutedText }}>Transcript will appear as speech is detected</span>
+          </div>
+        )}
+        {!isConnecting && transcript.length === 0 && (
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             justifyContent: 'center', height: '100%', color: COLORS.mutedText,
           }}>
-            <svg width="28" height="28" fill="none" stroke={COLORS.cardBorder} strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: 8 }}>
+            <svg width="28" height="28" fill="none" stroke={COLORS.cardBorder} strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: 8 }} aria-hidden="true">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
             <span style={{ fontSize: 12, fontWeight: 500 }}>Waiting for transcript...</span>
@@ -112,11 +129,12 @@ export default function TranscriptPanel({ transcript }) {
             setAutoScroll(true);
             if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
           }}
+          aria-label="Jump to latest transcript entry"
           style={{
             position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
             background: COLORS.primaryGradient, color: '#fff',
             border: 'none', borderRadius: 999, padding: '5px 14px',
-            fontSize: 11, fontWeight: 600, cursor: 'pointer',
+            fontSize: 11, fontWeight: 600,
             boxShadow: `0 2px 10px ${COLORS.primaryShadow}`,
           }}
         >
