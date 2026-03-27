@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicPulse — Final Layout</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; height: 100vh; display: flex; flex-direction: column; }
+
+  /* Top bar */
+  .topbar {
+    height: 44px; background: #fff; border-bottom: 1px solid #e2e8f0;
+    display: flex; align-items: center; padding: 0 20px; gap: 10; flex-shrink: 0;
+  }
+  .topbar .logo { width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; }
+  .topbar .name { font-weight: 800; font-size: 14px; color: #0f172a; }
+  .topbar .sub { font-size: 11px; color: #94a3b8; }
+  .topbar .status { margin-left: auto; display: flex; align-items: center; gap: 5; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 999px; padding: 3px 10px; }
+  .topbar .status .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+  .topbar .status span { font-size: 11px; font-weight: 700; color: #22c55e; }
+  .topbar .timer { font-size: 13px; font-weight: 600; color: #334155; font-variant-numeric: tabular-nums; margin-left: 10px; }
+  .topbar .session-id { font-size: 10px; color: #94a3b8; margin-left: 8px; }
+
+  /* Main grid */
+  .main { flex: 1; display: grid; grid-template-columns: 1.3fr 1fr; grid-template-rows: 1.2fr 0.8fr; gap: 10px; padding: 10px; overflow: hidden; }
+
+  /* Panel shared */
+  .panel {
+    background: #fff; border-radius: 14px; border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 14px rgba(99,102,241,.07);
+    display: flex; flex-direction: column; overflow: hidden; min-height: 0;
+  }
+  .panel .ph {
+    padding: 10px 14px; border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; gap: 8; flex-shrink: 0;
+  }
+  .panel .ph .icon { width: 13px; height: 13px; border-radius: 4px; flex-shrink: 0; }
+  .panel .ph .title { font-size: 12.5px; font-weight: 700; color: #0f172a; }
+  .panel .ph .badge { font-size: 10px; font-weight: 700; color: #6366f1; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 999px; padding: 0px 7px; margin-left: auto; }
+  .panel .ph .chevron { margin-left: 4px; color: #94a3b8; font-size: 10px; cursor: pointer; }
+
+  /* Bites */
+  .bites-body { flex: 1; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .bite {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 10px 14px; display: flex; align-items: flex-start; gap: 10;
+    transition: all .2s;
+  }
+  .bite:hover { background: #f1f5f9; }
+  .bite.active { border-color: #c7d2fe; background: #fafaff; }
+  .bite .num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
+    background: #eef2ff; border: 1.5px solid #c7d2fe; color: #6366f1;
+  }
+  .bite .num.carried { background: #f0fdf4; border-color: #bbf7d0; color: #22c55e; }
+  .bite .num.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+  .bite .content { flex: 1; }
+  .bite .content .label { font-size: 12.5px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+  .bite .content .meta { font-size: 10.5px; color: #64748b; line-height: 1.5; }
+  .bite .tag-s {
+    font-size: 9px; font-weight: 700; border-radius: 4px; padding: 2px 7px;
+    margin-top: 4px; display: inline-block;
+  }
+  .bite .tag-s.carried { background: #f0fdf4; color: #22c55e; border: 1px solid #bbf7d0; }
+  .bite .tag-s.active { background: #eef2ff; color: #6366f1; border: 1px solid #c7d2fe; }
+  .bite .tag-s.pending { background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; }
+
+  /* Top-right: Clerk Notes + Topics */
+  .top-right { display: grid; grid-template-columns: 1fr 0.5fr; gap: 10px; }
+
+  /* Clerk Notes */
+  .notes-body { flex: 1; padding: 8px 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+  .note-line {
+    font-size: 12px; color: #334155; line-height: 1.7;
+    padding: 4px 0; border-bottom: 1px solid #f1f5f9;
+    display: flex; gap: 8px;
+  }
+  .note-ts {
+    font-size: 10px; font-weight: 600; color: #6366f1; background: #eef2ff;
+    border-radius: 4px; padding: 1px 6px; white-space: nowrap; flex-shrink: 0;
+    height: fit-content; margin-top: 2px; font-variant-numeric: tabular-nums;
+  }
+  .note-input {
+    background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;
+    padding: 8px 10px; font-size: 11.5px; color: #94a3b8; font-style: italic;
+    margin-top: auto;
+  }
+
+  /* Topics */
+  .topics-body { flex: 1; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; justify-content: center; overflow-y: auto; }
+  .tb {
+    border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 600; letter-spacing: -0.2px; transition: transform .3s;
+  }
+  .tb:hover { transform: scale(1.08); }
+  .tb.indigo { box-shadow: 0 0 0 2px #a5b4fc, 0 0 0 4px #a5b4fc20, 0 0 12px rgba(99,102,241,.1); color: #6366f1; }
+  .tb.pink { box-shadow: 0 0 0 2px #f9a8d4, 0 0 0 4px #f9a8d420, 0 0 12px rgba(219,39,119,.08); color: #db2777; }
+  .tb.green { box-shadow: 0 0 0 2px #6ee7b7, 0 0 0 4px #6ee7b720, 0 0 12px rgba(5,150,105,.08); color: #059669; }
+  .tb.amber { box-shadow: 0 0 0 2px #fcd34d, 0 0 0 4px #fcd34d20, 0 0 12px rgba(202,138,4,.08); color: #92400e; }
+  .tb.blue { box-shadow: 0 0 0 2px #93c5fd, 0 0 0 4px #93c5fd20, 0 0 12px rgba(37,99,235,.08); color: #1d4ed8; }
+
+  /* Bottom-right: Transcript + Agenda */
+  .bottom-right { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 10px; }
+
+  /* Transcript */
+  .transcript-body { flex: 1; overflow-y: auto; padding: 6px 12px; }
+  .tl { display: flex; gap: 10px; padding: 5px 0; border-bottom: 1px solid #f8fafc; }
+  .tl .ts { font-size: 10px; font-weight: 600; color: #94a3b8; font-variant-numeric: tabular-nums; min-width: 36px; padding-top: 2px; }
+  .tl .tt { font-size: 12.5px; color: #334155; line-height: 1.7; }
+
+  /* Agenda */
+  .agenda-body { flex: 1; overflow-y: auto; padding: 6px 12px; }
+  .agenda-progress { height: 5px; border-radius: 3px; background: #f1f5f9; overflow: hidden; margin-bottom: 6px; }
+  .agenda-progress .fill { height: 100%; display: flex; }
+  .agenda-progress .done-fill { background: #22c55e; width: 37.5%; }
+  .agenda-progress .active-fill { background: #6366f1; width: 12.5%; }
+  .ai { display: flex; gap: 8px; padding: 5px 0; align-items: center; }
+  .ai .dot {
+    width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: #94a3b8; flex-shrink: 0;
+  }
+  .ai .dot.done { background: #f0fdf4; border-color: #bbf7d0; color: #22c55e; }
+  .ai .dot.now { background: #6366f1; border-color: #6366f1; color: #fff; }
+  .ai .label { font-size: 11px; color: #334155; font-weight: 500; }
+
+  /* Quick Motion — inline at bottom of Bites panel */
+  .qm-inline {
+    border-top: 1px solid #e2e8f0; background: #fafaff;
+    padding: 10px 14px; flex-shrink: 0;
+  }
+  .qm-inline-header {
+    display: flex; align-items: center; gap: 6; margin-bottom: 8px;
+  }
+  .qm-inline-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: #6366f1;
+  }
+  .qm-inline-row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .qm-inline-row:last-child { margin-bottom: 0; }
+  .qm-inline-input {
+    flex: 1; background: #fff; border: 1.5px solid #c7d2fe; border-radius: 8px;
+    padding: 8px 12px; font-size: 12.5px; color: #334155; font-family: inherit;
+    outline: none; transition: border-color .15s;
+  }
+  .qm-inline-input:focus { border-color: #818cf8; }
+  .qm-inline-input::placeholder { color: #94a3b8; font-style: italic; }
+  .qm-inline-select {
+    background: #fff; border: 1.5px solid #c7d2fe; border-radius: 8px;
+    padding: 7px 10px; font-size: 11px; color: #64748b; font-family: inherit;
+    flex: 1; cursor: pointer;
+  }
+  .qm-inline-btn {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
+    border: none; border-radius: 8px; padding: 7px 16px;
+    font-size: 11.5px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(99,102,241,.28);
+    display: flex; align-items: center; gap: 5; white-space: nowrap;
+  }
+
+  /* Session Controls Bar — slim bottom */
+  .session-bar {
+    height: 44px; background: #fff; border-top: 1px solid #e2e8f0;
+    display: flex; align-items: center; padding: 0 20px; flex-shrink: 0;
+  }
+  .ctrl-btn {
+    background: #fff; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    padding: 7px 14px; font-size: 11px; font-weight: 600; color: #64748b;
+    cursor: pointer; display: flex; align-items: center; gap: 4;
+  }
+  .ctrl-btn.red { color: #dc2626; border-color: #fecaca; }
+
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="logo">
+    <svg width="12" height="12" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+  </div>
+  <span class="name">CivicPulse</span>
+  <span class="sub">Regular Council Meeting — Aug 27, 2025</span>
+  <div class="status"><div class="dot"></div><span>ACTIVE</span></div>
+  <span class="timer">07:14</span>
+  <span class="session-id">a3f8c2d1...</span>
+</div>
+
+<!-- Main Bento Grid -->
+<div class="main">
+
+  <!-- LEFT: Procedural Bites (full height) -->
+  <div class="panel" style="grid-row: 1/3;">
+    <div class="ph">
+      <div class="icon" style="background:#6366f1;"></div>
+      <span class="title">Procedural Bites</span>
+      <span class="badge">5 motions</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="bites-body">
+      <div class="bite">
+        <div class="num carried">✓</div>
+        <div class="content">
+          <div class="label">Adoption of Agenda</div>
+          <div class="meta">MOVED: Mayor Veach · SECONDED: Cllr Johnston</div>
+          <div class="tag-s carried">CARRIED UNANIMOUSLY</div>
+        </div>
+      </div>
+      <div class="bite">
+        <div class="num carried">✓</div>
+        <div class="content">
+          <div class="label">Adoption of Minutes</div>
+          <div class="meta">Dec 18, 2024 RCM — with correction to item 8.1 re: Municipal Flag Policy</div>
+          <div class="tag-s carried">CARRIED UNANIMOUSLY</div>
+        </div>
+      </div>
+      <div class="bite">
+        <div class="num carried">✓</div>
+        <div class="content">
+          <div class="label">Council Portfolio Liaison Letters</div>
+          <div class="meta">MOVED: Mayor Veach · SECONDED: Cllr Rabel<br>Includes Terms of Reference for internal committees</div>
+          <div class="tag-s carried">CARRIED UNANIMOUSLY</div>
+        </div>
+      </div>
+      <div class="bite active">
+        <div class="num active">4</div>
+        <div class="content">
+          <div class="label">Water Service Rate Increase — Resident Notice</div>
+          <div class="meta">MOVED: Mayor Veach · SECONDED: Cllr Wall<br>10.76% increase imposed by City of Dawson Creek · Public consultation March 5</div>
+          <div class="tag-s active">IN PROGRESS</div>
+        </div>
+      </div>
+      <div class="bite">
+        <div class="num">5</div>
+        <div class="content">
+          <div class="label">Family Day Community Event</div>
+          <div class="meta">$500 budget from Village · Matching contribution from Library<br>Skating, tobogganing, snow art, bonfire, hot chocolate</div>
+          <div class="tag-s pending">PENDING</div>
+        </div>
+      </div>
+      <div class="bite">
+        <div class="num">6</div>
+        <div class="content">
+          <div class="label">BC Epilepsy Society — Purple Day Proclamation</div>
+          <div class="meta">March 26, 2025 · Illuminate Village office in purple</div>
+          <div class="tag-s pending">PENDING</div>
+        </div>
+      </div>
+    </div>
+    <!-- Quick Motion — bottom 15% of Bites panel -->
+    <div class="qm-inline">
+      <div class="qm-inline-header">
+        <svg width="12" height="12" fill="none" stroke="#6366f1" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="qm-inline-label">Quick Motion</span>
+      </div>
+      <div class="qm-inline-row">
+        <input class="qm-inline-input" placeholder="THAT Council approves the..." />
+      </div>
+      <div class="qm-inline-row">
+        <select class="qm-inline-select"><option>Mover ▾</option><option>Mayor Veach</option><option>Cllr Rabel</option><option>Cllr Wall</option><option>Cllr Johnston</option><option>Cllr Woodill</option></select>
+        <select class="qm-inline-select"><option>Seconder ▾</option><option>Mayor Veach</option><option>Cllr Rabel</option><option>Cllr Wall</option><option>Cllr Johnston</option><option>Cllr Woodill</option></select>
+        <button class="qm-inline-btn">
+          <svg width="11" height="11" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Record
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP-RIGHT: Clerk Notes + Topics -->
+  <div class="top-right">
+    <!-- Clerk Notes -->
+    <div class="panel">
+      <div class="ph">
+        <div class="icon" style="background:#f59e0b;"></div>
+        <span class="title">Clerk Notes</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="notes-body">
+        <div class="note-line"><span class="note-ts">02:14</span>Cllr Wall raised concern about proposed 10% municipal tax increase — wants BC Assessment data reviewed before any changes</div>
+        <div class="note-line"><span class="note-ts">03:41</span>Need to understand property value shifts across residential, commercial, and industrial sectors</div>
+        <div class="note-line"><span class="note-ts">05:08</span>Public consultation session confirmed for March 5, 2025</div>
+        <div class="note-line"><span class="note-ts">06:52</span>Fire Chief re: training room needs → discuss at Feb 12 COTW</div>
+        <div class="note-input">Type a note... <span style="float:right;font-style:normal;color:#c7d2fe;font-size:10px;font-weight:600;">07:14</span></div>
+      </div>
+    </div>
+
+    <!-- Topics (compact square) -->
+    <div class="panel">
+      <div class="ph">
+        <div class="icon" style="background:#8b5cf6;"></div>
+        <span class="title">Topics</span>
+        <span class="badge">6</span>
+      </div>
+      <div class="topics-body">
+        <div class="tb indigo" style="width:44px;height:44px;font-size:9px;">Budget</div>
+        <div class="tb pink" style="width:36px;height:36px;font-size:8px;">Policy</div>
+        <div class="tb green" style="width:40px;height:40px;font-size:8.5px;">Water</div>
+        <div class="tb amber" style="width:34px;height:34px;font-size:8px;">Bylaw</div>
+        <div class="tb blue" style="width:38px;height:38px;font-size:8px;">Motion</div>
+        <div class="tb indigo" style="width:30px;height:30px;font-size:7px;">Tax</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM-RIGHT: Transcript + Agenda -->
+  <div class="bottom-right">
+    <!-- Transcript -->
+    <div class="panel">
+      <div class="ph">
+        <div class="icon" style="background:#6366f1;"></div>
+        <span class="title">Transcript</span>
+        <span class="badge">18</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="transcript-body">
+        <div class="tl"><div class="ts">05:42</div><div class="tt">Council discussed the portfolio liaison letters and terms of reference for internal committees.</div></div>
+        <div class="tl"><div class="ts">06:18</div><div class="tt">Several minor corrections were noted, including consistency in naming across documents.</div></div>
+        <div class="tl"><div class="ts">06:51</div><div class="tt">Council reviewed the drafted resident notice regarding the water service rate increase.</div></div>
+        <div class="tl"><div class="ts">07:03</div><div class="tt">The increase of ten point seven six percent was imposed by the City of Dawson Creek.</div></div>
+        <div class="tl" style="border:none;background:#fafaff;border-radius:6px;padding:5px 0 5px 0;"><div class="ts" style="color:#6366f1;">07:14</div><div class="tt"><b>Council emphasized the importance of public engagement regarding the rate increase.</b></div></div>
+      </div>
+    </div>
+
+    <!-- Agenda -->
+    <div class="panel">
+      <div class="ph">
+        <div class="icon" style="background:#db2777;"></div>
+        <span class="title">Agenda</span>
+        <span class="badge">3 / 8</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="agenda-body">
+        <div class="agenda-progress"><div class="fill"><div class="done-fill"></div><div class="active-fill"></div></div></div>
+        <div class="ai"><div class="dot done">✓</div><div class="label">1. Call to Order</div></div>
+        <div class="ai"><div class="dot done">✓</div><div class="label">2. Land Acknowledgement</div></div>
+        <div class="ai"><div class="dot done">✓</div><div class="label">3. Adoption of Agenda</div></div>
+        <div class="ai"><div class="dot now">4</div><div class="label" style="color:#6366f1;font-weight:700;">8. Unfinished Business</div></div>
+        <div class="ai"><div class="dot">5</div><div class="label">9. New Business</div></div>
+        <div class="ai"><div class="dot">6</div><div class="label">10. Correspondence</div></div>
+        <div class="ai"><div class="dot">7</div><div class="label">14. Reports</div></div>
+        <div class="ai"><div class="dot">8</div><div class="label">18. Adjournment</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom: Session Controls -->
+<div class="session-bar">
+  <div style="display:flex;align-items:center;gap:8;">
+    <svg width="11" height="11" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="4"/><polygon points="10,8.5 16,12 10,15.5" fill="#94a3b8" stroke="none"/></svg>
+    <span style="font-size:11px;color:#94a3b8;">YouTube</span>
+    <span style="color:#e2e8f0;">|</span>
+    <span style="font-size:11px;color:#94a3b8;">18 chunks</span>
+    <span style="color:#e2e8f0;">|</span>
+    <span style="font-size:11px;color:#94a3b8;">6 topics</span>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:8px;">
+    <button class="ctrl-btn">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+      Pause
+    </button>
+    <button class="ctrl-btn red">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      End Meeting
+    </button>
+  </div>
+</div>
+
+</body>
+</html>

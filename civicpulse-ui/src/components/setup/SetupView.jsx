@@ -22,8 +22,7 @@ export default function SetupView({ session }) {
   async function handleDemo() {
     setDemoLoading(true);
     try {
-      await session.ingest('youtube', 'https://youtube.com/watch?v=demo-council-meeting');
-      await session.start('agenda-2025-08-27');
+      await session.ingest('youtube', 'https://www.youtube.com/watch?v=0Ea-1gRDChY');
     } catch (e) {
       setDemoLoading(false);
     }
@@ -65,40 +64,6 @@ export default function SetupView({ session }) {
         </div>
 
         <div style={{ padding: '20px 28px 24px' }}>
-          {/* Demo shortcut */}
-          <button
-            onClick={handleDemo}
-            disabled={demoLoading}
-            style={{
-              width: '100%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              padding: '11px 16px',
-              background: '#fff',
-              border: `1.5px solid ${COLORS.primaryBorder}`,
-              borderRadius: 10,
-              fontSize: 13, fontWeight: 600, color: COLORS.primary,
-              marginBottom: 16,
-              transition: 'all .15s',
-            }}
-          >
-            {demoLoading ? (
-              <><Spinner size={14} color={COLORS.primary} /> Starting demo...</>
-            ) : (
-              <>
-                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <polygon points="5,3 19,12 5,21" fill="currentColor" stroke="none" />
-                </svg>
-                Run Saved Demo (Aug 27 RCM)
-              </>
-            )}
-          </button>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <div style={{ flex: 1, height: 1, background: COLORS.cardBorder }} />
-            <span style={{ fontSize: 10, fontWeight: 600, color: COLORS.mutedText }}>OR</span>
-            <div style={{ flex: 1, height: 1, background: COLORS.cardBorder }} />
-          </div>
-
           <SourcePicker onIngest={session.ingest} loading={false} />
 
           {session.status === 'READY' && (

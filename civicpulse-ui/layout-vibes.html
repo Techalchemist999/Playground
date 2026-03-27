@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicPulse — Dashboard Layout Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; min-height: 100vh; padding: 40px 20px; }
+  h1 { text-align: center; font-size: 22px; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.3px; }
+  p.sub { text-align: center; font-size: 12.5px; color: #64748b; margin-bottom: 12px; line-height: 1.7; max-width: 600px; margin-left: auto; margin-right: auto; }
+  .feng { text-align: center; font-size: 11px; color: #94a3b8; margin-bottom: 36px; line-height: 1.7; max-width: 560px; margin-left: auto; margin-right: auto; font-style: italic; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 32px; max-width: 920px; margin: 0 auto; }
+
+  .card {
+    background: #fff; border-radius: 20px; border: 2px solid #e2e8f0;
+    padding: 24px; cursor: pointer; transition: all .25s;
+  }
+  .card:hover { border-color: #6366f1; box-shadow: 0 12px 40px rgba(99,102,241,.1); transform: translateY(-2px); }
+  .card.selected { border-color: #6366f1; background: #fafaff; box-shadow: 0 0 0 3px #6366f130, 0 12px 40px rgba(99,102,241,.1); }
+  .card .head { display: flex; align-items: center; gap: 10; margin-bottom: 12px; }
+  .card .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #6366f1; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 999px; padding: 3px 12px; }
+  .card .rec { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #22c55e; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 999px; padding: 3px 10px; }
+  .card h2 { font-size: 15px; color: #0f172a; margin-bottom: 4px; }
+  .card p.desc { font-size: 11.5px; color: #64748b; line-height: 1.7; margin-bottom: 16px; }
+  .card .feng-note { font-size: 10px; color: #a78bfa; font-style: italic; margin-bottom: 14px; line-height: 1.5; }
+
+  /* Bento shared */
+  .bento { border-radius: 14px; overflow: hidden; border: 1px solid #e2e8f0; background: #f1f5f9; }
+  .bento .topbar { height: 26px; background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; padding: 0 10px; gap: 6; }
+  .bento .topbar .dot { width: 12px; height: 12px; border-radius: 4px; background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+  .bento .topbar span { font-size: 7.5px; font-weight: 800; color: #0f172a; }
+  .bento .topbar .status { margin-left: auto; font-size: 6.5px; font-weight: 700; color: #22c55e; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 99px; padding: 1px 5px; }
+  .bento .content { display: grid; gap: 5px; padding: 5px; }
+  .bento .bottombar { height: 22px; background: #fff; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; gap: 6; }
+  .bento .bottombar .btn { font-size: 6px; font-weight: 700; padding: 2px 7px; border-radius: 4px; border: 1px solid #e2e8f0; color: #64748b; background: #fff; }
+  .bento .bottombar .btn.red { color: #dc2626; border-color: #fecaca; }
+
+  /* Panel */
+  .panel { border-radius: 9px; background: #fff; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+  .panel .ph { padding: 4px 7px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 4; flex-shrink: 0; }
+  .panel .ph .icon { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+  .panel .ph span { font-size: 6.5px; font-weight: 700; color: #0f172a; }
+  .panel .ph .badge { font-size: 5.5px; font-weight: 700; color: #6366f1; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 99px; padding: 0 4px; margin-left: auto; }
+  .panel .body { flex: 1; padding: 5px; display: flex; flex-wrap: wrap; gap: 3px; align-content: flex-start; justify-content: center; overflow: hidden; }
+
+  /* Bites */
+  .bites .body { padding: 5px 7px; gap: 3px; flex-direction: column; flex-wrap: nowrap; }
+  .bite { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 7px; display: flex; align-items: flex-start; gap: 5; }
+  .bite .num { width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 5.5px; font-weight: 700; flex-shrink: 0; background: #eef2ff; border: 1px solid #c7d2fe; color: #6366f1; }
+  .bite .num.carried { background: #f0fdf4; border-color: #bbf7d0; color: #22c55e; }
+  .bite .num.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+  .bite .text { font-size: 6px; color: #334155; line-height: 1.5; }
+  .bite .text b { color: #0f172a; }
+  .bite .tag-s { font-size: 5px; font-weight: 700; border-radius: 3px; padding: 1px 3px; margin-top: 1px; display: inline-block; }
+  .bite .tag-s.carried { background: #f0fdf4; color: #22c55e; border: 1px solid #bbf7d0; }
+  .bite .tag-s.active { background: #eef2ff; color: #6366f1; border: 1px solid #c7d2fe; }
+  .bite .tag-s.pending { background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; }
+
+  /* Bubbles */
+  .tb { border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; letter-spacing: -0.2px; }
+  .tb.indigo { box-shadow: 0 0 0 1.5px #a5b4fc, 0 0 6px rgba(99,102,241,.08); color: #6366f1; font-size: 5px; }
+  .tb.pink { box-shadow: 0 0 0 1.5px #f9a8d4, 0 0 6px rgba(219,39,119,.06); color: #db2777; font-size: 5px; }
+  .tb.green { box-shadow: 0 0 0 1.5px #6ee7b7, 0 0 6px rgba(5,150,105,.06); color: #059669; font-size: 5px; }
+  .tb.amber { box-shadow: 0 0 0 1.5px #fcd34d, 0 0 6px rgba(202,138,4,.06); color: #92400e; font-size: 5px; }
+  .tb.blue { box-shadow: 0 0 0 1.5px #93c5fd, 0 0 6px rgba(37,99,235,.06); color: #1d4ed8; font-size: 5px; }
+
+  /* Transcript */
+  .tl { display: flex; gap: 3px; padding: 2px 0; border-bottom: 1px solid #f8fafc; }
+  .tl .ts { font-size: 5px; color: #94a3b8; font-weight: 600; min-width: 16px; }
+  .tl .tt { font-size: 5.5px; color: #334155; line-height: 1.5; }
+
+  /* Agenda */
+  .ai { display: flex; gap: 3px; padding: 2px 0; align-items: center; }
+  .ai .dot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 4.5px; font-weight: 700; color: #94a3b8; flex-shrink: 0; }
+  .ai .dot.done { background: #f0fdf4; border-color: #bbf7d0; color: #22c55e; }
+  .ai .dot.now { background: #6366f1; border-color: #6366f1; color: #fff; }
+  .ai .label { font-size: 5.5px; color: #334155; font-weight: 500; }
+
+  /* Clerk Pad (notes + quick motion) */
+  .clerkpad .body { padding: 5px 7px; flex-direction: column; flex-wrap: nowrap; gap: 4px; }
+  .note-area { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 5px; padding: 4px 6px; min-height: 24px; }
+  .note-area .placeholder { font-size: 5.5px; color: #94a3b8; font-style: italic; }
+  .note-line { font-size: 5.5px; color: #334155; line-height: 1.6; border-bottom: 1px solid #f1f5f9; padding: 2px 0; }
+  .quick-motion { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 5px; padding: 4px 6px; }
+  .quick-motion .qm-label { font-size: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #6366f1; margin-bottom: 2px; }
+  .quick-motion .qm-field { background: #fff; border: 1px solid #c7d2fe; border-radius: 3px; padding: 2px 4px; font-size: 5px; color: #334155; margin-bottom: 2px; min-height: 12px; }
+  .quick-motion .qm-row { display: flex; gap: 3px; }
+  .quick-motion .qm-sel { background: #fff; border: 1px solid #c7d2fe; border-radius: 3px; padding: 1px 4px; font-size: 4.5px; color: #64748b; flex: 1; }
+  .quick-motion .qm-btn { background: #6366f1; color: #fff; border: none; border-radius: 3px; padding: 2px 6px; font-size: 5px; font-weight: 700; }
+
+  #result { text-align: center; margin-top: 32px; padding: 16px; display: none; }
+  #result > div { background: #fff; display: inline-block; border-radius: 12px; border: 2px solid #6366f1; padding: 16px 28px; box-shadow: 0 4px 20px rgba(99,102,241,.1); }
+</style>
+</head>
+<body>
+
+<h1>Live Dashboard Layout</h1>
+<p class="sub">5 panels: Procedural Bites (main), Clerk Pad (notes + quick motions), Transcript, Agenda, Topics (compact). Ranked by recommendation.</p>
+<div class="feng">Feng Shui: active energy (Bites) flows left-to-centre. Reflective space (Notes) anchors the right or bottom. Transcript flows downward like water. Topics float lightly. Agenda grounds the structure.</div>
+
+<div class="grid">
+
+<!-- ============ LAYOUT 1 — RECOMMENDED ============ -->
+<div class="card" onclick="select(this,'1')">
+  <div class="head"><span class="tag">Layout 1</span><span class="rec">Recommended</span></div>
+  <h2>Command Centre — Bites Left, Clerk Pad Right, Support Below</h2>
+  <p class="desc">Procedural Bites commands the left (fire/active energy). Clerk Pad anchors the right (metal/precision). Transcript and Agenda ground the bottom. Topics floats top-right.</p>
+  <div class="feng-note">Wood feeds Fire on the left; Metal refines on the right. Water (transcript) flows below. Earth (agenda) stabilises.</div>
+  <div class="bento">
+    <div class="topbar"><div class="dot"></div><span>CivicPulse</span><div class="status">ACTIVE 02:14</div></div>
+    <div class="content" style="grid-template-columns: 1.3fr 1fr; grid-template-rows: 1.2fr 0.8fr; height: 300px;">
+      <!-- Bites — left full height -->
+      <div class="panel bites" style="grid-row: 1/3;">
+        <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Procedural Bites</span><div class="badge">4 motions</div></div>
+        <div class="body">
+          <div class="bite"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Agenda</b><br>MOVED: Mayor Veach · SECONDED: Cllr Johnston</div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Minutes</b><br>Dec 18, 2024 RCM — with correction to item 8.1</div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite" style="border-color:#c7d2fe; background:#fafaff;"><div class="num active">3</div><div><div class="text"><b>Water Service Rate Increase</b><br>MOVED: Mayor Veach · SECONDED: Cllr Wall<br>Resident notice for public distribution</div><div class="tag-s active">IN PROGRESS</div></div></div>
+          <div class="bite"><div class="num">4</div><div><div class="text"><b>Family Day Community Event</b><br>$500 budget allocation · VoPC & Library</div><div class="tag-s pending">PENDING</div></div></div>
+          <div class="bite"><div class="num">5</div><div><div class="text"><b>Purple Day Proclamation</b><br>BC Epilepsy Society · March 26</div><div class="tag-s pending">PENDING</div></div></div>
+        </div>
+      </div>
+      <!-- Top-right: Clerk Pad + Topics -->
+      <div style="grid-row: 1; display: grid; grid-template-columns: 1fr 0.55fr; gap: 5px;">
+        <!-- Clerk Pad -->
+        <div class="panel clerkpad">
+          <div class="ph"><div class="icon" style="background:#f59e0b;"></div><span>Clerk Pad</span></div>
+          <div class="body">
+            <div class="note-area">
+              <div class="note-line">Cllr Wall raised concern about 10% tax increase</div>
+              <div class="note-line">Need BC Assessment data before finalising</div>
+              <div class="placeholder">Type a note...</div>
+            </div>
+            <div class="quick-motion">
+              <div class="qm-label">Quick Motion</div>
+              <div class="qm-field">THAT Council approves the...</div>
+              <div class="qm-row">
+                <div class="qm-sel">Mover ▾</div>
+                <div class="qm-sel">Seconder ▾</div>
+                <div class="qm-btn">Record</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Topics — compact -->
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#8b5cf6;"></div><span>Topics</span><div class="badge">5</div></div>
+          <div class="body" style="padding:5px; gap:4px;">
+            <div class="tb indigo" style="width:24px;height:24px;">Budget</div>
+            <div class="tb pink" style="width:20px;height:20px;">Policy</div>
+            <div class="tb green" style="width:22px;height:22px;">Water</div>
+            <div class="tb amber" style="width:18px;height:18px;">Bylaw</div>
+            <div class="tb blue" style="width:22px;height:22px;">Motion</div>
+          </div>
+        </div>
+      </div>
+      <!-- Bottom-right: Transcript + Agenda -->
+      <div style="grid-row: 2; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 5px;">
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Transcript</span><div class="badge">12</div></div>
+          <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+            <div class="tl"><div class="ts">02:12</div><div class="tt">Council moves to the water service rate discussion.</div></div>
+            <div class="tl"><div class="ts">02:15</div><div class="tt">Mayor Veach presents the drafted resident notice.</div></div>
+            <div class="tl" style="border:none;"><div class="ts">02:18</div><div class="tt">Councillor Wall emphasises public engagement.</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#db2777;"></div><span>Agenda</span><div class="badge">3/8</div></div>
+          <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+            <div class="ai"><div class="dot done">✓</div><div class="label">Call to Order</div></div>
+            <div class="ai"><div class="dot done">✓</div><div class="label">Adoption of Agenda</div></div>
+            <div class="ai"><div class="dot done">✓</div><div class="label">Adoption of Minutes</div></div>
+            <div class="ai"><div class="dot now">4</div><div class="label" style="color:#6366f1;font-weight:700;">Unfinished Business</div></div>
+            <div class="ai"><div class="dot">5</div><div class="label">New Business</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottombar"><div class="btn">Pause</div><div class="btn red">End Meeting</div></div>
+  </div>
+</div>
+
+<!-- ============ LAYOUT 2 ============ -->
+<div class="card" onclick="select(this,'2')">
+  <div class="head"><span class="tag">Layout 2</span></div>
+  <h2>Split Command — Bites + Pad Side by Side, Stream Below</h2>
+  <p class="desc">Equal weight to Bites and Clerk Pad across the top. Transcript, Agenda, Topics share a grounded bottom row.</p>
+  <div class="feng-note">Fire and Metal balanced at eye level. Water, Earth and Air settle below — calm foundation under active decision-making.</div>
+  <div class="bento">
+    <div class="topbar"><div class="dot"></div><span>CivicPulse</span><div class="status">ACTIVE 02:14</div></div>
+    <div class="content" style="grid-template-columns: 1fr 1fr; grid-template-rows: 1.4fr 0.6fr; height: 300px;">
+      <!-- Bites — top-left -->
+      <div class="panel bites">
+        <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Procedural Bites</span><div class="badge">4 motions</div></div>
+        <div class="body">
+          <div class="bite"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Agenda</b><br>MOVED: Mayor Veach</div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Minutes</b></div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite" style="border-color:#c7d2fe; background:#fafaff;"><div class="num active">3</div><div><div class="text"><b>Water Service Rate Increase</b><br>MOVED: Mayor Veach · SECONDED: Cllr Wall</div><div class="tag-s active">IN PROGRESS</div></div></div>
+          <div class="bite"><div class="num">4</div><div><div class="text"><b>Family Day Event</b></div><div class="tag-s pending">PENDING</div></div></div>
+        </div>
+      </div>
+      <!-- Clerk Pad — top-right -->
+      <div class="panel clerkpad">
+        <div class="ph"><div class="icon" style="background:#f59e0b;"></div><span>Clerk Pad</span></div>
+        <div class="body">
+          <div class="note-area" style="flex:1;">
+            <div class="note-line">Cllr Wall raised concern about 10% tax increase</div>
+            <div class="note-line">Need BC Assessment data before finalising</div>
+            <div class="note-line">Fire Chief re: training room — Feb 12 COTW</div>
+            <div class="placeholder">Type a note...</div>
+          </div>
+          <div class="quick-motion">
+            <div class="qm-label">Quick Motion</div>
+            <div class="qm-field">THAT Council approves the...</div>
+            <div class="qm-row">
+              <div class="qm-sel">Mover ▾</div>
+              <div class="qm-sel">Seconder ▾</div>
+              <div class="qm-btn">Record</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Bottom row: Transcript + Agenda + Topics -->
+      <div style="grid-column:1/3; display:grid; grid-template-columns:1.2fr 0.8fr 0.5fr; gap:5px;">
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Transcript</span><div class="badge">12</div></div>
+          <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+            <div class="tl"><div class="ts">02:12</div><div class="tt">Council moves to the water service rate discussion.</div></div>
+            <div class="tl"><div class="ts">02:15</div><div class="tt">Mayor Veach presents the drafted resident notice.</div></div>
+            <div class="tl" style="border:none;"><div class="ts">02:18</div><div class="tt">Councillor Wall emphasises public engagement.</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#db2777;"></div><span>Agenda</span><div class="badge">3/8</div></div>
+          <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+            <div class="ai"><div class="dot done">✓</div><div class="label">Call to Order</div></div>
+            <div class="ai"><div class="dot done">✓</div><div class="label">Adoption</div></div>
+            <div class="ai"><div class="dot now">3</div><div class="label" style="color:#6366f1;font-weight:700;">Unfinished</div></div>
+            <div class="ai"><div class="dot">4</div><div class="label">New Business</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#8b5cf6;"></div><span>Topics</span><div class="badge">5</div></div>
+          <div class="body" style="padding:4px;gap:3px;">
+            <div class="tb indigo" style="width:20px;height:20px;">Budget</div>
+            <div class="tb pink" style="width:18px;height:18px;">Policy</div>
+            <div class="tb green" style="width:20px;height:20px;">Water</div>
+            <div class="tb amber" style="width:16px;height:16px;">Bylaw</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottombar"><div class="btn">Pause</div><div class="btn red">End Meeting</div></div>
+  </div>
+</div>
+
+<!-- ============ LAYOUT 3 ============ -->
+<div class="card" onclick="select(this,'3')">
+  <div class="head"><span class="tag">Layout 3</span></div>
+  <h2>Three Columns — Transcript | Bites | Pad+Agenda</h2>
+  <p class="desc">Reading flows left to right: raw transcript feeds into Bites (centre stage), Clerk Pad and Agenda anchor the right. Topics tucks into top-right corner.</p>
+  <div class="feng-note">Water (transcript) flows from the left, feeds Fire (bites) at centre. Metal (pad) and Earth (agenda) receive on the right. Balanced east-to-west flow.</div>
+  <div class="bento">
+    <div class="topbar"><div class="dot"></div><span>CivicPulse</span><div class="status">ACTIVE 02:14</div></div>
+    <div class="content" style="grid-template-columns: 0.7fr 1.2fr 0.9fr; grid-template-rows: 1fr; height: 300px;">
+      <!-- Transcript — left -->
+      <div class="panel">
+        <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Transcript</span><div class="badge">12</div></div>
+        <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+          <div class="tl"><div class="ts">00:12</div><div class="tt">Council moves to capital budget.</div></div>
+          <div class="tl"><div class="ts">00:15</div><div class="tt">Finance presents proposed budget.</div></div>
+          <div class="tl"><div class="ts">00:21</div><div class="tt">Cllr Smith asks about water.</div></div>
+          <div class="tl"><div class="ts">00:24</div><div class="tt">Public Works requests $3M.</div></div>
+          <div class="tl"><div class="ts">00:30</div><div class="tt">Motion to approve capital budget.</div></div>
+          <div class="tl" style="border:none;"><div class="ts">00:36</div><div class="tt">Discussion on zoning bylaw.</div></div>
+        </div>
+      </div>
+      <!-- Bites — centre -->
+      <div class="panel bites">
+        <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Procedural Bites</span><div class="badge">4</div></div>
+        <div class="body">
+          <div class="bite"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Agenda</b><br>MOVED: Mayor Veach · SECONDED: Cllr Johnston</div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Minutes</b></div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite" style="border-color:#c7d2fe; background:#fafaff;"><div class="num active">3</div><div><div class="text"><b>Water Service Rate Increase</b><br>MOVED: Mayor Veach · SECONDED: Cllr Wall</div><div class="tag-s active">IN PROGRESS</div></div></div>
+          <div class="bite"><div class="num">4</div><div><div class="text"><b>Family Day Event</b></div><div class="tag-s pending">PENDING</div></div></div>
+        </div>
+      </div>
+      <!-- Right: Topics (small) + Clerk Pad + Agenda -->
+      <div style="display:grid; grid-template-rows: auto 1fr 1fr; gap:5px;">
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#8b5cf6;"></div><span>Topics</span><div class="badge">5</div></div>
+          <div class="body" style="padding:4px;gap:3px;">
+            <div class="tb indigo" style="width:20px;height:20px;">Budget</div>
+            <div class="tb pink" style="width:18px;height:18px;">Policy</div>
+            <div class="tb green" style="width:20px;height:20px;">Water</div>
+            <div class="tb amber" style="width:16px;height:16px;">Bylaw</div>
+            <div class="tb blue" style="width:18px;height:18px;">Motion</div>
+          </div>
+        </div>
+        <div class="panel clerkpad">
+          <div class="ph"><div class="icon" style="background:#f59e0b;"></div><span>Clerk Pad</span></div>
+          <div class="body">
+            <div class="note-area" style="flex:1;"><div class="note-line">Tax increase concern raised</div><div class="placeholder">Type a note...</div></div>
+            <div class="quick-motion">
+              <div class="qm-label">Quick Motion</div>
+              <div class="qm-field">THAT Council...</div>
+              <div class="qm-row"><div class="qm-sel">Mover ▾</div><div class="qm-sel">Seconder ▾</div><div class="qm-btn">Record</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#db2777;"></div><span>Agenda</span><div class="badge">3/8</div></div>
+          <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+            <div class="ai"><div class="dot done">✓</div><div class="label">Call to Order</div></div>
+            <div class="ai"><div class="dot done">✓</div><div class="label">Adoption</div></div>
+            <div class="ai"><div class="dot now">3</div><div class="label" style="color:#6366f1;font-weight:700;">Unfinished</div></div>
+            <div class="ai"><div class="dot">4</div><div class="label">New Business</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottombar"><div class="btn">Pause</div><div class="btn red">End Meeting</div></div>
+  </div>
+</div>
+
+<!-- ============ LAYOUT 4 ============ -->
+<div class="card" onclick="select(this,'4')">
+  <div class="head"><span class="tag">Layout 4</span></div>
+  <h2>Wide Bites Top, Everything Else Below</h2>
+  <p class="desc">Bites spans the full top — maximum prominence. Clerk Pad, Transcript, Agenda, and Topics fill a 4-panel bottom row.</p>
+  <div class="feng-note">Fire across the top horizon. Supporting elements rest below like earth and water — stable, grounding, accessible.</div>
+  <div class="bento">
+    <div class="topbar"><div class="dot"></div><span>CivicPulse</span><div class="status">ACTIVE 02:14</div></div>
+    <div class="content" style="grid-template-columns: 1fr; grid-template-rows: 1.3fr 0.7fr; height: 300px;">
+      <!-- Bites — full width top -->
+      <div class="panel bites">
+        <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Procedural Bites</span><div class="badge">4 motions</div></div>
+        <div class="body" style="flex-direction:row; flex-wrap: nowrap; overflow-x:auto; gap:5px;">
+          <div class="bite" style="min-width:150px;"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Agenda</b><br>MOVED: Mayor Veach</div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite" style="min-width:150px;"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Minutes</b><br>Dec 18 — with correction</div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite" style="min-width:180px;border-color:#c7d2fe;background:#fafaff;"><div class="num active">3</div><div><div class="text"><b>Water Service Rate Increase</b><br>MOVED: Mayor Veach · SECONDED: Cllr Wall</div><div class="tag-s active">IN PROGRESS</div></div></div>
+          <div class="bite" style="min-width:130px;"><div class="num">4</div><div><div class="text"><b>Family Day Event</b><br>$500 allocation</div><div class="tag-s pending">PENDING</div></div></div>
+          <div class="bite" style="min-width:130px;"><div class="num">5</div><div><div class="text"><b>Purple Day</b></div><div class="tag-s pending">PENDING</div></div></div>
+        </div>
+      </div>
+      <!-- Bottom row -->
+      <div style="display:grid; grid-template-columns: 1fr 1fr 0.8fr 0.4fr; gap:5px;">
+        <div class="panel clerkpad">
+          <div class="ph"><div class="icon" style="background:#f59e0b;"></div><span>Clerk Pad</span></div>
+          <div class="body">
+            <div class="note-area"><div class="note-line">Tax concern raised</div><div class="placeholder">Note...</div></div>
+            <div class="quick-motion"><div class="qm-label">Quick Motion</div><div class="qm-field">THAT Council...</div><div class="qm-row"><div class="qm-sel">Mover ▾</div><div class="qm-btn">Record</div></div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Transcript</span><div class="badge">12</div></div>
+          <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+            <div class="tl"><div class="ts">02:12</div><div class="tt">Council moves to water service.</div></div>
+            <div class="tl"><div class="ts">02:15</div><div class="tt">Mayor presents notice.</div></div>
+            <div class="tl" style="border:none;"><div class="ts">02:18</div><div class="tt">Cllr Wall on engagement.</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#db2777;"></div><span>Agenda</span><div class="badge">3/8</div></div>
+          <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+            <div class="ai"><div class="dot done">✓</div><div class="label">Call to Order</div></div>
+            <div class="ai"><div class="dot done">✓</div><div class="label">Adoption</div></div>
+            <div class="ai"><div class="dot now">3</div><div class="label" style="color:#6366f1;font-weight:700;">Unfinished</div></div>
+            <div class="ai"><div class="dot">4</div><div class="label">New Business</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#8b5cf6;"></div><span>Topics</span></div>
+          <div class="body" style="padding:4px;gap:3px;">
+            <div class="tb indigo" style="width:18px;height:18px;">B</div>
+            <div class="tb pink" style="width:16px;height:16px;">P</div>
+            <div class="tb green" style="width:18px;height:18px;">W</div>
+            <div class="tb amber" style="width:14px;height:14px;">B</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottombar"><div class="btn">Pause</div><div class="btn red">End Meeting</div></div>
+  </div>
+</div>
+
+<!-- ============ LAYOUT 5 ============ -->
+<div class="card" onclick="select(this,'5')">
+  <div class="head"><span class="tag">Layout 5</span></div>
+  <h2>Golden Ratio — Bites 60%, Right Stack 40%</h2>
+  <p class="desc">Bites takes golden-ratio proportion on the left. Right column stacks Clerk Pad, Transcript, Topics, and Agenda in descending priority.</p>
+  <div class="feng-note">Golden ratio mirrors natural harmony. Active energy concentrated left, support cascades down the right — each panel slightly smaller than the last.</div>
+  <div class="bento">
+    <div class="topbar"><div class="dot"></div><span>CivicPulse</span><div class="status">ACTIVE 02:14</div></div>
+    <div class="content" style="grid-template-columns: 1.6fr 1fr; grid-template-rows: 1fr; height: 300px;">
+      <!-- Bites — golden ratio left -->
+      <div class="panel bites">
+        <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Procedural Bites</span><div class="badge">4 motions</div></div>
+        <div class="body">
+          <div class="bite"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Agenda</b><br>MOVED: Mayor Veach · SECONDED: Cllr Johnston</div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Minutes</b><br>Dec 18, 2024 — with correction to item 8.1</div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite" style="border-color:#c7d2fe; background:#fafaff;"><div class="num active">3</div><div><div class="text"><b>Water Service Rate Increase</b><br>MOVED: Mayor Veach · SECONDED: Cllr Wall<br>Resident notice for public distribution</div><div class="tag-s active">IN PROGRESS</div></div></div>
+          <div class="bite"><div class="num">4</div><div><div class="text"><b>Family Day Community Event</b><br>$500 budget · VoPC & Library</div><div class="tag-s pending">PENDING</div></div></div>
+          <div class="bite"><div class="num">5</div><div><div class="text"><b>Purple Day Proclamation</b></div><div class="tag-s pending">PENDING</div></div></div>
+        </div>
+      </div>
+      <!-- Right column cascade -->
+      <div style="display:grid; grid-template-rows: 1.2fr 1fr 0.5fr 0.8fr; gap:5px;">
+        <div class="panel clerkpad">
+          <div class="ph"><div class="icon" style="background:#f59e0b;"></div><span>Clerk Pad</span></div>
+          <div class="body">
+            <div class="note-area"><div class="note-line">Tax increase concern</div><div class="placeholder">Note...</div></div>
+            <div class="quick-motion"><div class="qm-label">Quick Motion</div><div class="qm-field">THAT Council...</div><div class="qm-row"><div class="qm-sel">Mover ▾</div><div class="qm-sel">Seconder ▾</div><div class="qm-btn">Record</div></div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Transcript</span><div class="badge">12</div></div>
+          <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+            <div class="tl"><div class="ts">02:15</div><div class="tt">Mayor presents resident notice.</div></div>
+            <div class="tl" style="border:none;"><div class="ts">02:18</div><div class="tt">Cllr Wall on public engagement.</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#8b5cf6;"></div><span>Topics</span><div class="badge">5</div></div>
+          <div class="body" style="padding:3px;gap:3px;">
+            <div class="tb indigo" style="width:16px;height:16px;">B</div>
+            <div class="tb pink" style="width:14px;height:14px;">P</div>
+            <div class="tb green" style="width:16px;height:16px;">W</div>
+            <div class="tb amber" style="width:14px;height:14px;">B</div>
+            <div class="tb blue" style="width:16px;height:16px;">M</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="icon" style="background:#db2777;"></div><span>Agenda</span><div class="badge">3/8</div></div>
+          <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+            <div class="ai"><div class="dot done">✓</div><div class="label">Call to Order</div></div>
+            <div class="ai"><div class="dot done">✓</div><div class="label">Adoption</div></div>
+            <div class="ai"><div class="dot now">3</div><div class="label" style="color:#6366f1;font-weight:700;">Unfinished</div></div>
+            <div class="ai"><div class="dot">4</div><div class="label">New Business</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottombar"><div class="btn">Pause</div><div class="btn red">End Meeting</div></div>
+  </div>
+</div>
+
+<!-- ============ LAYOUT 6 ============ -->
+<div class="card" onclick="select(this,'6')">
+  <div class="head"><span class="tag">Layout 6</span></div>
+  <h2>Asymmetric Grid — Bites Centre, Pad Bottom, Support Corners</h2>
+  <p class="desc">Bites dominates the centre-left. Clerk Pad spans the bottom. Topics and Agenda occupy the right corners. Transcript top-left.</p>
+  <div class="feng-note">Centre is the health/balance position. Active decisions sit at the heart. Creativity (pad) at the base. Knowledge (transcript) north. Structure (agenda) east.</div>
+  <div class="bento">
+    <div class="topbar"><div class="dot"></div><span>CivicPulse</span><div class="status">ACTIVE 02:14</div></div>
+    <div class="content" style="grid-template-columns: 0.7fr 1.3fr 0.7fr; grid-template-rows: 0.4fr 1fr 0.5fr; height: 300px;">
+      <!-- Transcript — top-left -->
+      <div class="panel" style="grid-column:1; grid-row:1;">
+        <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Transcript</span><div class="badge">12</div></div>
+        <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+          <div class="tl"><div class="ts">02:15</div><div class="tt">Mayor presents notice.</div></div>
+          <div class="tl" style="border:none;"><div class="ts">02:18</div><div class="tt">Cllr Wall on engagement.</div></div>
+        </div>
+      </div>
+      <!-- Topics — top-right -->
+      <div class="panel" style="grid-column:3; grid-row:1;">
+        <div class="ph"><div class="icon" style="background:#8b5cf6;"></div><span>Topics</span><div class="badge">5</div></div>
+        <div class="body" style="padding:3px;gap:3px;">
+          <div class="tb indigo" style="width:16px;height:16px;">B</div>
+          <div class="tb pink" style="width:14px;height:14px;">P</div>
+          <div class="tb green" style="width:16px;height:16px;">W</div>
+          <div class="tb amber" style="width:14px;height:14px;">B</div>
+        </div>
+      </div>
+      <!-- Bites — centre spanning -->
+      <div class="panel bites" style="grid-column:1/3; grid-row:2;">
+        <div class="ph"><div class="icon" style="background:#6366f1;"></div><span>Procedural Bites</span><div class="badge">4</div></div>
+        <div class="body">
+          <div class="bite"><div class="num carried">✓</div><div><div class="text"><b>Adoption of Agenda</b><br>MOVED: Mayor Veach</div><div class="tag-s carried">CARRIED</div></div></div>
+          <div class="bite" style="border-color:#c7d2fe; background:#fafaff;"><div class="num active">2</div><div><div class="text"><b>Water Rate Increase</b><br>MOVED: Mayor Veach · SECONDED: Cllr Wall</div><div class="tag-s active">IN PROGRESS</div></div></div>
+          <div class="bite"><div class="num">3</div><div><div class="text"><b>Family Day Event</b></div><div class="tag-s pending">PENDING</div></div></div>
+        </div>
+      </div>
+      <!-- Agenda — right middle -->
+      <div class="panel" style="grid-column:3; grid-row:2;">
+        <div class="ph"><div class="icon" style="background:#db2777;"></div><span>Agenda</span><div class="badge">3/8</div></div>
+        <div class="body" style="flex-direction:column;flex-wrap:nowrap;padding:3px 5px;">
+          <div class="ai"><div class="dot done">✓</div><div class="label">Call to Order</div></div>
+          <div class="ai"><div class="dot done">✓</div><div class="label">Adoption</div></div>
+          <div class="ai"><div class="dot now">3</div><div class="label" style="color:#6366f1;font-weight:700;">Unfinished</div></div>
+          <div class="ai"><div class="dot">4</div><div class="label">New Business</div></div>
+        </div>
+      </div>
+      <!-- Clerk Pad — full bottom -->
+      <div class="panel clerkpad" style="grid-column:1/4; grid-row:3;">
+        <div class="ph"><div class="icon" style="background:#f59e0b;"></div><span>Clerk Pad</span></div>
+        <div class="body" style="flex-direction:row; gap:6px;">
+          <div class="note-area" style="flex:1;"><div class="note-line">Tax increase concern · Need BC Assessment data</div><div class="placeholder">Type a note...</div></div>
+          <div class="quick-motion" style="flex:1;">
+            <div class="qm-label">Quick Motion</div>
+            <div class="qm-field">THAT Council approves the...</div>
+            <div class="qm-row"><div class="qm-sel">Mover ▾</div><div class="qm-sel">Seconder ▾</div><div class="qm-btn">Record</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottombar"><div class="btn">Pause</div><div class="btn red">End Meeting</div></div>
+  </div>
+</div>
+
+</div>
+
+<div id="result">
+  <div>
+    <span style="font-size: 13px; color: #64748b;">Selected:</span>
+    <span id="choice" style="font-size: 15px; font-weight: 700; color: #6366f1; margin-left: 8px;"></span>
+  </div>
+</div>
+
+<script>
+function select(el, layout) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('choice').textContent = 'Layout ' + layout + ' — ' + el.querySelector('h2').textContent;
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+
+</body>
+</html>

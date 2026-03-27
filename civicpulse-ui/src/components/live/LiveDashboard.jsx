@@ -96,15 +96,16 @@ export default function LiveDashboard({ session }) {
           </BentoPanel>
         </div>
 
-        {/* TOP-RIGHT: Clerk Notes + Topics side by side */}
+        {/* TOP-RIGHT: Transcript + Topics side by side */}
         <div style={{ gridColumn: '2', gridRow: '1', display: 'grid', gridTemplateColumns: '1fr 0.5fr', gap: 10, minHeight: 0 }}>
-          {/* Clerk Notes */}
+          {/* Transcript */}
           <BentoPanel
-            title="Clerk Notes"
-            icon={iconNotes}
+            title="Transcript"
+            icon={iconTranscript}
+            badge={`${session.transcript.length}`}
             style={{ minHeight: 0 }}
           >
-            <ClerkNotes />
+            <TranscriptPanel transcript={session.transcript} status={session.status} embedded />
           </BentoPanel>
 
           {/* Topics — compact */}
@@ -118,17 +119,8 @@ export default function LiveDashboard({ session }) {
           </BentoPanel>
         </div>
 
-        {/* BOTTOM-RIGHT: Transcript + Agenda */}
+        {/* BOTTOM-RIGHT: Agenda + Clerk Notes */}
         <div style={{ gridColumn: '2', gridRow: '2', display: 'grid', gridTemplateColumns: '1.3fr 0.7fr', gap: 10, minHeight: 0 }}>
-          <BentoPanel
-            title="Transcript"
-            icon={iconTranscript}
-            badge={`${session.transcript.length}`}
-            style={{ minHeight: 0 }}
-          >
-            <TranscriptPanel transcript={session.transcript} status={session.status} embedded />
-          </BentoPanel>
-
           <BentoPanel
             title="Agenda"
             icon={iconAgenda}
@@ -142,6 +134,14 @@ export default function LiveDashboard({ session }) {
               transcript={session.transcript}
               embedded
             />
+          </BentoPanel>
+
+          <BentoPanel
+            title="Clerk Notes"
+            icon={iconNotes}
+            style={{ minHeight: 0 }}
+          >
+            <ClerkNotes />
           </BentoPanel>
         </div>
       </div>

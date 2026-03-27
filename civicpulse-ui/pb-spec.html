@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procedural Bites — Card Spec</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; min-height: 100vh; padding: 40px 20px; }
+  h1 { text-align: center; font-size: 22px; color: #0f172a; margin-bottom: 6px; }
+  p.sub { text-align: center; font-size: 12.5px; color: #64748b; margin-bottom: 36px; line-height: 1.7; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+  .spec-grid { display: flex; flex-direction: column; gap: 40px; max-width: 480px; margin: 0 auto; }
+
+  .stage-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #6366f1; background: #eef2ff; border: 1px solid #c7d2fe;
+    border-radius: 999px; padding: 4px 14px; display: inline-block; margin-bottom: 10px;
+  }
+  .stage-desc { font-size: 11.5px; color: #64748b; margin-bottom: 14px; line-height: 1.6; }
+  .arrow { text-align: center; font-size: 20px; color: #c7d2fe; }
+
+  /* PB Card */
+  .pb {
+    background: #fff; border-radius: 14px; border: 1px solid #e2e8f0;
+    overflow: hidden; box-shadow: 0 2px 14px rgba(99,102,241,.07);
+  }
+  .pb .topbar { height: 3px; }
+  .pb .topbar.blue { background: linear-gradient(90deg, #2563eb, #2563eb66, transparent); }
+  .pb .topbar.indigo { background: linear-gradient(90deg, #6366f1, #6366f166, transparent); }
+  .pb .topbar.green { background: linear-gradient(90deg, #22c55e, #22c55e66, transparent); }
+  .pb .topbar.red { background: linear-gradient(90deg, #dc2626, #dc262666, transparent); }
+
+  .pb .header { padding: 14px 18px 0; }
+  .pb .cat { font-size: 9px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px; }
+  .pb .title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .pb .title { font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+
+  .pb .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 4px 10px; flex-shrink: 0; }
+  .pb .badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .pb .badge span { font-size: 10px; font-weight: 700; }
+  .badge.waiting { background: #fffbeb; border: 1.5px solid #fde68a; }
+  .badge.waiting .dot { background: #f59e0b; animation: pulse 1.5s infinite; }
+  .badge.waiting span { color: #b45309; }
+  .badge.active { background: #eef2ff; border: 1.5px solid #c7d2fe; }
+  .badge.active .dot { background: #6366f1; animation: pulse 1.5s infinite; }
+  .badge.active span { color: #6366f1; }
+  .badge.carried { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+  .badge.carried .dot { background: #22c55e; }
+  .badge.carried span { color: #22c55e; }
+  .badge.defeated { background: #fef2f2; border: 1.5px solid #fecaca; }
+  .badge.defeated .dot { background: #dc2626; }
+  .badge.defeated span { color: #dc2626; }
+  .badge.pending { background: #f8fafc; border: 1.5px solid #e2e8f0; }
+  .badge.pending .dot { background: #94a3b8; }
+  .badge.pending span { color: #94a3b8; }
+
+  /* Motion blockquote */
+  .pb .motion-bq {
+    background: #f8fafc; border-left: 3px solid; border-radius: 0 10px 10px 0;
+    padding: 10px 14px; margin: 0 18px 12px;
+    font-size: 13px; color: #334155; line-height: 1.75;
+  }
+  .motion-bq.blue { border-color: #2563eb; }
+  .motion-bq.indigo { border-color: #6366f1; }
+
+  /* Mover / Seconder tiles */
+  .pb .tiles { display: flex; gap: 8px; padding: 0 18px 14px; }
+  .pb .tile {
+    flex: 1; background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 8px 10px; transition: all .3s;
+  }
+  .pb .tile.highlight {
+    border-color: #6366f1; background: #eef2ff;
+    animation: tileGlow 1.5s ease infinite;
+  }
+  .pb .tile.filled { border-color: #bbf7d0; background: #f0fdf4; }
+  .pb .tile.waiting-fill {
+    border-color: #fde68a; background: #fffbeb;
+    border-style: dashed;
+  }
+  .pb .tile .label {
+    font-size: 8px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; margin-bottom: 3px;
+  }
+  .pb .tile .label.muted { color: #94a3b8; }
+  .pb .tile .label.active { color: #6366f1; }
+  .pb .tile .label.done { color: #22c55e; }
+  .pb .tile .label.waiting { color: #b45309; }
+  .pb .tile .name { font-size: 13px; font-weight: 700; }
+  .pb .tile .name.muted { color: #cbd5e1; }
+  .pb .tile .name.filled { color: #0f172a; }
+  .pb .tile .name.active { color: #6366f1; }
+  .pb .tile .name.waiting { color: #b45309; font-style: italic; }
+
+  /* Vote bar */
+  .pb .vote-bar {
+    margin: 0 18px 14px; padding: 10px 12px;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+  }
+  .pb .vote-bar .vb-label {
+    font-size: 8px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: #94a3b8; margin-bottom: 6px;
+  }
+  .pb .vote-bar .vb-label.active { color: #6366f1; }
+  .pb .vote-dots { display: flex; gap: 6px; }
+  .pb .vote-dot {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7px; font-weight: 700; color: #94a3b8;
+    transition: all .3s;
+  }
+  .pb .vote-dot.yes { border-color: #22c55e; background: #f0fdf4; color: #22c55e; }
+  .pb .vote-dot.no { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
+  .pb .vote-dot.waiting { border-color: #6366f1; border-style: dashed; animation: pulse 1.5s infinite; }
+
+  /* Tags */
+  .pb .tags { display: flex; gap: 5px; padding: 0 18px 14px; flex-wrap: wrap; }
+  .pb .tag { font-size: 10px; border-radius: 999px; padding: 3px 9px; }
+  .tag.blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .tag.green { background: #f0fdf4; color: #22c55e; border: 1px solid #bbf7d0; }
+  .tag.gray { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes tileGlow {
+    0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+    50% { box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+  }
+</style>
+</head>
+<body>
+
+<h1>Procedural Bites — Card Spec</h1>
+<p class="sub">How a PB card listens to the meeting and builds itself in real-time. Each stage shows what the card looks like as the meeting unfolds.</p>
+
+<div class="spec-grid">
+
+<!-- STAGE 1: Motion Detected -->
+<div>
+  <div class="stage-label">Stage 1 — Motion Detected</div>
+  <div class="stage-desc">The system hears "I move that..." or "THAT Council..." from the transcript. A new PB card appears. The mover is highlighted as it's being identified from audio.</div>
+
+  <div class="pb">
+    <div class="topbar blue"></div>
+    <div class="header">
+      <div class="cat">Motion · Item 8.2</div>
+      <div class="title-row">
+        <div class="title">Water Service Rate Increase — Resident Notice</div>
+        <div class="badge active"><div class="dot"></div><span>MOVER DETECTED</span></div>
+      </div>
+    </div>
+    <div class="motion-bq blue">
+      THAT Council adopts the Water Service Increase Drafted Resident Notice on behalf of the Village of Pouce Coupe for public distribution.
+    </div>
+    <div class="tiles">
+      <div class="tile highlight">
+        <div class="label active">Moved By</div>
+        <div class="name active">Mayor Veach</div>
+      </div>
+      <div class="tile waiting-fill">
+        <div class="label waiting">Seconded By</div>
+        <div class="name waiting">Listening...</div>
+      </div>
+    </div>
+    <div class="tags">
+      <div class="tag blue">motion</div>
+      <div class="tag gray">awaiting seconder</div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+
+<!-- STAGE 2: Seconder Detected -->
+<div>
+  <div class="stage-label">Stage 2 — Seconder Detected</div>
+  <div class="stage-desc">The system hears "Seconded by Councillor Wall" — the seconder tile fills in. The card now waits for the vote to be called.</div>
+
+  <div class="pb">
+    <div class="topbar blue"></div>
+    <div class="header">
+      <div class="cat">Motion · Item 8.2</div>
+      <div class="title-row">
+        <div class="title">Water Service Rate Increase — Resident Notice</div>
+        <div class="badge waiting"><div class="dot"></div><span>AWAITING VOTE</span></div>
+      </div>
+    </div>
+    <div class="motion-bq blue">
+      THAT Council adopts the Water Service Increase Drafted Resident Notice on behalf of the Village of Pouce Coupe for public distribution.
+    </div>
+    <div class="tiles">
+      <div class="tile filled">
+        <div class="label done">Moved By</div>
+        <div class="name filled">Mayor Veach</div>
+      </div>
+      <div class="tile filled">
+        <div class="label done">Seconded By</div>
+        <div class="name filled">Cllr Wall</div>
+      </div>
+    </div>
+    <div class="tags">
+      <div class="tag blue">motion</div>
+      <div class="tag gray">awaiting vote</div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+
+<!-- STAGE 3: Vote Called -->
+<div>
+  <div class="stage-label">Stage 3 — Vote Called</div>
+  <div class="stage-desc">The Chair calls the vote. Each councillor's vote is tracked as it's heard — dots fill in real-time. Green = in favour, red = opposed.</div>
+
+  <div class="pb">
+    <div class="topbar indigo"></div>
+    <div class="header">
+      <div class="cat">Motion · Item 8.2</div>
+      <div class="title-row">
+        <div class="title">Water Service Rate Increase — Resident Notice</div>
+        <div class="badge active"><div class="dot"></div><span>VOTE IN PROGRESS</span></div>
+      </div>
+    </div>
+    <div class="motion-bq indigo">
+      THAT Council adopts the Water Service Increase Drafted Resident Notice on behalf of the Village of Pouce Coupe for public distribution.
+    </div>
+    <div class="tiles">
+      <div class="tile filled">
+        <div class="label done">Moved By</div>
+        <div class="name filled">Mayor Veach</div>
+      </div>
+      <div class="tile filled">
+        <div class="label done">Seconded By</div>
+        <div class="name filled">Cllr Wall</div>
+      </div>
+    </div>
+    <div class="vote-bar" style="border-color: #c7d2fe; background: #fafaff;">
+      <div class="vb-label active">Vote · All in favour?</div>
+      <div class="vote-dots">
+        <div class="vote-dot yes">✓</div>
+        <div class="vote-dot yes">✓</div>
+        <div class="vote-dot yes">✓</div>
+        <div class="vote-dot waiting" style="color:#6366f1;">?</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;font-size:9px;color:#94a3b8;">
+        <span>Veach</span><span>Rabel</span><span>Wall</span><span style="color:#6366f1;">Johnston</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+
+<!-- STAGE 4a: Carried -->
+<div>
+  <div class="stage-label">Stage 4a — Carried Unanimously</div>
+  <div class="stage-desc">All members voted in favour. The card resolves to CARRIED UNANIMOUSLY with a green state.</div>
+
+  <div class="pb">
+    <div class="topbar green"></div>
+    <div class="header">
+      <div class="cat">Motion · Item 8.2</div>
+      <div class="title-row">
+        <div class="title">Water Service Rate Increase — Resident Notice</div>
+        <div class="badge carried"><div class="dot"></div><span>CARRIED UNANIMOUSLY</span></div>
+      </div>
+    </div>
+    <div class="motion-bq blue">
+      THAT Council adopts the Water Service Increase Drafted Resident Notice on behalf of the Village of Pouce Coupe for public distribution.
+    </div>
+    <div class="tiles">
+      <div class="tile filled">
+        <div class="label done">Moved By</div>
+        <div class="name filled">Mayor Veach</div>
+      </div>
+      <div class="tile filled">
+        <div class="label done">Seconded By</div>
+        <div class="name filled">Cllr Wall</div>
+      </div>
+    </div>
+    <div class="vote-bar">
+      <div class="vb-label" style="color:#22c55e;">Vote Result</div>
+      <div class="vote-dots">
+        <div class="vote-dot yes">✓</div>
+        <div class="vote-dot yes">✓</div>
+        <div class="vote-dot yes">✓</div>
+        <div class="vote-dot yes">✓</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;font-size:9px;color:#22c55e;">
+        <span>Veach</span><span>Rabel</span><span>Wall</span><span>Johnston</span>
+      </div>
+    </div>
+    <div class="tags">
+      <div class="tag green">carried unanimously</div>
+      <div class="tag blue">motion</div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+
+<!-- STAGE 4b: Defeated (alternative) -->
+<div>
+  <div class="stage-label">Stage 4b — Defeated (Alternative)</div>
+  <div class="stage-desc">When a motion fails. Shows OPPOSED members. Red state.</div>
+
+  <div class="pb">
+    <div class="topbar red"></div>
+    <div class="header">
+      <div class="cat">Motion · Item 9.1</div>
+      <div class="title-row">
+        <div class="title">Outdoor Fabrication Yard Permit — Peak Mobile Welding</div>
+        <div class="badge defeated"><div class="dot"></div><span>DEFEATED 3–2</span></div>
+      </div>
+    </div>
+    <div class="motion-bq blue">
+      THAT Council approve Temporary Use Permit No. TUP2024-03 to Peak Mobile Welding for the temporary use of the property at 5190 53 Street.
+    </div>
+    <div class="tiles">
+      <div class="tile filled">
+        <div class="label done">Moved By</div>
+        <div class="name filled">Cllr Patel</div>
+      </div>
+      <div class="tile filled">
+        <div class="label done">Seconded By</div>
+        <div class="name filled">Cllr James</div>
+      </div>
+    </div>
+    <div class="vote-bar" style="border-color: #fecaca; background: #fef2f2;">
+      <div class="vb-label" style="color:#dc2626;">Vote Result — DEFEATED</div>
+      <div class="vote-dots">
+        <div class="vote-dot yes">✓</div>
+        <div class="vote-dot yes">✓</div>
+        <div class="vote-dot no">✗</div>
+        <div class="vote-dot no">✗</div>
+        <div class="vote-dot no">✗</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;font-size:9px;">
+        <span style="color:#22c55e;">Patel</span>
+        <span style="color:#22c55e;">James</span>
+        <span style="color:#dc2626;">Veach</span>
+        <span style="color:#dc2626;">Wall</span>
+        <span style="color:#dc2626;">Rabel</span>
+      </div>
+    </div>
+    <div class="tags">
+      <div class="tag" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">defeated 3–2</div>
+      <div class="tag blue">motion</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</body>
+</html>
