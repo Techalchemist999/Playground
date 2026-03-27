@@ -1,4 +1,4 @@
-import { COLORS, SPACING } from '../../styles/tokens';
+import { COLORS } from '../../styles/tokens';
 
 const STATUS_STYLES = {
   pending:   { bg: '#f8fafc', color: '#94a3b8', border: '#e2e8f0', label: 'Pending' },
@@ -6,7 +6,7 @@ const STATUS_STYLES = {
   discussed: { bg: '#f0fdf4', color: '#22c55e', border: '#bbf7d0', label: 'Discussed' },
 };
 
-export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics }) {
+export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, embedded }) {
   const total = agendaItems.length;
   const discussed = agendaItems.filter(i => i.status === 'discussed').length;
   const active = agendaItems.filter(i => i.status === 'active').length;
@@ -15,58 +15,28 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics }
 
   if (agendaItems.length === 0) {
     return (
-      <div className="sidebar-right" style={{
-        width: SPACING.sidebarWidth,
-        borderLeft: `1px solid ${COLORS.cardBorder}`,
-        background: '#fff',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 24,
-        textAlign: 'center',
-        flexShrink: 0,
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', padding: 20, textAlign: 'center', flex: 1,
       }}>
-        <svg width="28" height="28" fill="none" stroke={COLORS.cardBorder} strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: 8 }}>
+        <svg width="24" height="24" fill="none" stroke={COLORS.cardBorder} strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: 6 }} aria-hidden="true">
           <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
-        <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.secondaryText }}>No Agenda</div>
-        <div style={{ fontSize: 11, color: COLORS.mutedText, marginTop: 4, lineHeight: 1.5 }}>
-          No agenda was attached to this session.
+        <div style={{ fontSize: 11.5, fontWeight: 600, color: COLORS.secondaryText }}>No Agenda</div>
+        <div style={{ fontSize: 10.5, color: COLORS.mutedText, marginTop: 3, lineHeight: 1.5 }}>
+          No agenda attached to this session.
         </div>
       </div>
     );
   }
 
   return (
-    <div className="sidebar-right" style={{
-      width: SPACING.sidebarWidth,
-      borderLeft: `1px solid ${COLORS.cardBorder}`,
-      background: '#fff',
-      display: 'flex',
-      flexDirection: 'column',
-      flexShrink: 0,
-      overflow: 'hidden',
-    }}>
-      {/* Header */}
-      <div style={{
-        padding: '13px 15px 11px',
-        borderBottom: `1px solid ${COLORS.cardBorder}`,
-        background: '#fafbfc',
-        flexShrink: 0,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <svg width="13" height="13" fill="none" stroke={COLORS.primary} strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-          </svg>
-          <span style={{ fontWeight: 700, fontSize: 13, color: COLORS.headingText }}>Agenda</span>
-        </div>
-
-        {/* Progress bar */}
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+      {/* Progress bar */}
+      <div style={{ padding: '10px 14px 8px', flexShrink: 0 }}>
         <div style={{
-          height: 6, borderRadius: 3,
+          height: 5, borderRadius: 3,
           background: '#f1f5f9',
           overflow: 'hidden',
           marginBottom: 4,
@@ -76,13 +46,13 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics }
             <div style={{ width: `${pctActive}%`, background: '#6366f1', transition: 'width .5s' }} />
           </div>
         </div>
-        <span style={{ fontSize: 10.5, color: COLORS.mutedText }}>
+        <span style={{ fontSize: 10, color: COLORS.mutedText }}>
           <b style={{ color: COLORS.bodyText }}>{discussed}</b> of {total} items discussed
         </span>
       </div>
 
       {/* Items list */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
+      <div style={{ flex: 1, overflowY: 'auto' }}>
         {agendaItems.map((item, i) => {
           const st = STATUS_STYLES[item.status] || STATUS_STYLES.pending;
           const isActive = item.status === 'active';
@@ -91,22 +61,22 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics }
               key={item.number || i}
               style={{
                 display: 'flex',
-                gap: 10,
-                padding: '10px 15px',
-                borderLeft: isActive ? `4px solid ${COLORS.primary}` : '4px solid transparent',
+                gap: 8,
+                padding: '8px 14px',
+                borderLeft: isActive ? `3px solid ${COLORS.primary}` : '3px solid transparent',
                 background: isActive ? COLORS.primaryLight : 'transparent',
                 transition: 'all .3s',
               }}
             >
               <div style={{
-                width: 22, height: 22, borderRadius: '50%',
+                width: 20, height: 20, borderRadius: '50%',
                 background: st.bg, border: `1.5px solid ${st.border}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 flexShrink: 0,
-                fontSize: 10, fontWeight: 700, color: st.color,
+                fontSize: 9, fontWeight: 700, color: st.color,
               }}>
                 {item.status === 'discussed' ? (
-                  <svg width="10" height="10" fill="none" stroke="#22c55e" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <svg width="9" height="9" fill="none" stroke="#22c55e" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 ) : (
@@ -115,14 +85,14 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics }
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
-                  fontSize: 11.5, fontWeight: 600,
+                  fontSize: 11, fontWeight: 600,
                   color: isActive ? COLORS.primary : COLORS.headingText,
                   lineHeight: 1.3,
                 }}>
                   {item.title}
                 </div>
                 {item.description && (
-                  <div style={{ fontSize: 10, color: COLORS.mutedText, marginTop: 2 }}>
+                  <div style={{ fontSize: 9.5, color: COLORS.mutedText, marginTop: 1 }}>
                     {item.description}
                   </div>
                 )}

@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { COLORS, SPACING } from '../../styles/tokens';
-import { cardStyle } from '../../styles/shared';
+import { COLORS } from '../../styles/tokens';
 import Spinner from '../shared/Spinner';
 
 function formatTs(seconds) {
@@ -10,7 +9,7 @@ function formatTs(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export default function TranscriptPanel({ transcript, status }) {
+export default function TranscriptPanel({ transcript, status, embedded }) {
   const scrollRef = useRef(null);
   const [autoScroll, setAutoScroll] = useState(true);
 
@@ -30,37 +29,12 @@ export default function TranscriptPanel({ transcript, status }) {
 
   return (
     <div style={{
-      ...cardStyle,
       display: 'flex',
       flexDirection: 'column',
-      minWidth: 280,
       flex: 1,
       overflow: 'hidden',
       position: 'relative',
     }}>
-      <div style={{
-        padding: '12px 16px 10px',
-        borderBottom: `1px solid ${COLORS.subtleBorder}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexShrink: 0,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <svg width="14" height="14" fill="none" stroke={COLORS.primary} strokeWidth="2" viewBox="0 0 24 24" role="img" aria-label="Transcript">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          <span style={{ fontWeight: 700, fontSize: 13, color: COLORS.headingText }}>Transcript</span>
-          <div style={{
-            background: COLORS.primaryLight,
-            border: `1px solid ${COLORS.primaryBorder}`,
-            borderRadius: 999, padding: '1px 8px',
-          }}>
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: COLORS.primary }}>{transcript.length}</span>
-          </div>
-        </div>
-      </div>
-
       <div
         ref={scrollRef}
         onScroll={handleScroll}
@@ -70,7 +44,7 @@ export default function TranscriptPanel({ transcript, status }) {
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '8px 16px 16px',
+          padding: '8px 14px 16px',
         }}
       >
         {isConnecting && (
@@ -100,7 +74,7 @@ export default function TranscriptPanel({ transcript, status }) {
             style={{
               display: 'flex',
               gap: 10,
-              padding: '6px 0',
+              padding: '5px 0',
               borderBottom: i < transcript.length - 1 ? `1px solid ${COLORS.subtleBorder}` : 'none',
               animation: i === transcript.length - 1 ? 'fadeIn .3s ease' : 'none',
             }}
@@ -131,10 +105,10 @@ export default function TranscriptPanel({ transcript, status }) {
           }}
           aria-label="Jump to latest transcript entry"
           style={{
-            position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
+            position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)',
             background: COLORS.primaryGradient, color: '#fff',
-            border: 'none', borderRadius: 999, padding: '5px 14px',
-            fontSize: 11, fontWeight: 600,
+            border: 'none', borderRadius: 999, padding: '4px 12px',
+            fontSize: 10.5, fontWeight: 600,
             boxShadow: `0 2px 10px ${COLORS.primaryShadow}`,
           }}
         >
