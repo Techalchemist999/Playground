@@ -1,41 +1,39 @@
 import { COLORS, CATEGORY_COLORS, TOPIC_STATE_COLORS } from '../../styles/tokens';
 import Spinner from '../shared/Spinner';
 
-// Pearlescent color pairs — soft, muted, multi-tone like Apple
-const PEARL_PALETTES = {
-  topic:        ['#818cf8', '#c4b5fd', '#e0e7ff'],  // soft indigo → lavender
-  bylaw:        ['#fbbf24', '#fde68a', '#fef9c3'],  // warm gold → cream
-  department:   ['#fb923c', '#fdba74', '#ffedd5'],  // peach → apricot
-  location:     ['#34d399', '#6ee7b7', '#d1fae5'],  // mint → seafoam
-  program:      ['#a78bfa', '#c4b5fd', '#ede9fe'],  // violet → wisteria
-  policy:       ['#f472b6', '#fbcfe8', '#fce7f3'],  // rose → blush
-  motion:       ['#60a5fa', '#93c5fd', '#dbeafe'],  // sky → ice
-  organization: ['#22d3ee', '#67e8f9', '#cffafe'],  // cyan → frost
-  budget:       ['#fbbf24', '#fcd34d', '#fef3c7'],  // amber → buttercream
-  person:       ['#94a3b8', '#cbd5e1', '#f1f5f9'],  // slate → pearl
+// Ring + glow colour pairs per category
+const BUBBLE_STYLES = {
+  topic:        { ring: '#a5b4fc', glow: 'rgba(99,102,241,0.12)',  text: '#6366f1' },
+  bylaw:        { ring: '#fcd34d', glow: 'rgba(202,138,4,0.1)',    text: '#b45309' },
+  department:   { ring: '#fdba74', glow: 'rgba(234,88,12,0.1)',    text: '#c2410c' },
+  location:     { ring: '#6ee7b7', glow: 'rgba(5,150,105,0.1)',    text: '#059669' },
+  program:      { ring: '#c4b5fd', glow: 'rgba(124,58,237,0.1)',   text: '#7c3aed' },
+  policy:       { ring: '#f9a8d4', glow: 'rgba(219,39,119,0.1)',   text: '#db2777' },
+  motion:       { ring: '#93c5fd', glow: 'rgba(37,99,235,0.1)',    text: '#1d4ed8' },
+  organization: { ring: '#67e8f9', glow: 'rgba(6,182,212,0.1)',    text: '#0e7490' },
+  budget:       { ring: '#fcd34d', glow: 'rgba(245,158,11,0.1)',   text: '#92400e' },
+  person:       { ring: '#cbd5e1', glow: 'rgba(100,116,139,0.08)', text: '#475569' },
 };
 
 function getBubbleSize(mentionCount, compact) {
-  const base = compact ? 40 : 52;
-  const scale = compact ? 5 : 8;
-  const max = compact ? 78 : 110;
+  const base = compact ? 42 : 54;
+  const scale = compact ? 5 : 7;
+  const max = compact ? 76 : 100;
   return Math.min(max, base + (mentionCount || 1) * scale);
 }
 
 function TopicBubble({ topic, compact }) {
-  const cat = CATEGORY_COLORS[topic.category] || CATEGORY_COLORS.topic;
-  const pearl = PEARL_PALETTES[topic.category] || PEARL_PALETTES.topic;
+  const bs = BUBBLE_STYLES[topic.category] || BUBBLE_STYLES.topic;
   const stateColor = TOPIC_STATE_COLORS[topic.state] || TOPIC_STATE_COLORS.DETECTED;
   const size = getBubbleSize(topic.mention_count, compact);
   const isExpired = topic.state === 'EXPIRED' || topic.state === 'EVICTED';
   const isNew = topic.state === 'DETECTED';
   const isReappeared = topic.state === 'REAPPEARED';
-  const opacity = isExpired ? 0.35 : (topic.decay_score != null ? Math.max(0.55, topic.decay_score) : 1);
-  const displaySize = isExpired ? size * 0.7 : size;
-  const fontSize = compact ? Math.max(8, Math.min(10.5, displaySize / 7.5)) : Math.max(9, Math.min(12.5, displaySize / 8));
-
-  // Pearlescent gradient — soft colour wash that shifts across the sphere
-  const bg = `linear-gradient(135deg, ${pearl[2]} 0%, ${pearl[1]} 35%, ${pearl[0]} 70%, ${cat.color}cc 100%)`;
+  const opacity = isExpired ? 0.35 : 1;
+  const displaySize = isExpired ? size * 0.75 : size;
+  const fontSize = compact
+    ? Math.max(7.5, Math.min(10, displaySize / 7.5))
+    : Math.max(8.5, Math.min(12, displaySize / 8));
 
   return (
     <div
@@ -45,64 +43,59 @@ function TopicBubble({ topic, compact }) {
         width: displaySize,
         height: displaySize,
         borderRadius: '50%',
-        background: bg,
+        background: '#fff',
         opacity,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        transition: 'all .6s cubic-bezier(.22,1,.36,1)',
-        animation: isNew ? 'bubbleIn .5s cubic-bezier(.22,1,.36,1)' : isReappeared ? 'bubbleGlow 1s ease' : 'none',
-        boxShadow: isNew
-          ? `0 0 0 2px ${pearl[1]}80, 0 8px 24px -4px ${cat.color}20`
-          : isReappeared
-          ? `0 0 0 2px ${pearl[1]}60, 0 6px 20px -4px ${cat.color}18`
-          : `0 4px 16px -4px ${cat.color}15`,
-        border: `1px solid ${pearl[1]}90`,
+        transition: 'all .5s cubic-bezier(.22,1,.36,1)',
+        animation: isNew ? 'bubbleIn .45s cubic-bezier(.22,1,.36,1)' : isReappeared ? 'bubbleGlow 1s ease' : 'none',
+        // Ring + outer halo + glow shadow
+        boxShadow: [
+          `0 0 0 2.5px ${bs.ring}`,                         // solid ring
+          `0 0 0 5px ${bs.ring}20`,                          // soft outer halo
+          `0 0 ${isNew ? 28 : 18}px ${bs.glow}`,            // coloured glow
+          `0 4px 12px -4px rgba(0,0,0,0.06)`,               // subtle depth
+        ].join(', '),
         flexShrink: 0,
-        backdropFilter: 'blur(2px)',
       }}
     >
-      {/* Soft pearlescent sheen — top highlight */}
+      {/* State dot */}
       <div aria-hidden="true" style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0, bottom: 0,
+        position: 'absolute', top: 1, right: 1,
+        width: compact ? 5 : 7, height: compact ? 5 : 7,
         borderRadius: '50%',
-        background: `radial-gradient(ellipse at 35% 25%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.15) 35%, transparent 65%)`,
-        pointerEvents: 'none',
-      }} />
-
-      {/* State indicator — subtle */}
-      <div aria-hidden="true" style={{
-        position: 'absolute', top: 3, right: 3,
-        width: compact ? 5 : 7, height: compact ? 5 : 7, borderRadius: '50%',
         background: stateColor,
-        border: '1px solid rgba(255,255,255,0.7)',
-        boxShadow: `0 0 6px ${stateColor}50`,
+        border: '1.5px solid #fff',
+        boxShadow: `0 0 4px ${stateColor}40`,
       }} />
 
       <span style={{
-        fontSize, fontWeight: 600, color: cat.color,
-        textAlign: 'center', padding: '0 5px',
-        lineHeight: 1.2, maxWidth: displaySize - 12,
-        overflow: 'hidden', textOverflow: 'ellipsis',
+        fontSize,
+        fontWeight: 600,
+        color: bs.text,
+        textAlign: 'center',
+        padding: '0 5px',
+        lineHeight: 1.2,
+        maxWidth: displaySize - 14,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
         display: '-webkit-box',
-        WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
         wordBreak: 'break-word',
-        position: 'relative', zIndex: 1,
         letterSpacing: '-0.2px',
-        // Subtle text shadow that works with coloured text on light pearl bg
-        textShadow: '0 0.5px 2px rgba(255,255,255,0.8)',
       }}>
         {topic.label}
       </span>
 
       {topic.mention_count > 1 && !compact && (
         <span style={{
-          fontSize: 8, fontWeight: 600,
-          color: `${cat.color}99`,
-          marginTop: 1, position: 'relative', zIndex: 1,
+          fontSize: 7.5, fontWeight: 600,
+          color: `${bs.text}80`,
+          marginTop: 1,
           letterSpacing: '0.3px',
         }}>
           x{topic.mention_count}
@@ -128,8 +121,8 @@ export default function TopicBubbles({ topics, status, compact }) {
           flex: 1,
           display: 'flex',
           flexWrap: 'wrap',
-          gap: compact ? 8 : 12,
-          padding: compact ? '10px 12px' : 16,
+          gap: compact ? 10 : 14,
+          padding: compact ? '12px 14px' : '16px 20px',
           alignContent: 'flex-start',
           justifyContent: 'center',
           overflowY: 'auto',
@@ -163,17 +156,18 @@ export default function TopicBubbles({ topics, status, compact }) {
 
       {topicsArray.length > 0 && (
         <div style={{
-          padding: '6px 12px 8px',
+          padding: '6px 14px 8px',
           borderTop: `1px solid ${COLORS.subtleBorder}`,
-          display: 'flex', gap: 8, flexWrap: 'wrap', flexShrink: 0,
+          display: 'flex', gap: 10, flexWrap: 'wrap', flexShrink: 0,
         }}>
-          {Object.entries(CATEGORY_COLORS)
+          {Object.entries(BUBBLE_STYLES)
             .filter(([cat]) => topicsArray.some(t => t.category === cat))
-            .map(([cat, colors]) => (
-              <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            .map(([cat, bs]) => (
+              <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <div style={{
-                  width: 6, height: 6, borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${(PEARL_PALETTES[cat] || PEARL_PALETTES.topic)[1]}, ${colors.color})`,
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: '#fff',
+                  boxShadow: `0 0 0 1.5px ${bs.ring}, 0 0 6px ${bs.glow}`,
                 }} aria-hidden="true" />
                 <span style={{ fontSize: 9, color: COLORS.mutedText, textTransform: 'capitalize' }}>{cat}</span>
               </div>
@@ -184,12 +178,12 @@ export default function TopicBubbles({ topics, status, compact }) {
       <style>{`
         @keyframes bubbleIn {
           from { transform: scale(0.3); opacity: 0; }
-          60% { transform: scale(1.05); }
+          60% { transform: scale(1.04); }
           to { transform: scale(1); opacity: 1; }
         }
         @keyframes bubbleGlow {
           0% { filter: brightness(1); }
-          50% { filter: brightness(1.15); }
+          50% { filter: brightness(1.08); }
           100% { filter: brightness(1); }
         }
       `}</style>
