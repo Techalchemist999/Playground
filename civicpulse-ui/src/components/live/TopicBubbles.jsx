@@ -51,7 +51,7 @@ function TopicBubble({ topic, compact }) {
         justifyContent: 'center',
         position: 'relative',
         transition: 'all .5s cubic-bezier(.22,1,.36,1)',
-        animation: isNew ? 'bubbleIn .45s cubic-bezier(.22,1,.36,1)' : isReappeared ? 'bubbleGlow 1s ease' : 'none',
+        animation: isNew ? 'bubbleIn 1.2s cubic-bezier(.22,1,.36,1)' : isReappeared ? 'bubbleGlow 1.5s ease' : 'none',
         // Ring + outer halo + glow shadow
         boxShadow: [
           `0 0 0 2.5px ${bs.ring}`,                         // solid ring
@@ -177,9 +177,10 @@ export default function TopicBubbles({ topics, status, compact }) {
 
       <style>{`
         @keyframes bubbleIn {
-          from { transform: scale(0.3); opacity: 0; }
-          60% { transform: scale(1.04); }
-          to { transform: scale(1); opacity: 1; }
+          0% { transform: scale(0.2); opacity: 0; }
+          40% { opacity: 0.6; }
+          70% { transform: scale(1.06); opacity: 0.9; }
+          100% { transform: scale(1); opacity: 1; }
         }
         @keyframes bubbleGlow {
           0% { filter: brightness(1); }
