@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { COLORS } from '../../styles/tokens';
 import * as api from '../../api/client';
 
-export default function AgendaPicker({ selectedAgenda, onSelect }) {
+export default function AgendaPicker({ selectedAgenda, onSelect, onAgendaLoaded }) {
   const [agendas, setAgendas] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +31,17 @@ export default function AgendaPicker({ selectedAgenda, onSelect }) {
           return (
             <button
               key={agenda.id}
-              onClick={() => onSelect(isSelected ? null : agenda.id)}
+              onClick={() => {
+                const nextId = isSelected ? null : agenda.id;
+                onSelect(nextId);
+                if (onAgendaLoaded) {
+                  onAgendaLoaded(nextId ? (agenda.items || []).map((item, idx) => ({
+                    ...item,
+                    number: item.number || (idx + 1),
+                    status: 'pending',
+                  })) : []);
+                }
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',

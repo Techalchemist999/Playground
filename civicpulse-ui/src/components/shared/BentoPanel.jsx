@@ -57,9 +57,7 @@ export default function BentoPanel({ title, icon, badge, collapsed: defaultColla
       {/* Content — collapsible */}
       <div style={{
         flex: collapsed ? 0 : 1,
-        overflow: 'hidden',
-        maxHeight: collapsed ? 0 : 9999,
-        transition: 'max-height .4s cubic-bezier(.22,1,.36,1)',
+        overflow: collapsed ? 'hidden' : 'auto',
         display: collapsed ? 'none' : 'flex',
         flexDirection: 'column',
         minHeight: 0,

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Color Theme Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:24px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.grid{display:flex;flex-direction:column;gap:24px;max-width:1100px;margin:0 auto;}
+.sw{border-radius:16px;border:2px solid #e2e8f0;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,.04);cursor:pointer;transition:all .3s;}
+.sw:hover{border-color:#a5b4fc;box-shadow:0 6px 24px rgba(99,102,241,.12);transform:translateY(-2px);}
+.sw.selected{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+.sh{padding:12px 18px 10px;display:flex;align-items:baseline;gap:10px;border-bottom:1px solid #f1f5f9;background:#fff;}
+.sh h2{font-size:14px;font-weight:700;}
+.sh p{font-size:10px;color:#94a3b8;margin-left:auto;font-style:italic;}
+.mock{display:grid;grid-template-columns:.4fr 1.1fr .75fr;grid-template-rows:1fr 1fr;gap:5px;padding:8px;height:400px;}
+.pnl{border-radius:8px;overflow:hidden;display:flex;flex-direction:column;}
+.pnl-h{padding:5px 8px;display:flex;align-items:center;gap:4px;flex-shrink:0;border-bottom:1px solid var(--border);}
+.pnl-h .ic{width:8px;height:8px;border-radius:2px;}
+.pnl-h .tt{font-size:8px;font-weight:700;}
+.pnl-h .bd{font-size:6px;font-weight:700;padding:1px 4px;border-radius:999px;margin-left:auto;}
+.pnl-b{flex:1;overflow:hidden;padding:4px 6px;font-size:7px;line-height:1.5;}
+.mc{border-radius:6px;overflow:hidden;margin-bottom:4px;}
+.mc-bar{height:2px;}
+.mc-h{padding:4px 6px 0;}
+.mc-m{font-size:5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.mc-r{display:flex;justify-content:space-between;align-items:flex-start;gap:3px;margin:1px 0 3px;}
+.mc-t{font-size:7.5px;font-weight:700;line-height:1.3;}
+.mc-bg{font-size:5px;font-weight:700;padding:1px 4px;border-radius:999px;white-space:nowrap;display:flex;align-items:center;gap:2px;}
+.mc-bg .d{width:3px;height:3px;border-radius:50%;}
+.mc-q{font-size:6px;padding:3px 5px;margin:0 6px 3px;border-radius:0 4px 4px 0;line-height:1.5;}
+.mc-tl{display:flex;gap:2px;padding:0 6px 3px;}
+.mc-ti{flex:1;border-radius:3px;padding:2px 4px;}
+.mc-ti-l{font-size:4px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;}
+.mc-ti-n{font-size:6px;font-weight:700;}
+.mc-v{display:flex;gap:3px;justify-content:center;padding:3px 6px 5px;}
+.vo{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;}
+.mc-am{margin:0 6px 3px;padding:4px 5px;border-radius:0 5px 5px 0;}
+.mc-am-l{font-size:5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:1px;}
+.mc-am-t{font-size:6px;line-height:1.5;}
+.ai2{display:flex;gap:3px;padding:2px 3px;align-items:center;}
+.ai2.act{border-left:2px solid;}
+.an3{width:10px;height:10px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:5px;font-weight:700;flex-shrink:0;}
+.at2{font-size:6px;font-weight:600;line-height:1.3;}
+.bbc{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;align-items:center;padding:3px;}
+.bb2{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;position:relative;overflow:hidden;}
+.bb2::before{content:'';position:absolute;top:-10%;left:-10%;width:70%;height:60%;border-radius:50%;background:radial-gradient(ellipse,rgba(255,255,255,.5),transparent 80%);transform:rotate(-20deg);}
+.bb2 span{position:relative;z-index:1;}
+.nt2{border-radius:4px;padding:3px 5px;margin-bottom:2px;}
+.nt2-t{font-size:4px;font-weight:700;}
+.nt2-x{font-size:5.5px;line-height:1.4;}
+.tabs2{display:flex;border-radius:3px;padding:1px;margin-bottom:3px;}
+.tab2{padding:1px 5px;font-size:5px;font-weight:600;border-radius:2px;}
+.ap2{height:2px;border-radius:1px;margin-bottom:3px;overflow:hidden;display:flex;}
+#result{display:none;max-width:1100px;margin:24px auto 0;background:#fff;border-radius:16px;border:2px solid #6366f1;padding:18px;text-align:center;}
+#result .label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+#result .pick{font-size:18px;font-weight:800;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div style="max-width:1100px;margin:0 auto;">
+  <div class="tag">COLOR THEME PICKER</div>
+  <h1>10 Color Palettes — Same Layout</h1>
+  <p class="subtitle">Rules: Votes are always green (yes) and red (no). Topic bubbles always have category colors. The theme controls everything else — panels, cards, badges, text, notes.</p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+// Fixed: vote green/red, topic category colors
+const VOTE_YES = {bg:'#dcfce7',border:'#86efac',color:'#16a34a'};
+const VOTE_NO = {bg:'#fee2e2',border:'#fca5a5',color:'#dc2626'};
+const VOTE_WAIT_LIGHT = {bg:'#f1f5f9',border:'#cbd5e1',color:'#94a3b8'};
+const VOTE_WAIT_DARK = {bg:'#1e293b',border:'#475569',color:'#64748b'};
+const CARRIED = {bg:'#f0fdf4',border:'#bbf7d0',color:'#22c55e'};
+const DEFEATED = {bg:'#fef2f2',border:'#fecaca',color:'#dc2626'};
+
+// Category bubble colors — always the same
+const CAT_BUBBLES = [
+  {bg:'linear-gradient(145deg,#fefce8,#fde68a,#fcd34d,#fbbf24bb)',border:'rgba(253,230,138,.5)',text:'#92400e',label:'Bylaw',size:38},
+  {bg:'linear-gradient(145deg,#ecfdf5,#a7f3d0,#6ee7b7,#34d399bb)',border:'rgba(110,231,183,.4)',text:'#065f46',label:'Pine',size:32},
+  {bg:'linear-gradient(145deg,#fdf2f8,#fbcfe8,#f9a8d4,#f472b6bb)',border:'rgba(251,207,232,.5)',text:'#9d174d',label:'Policy',size:28},
+  {bg:'linear-gradient(145deg,#eef2ff,#c7d2fe,#a5b4fc,#818cf8bb)',border:'rgba(165,180,252,.5)',text:'#4338ca',label:'Roads',size:24},
+  {bg:'linear-gradient(145deg,#fffbeb,#fde68a,#fcd34d,#f59e0bbb)',border:'rgba(253,230,138,.5)',text:'#92400e',label:'Rates',size:22},
+];
+
+const themes = [
+  { id:'mono', num:'01', name:'Monochrome Slate', desc:'All UI is grey. Only votes and topic bubbles have color.',
+    bg:'#f8fafc',pBg:'#fff',pBd:'#e2e8f0',hd:'#0f172a',bd:'#475569',mt:'#94a3b8',bdr:'#e2e8f0',
+    ac:'#475569',acL:'#f1f5f9',acB:'#cbd5e1',
+    amBg:'#f1f5f9',amBd:'#94a3b8',amTx:'#334155',amLbl:'#64748b',
+    nBg:'#f1f5f9',nBd:'#cbd5e1',nTx:'#334155',nTm:'#64748b',
+    tabAc:'#475569',dark:false },
+  { id:'ink', num:'02', name:'Ink & Paper', desc:'Cream background, charcoal text. Warm editorial feel.',
+    bg:'#faf9f6',pBg:'#fff',pBd:'#e8e5de',hd:'#1a1a1a',bd:'#3d3d3d',mt:'#999',bdr:'#e8e5de',
+    ac:'#1a1a1a',acL:'#f5f4f0',acB:'#d4d0c8',
+    amBg:'#f5f4f0',amBd:'#c4b48c',amTx:'#5c4b28',amLbl:'#8a6d3b',
+    nBg:'#f5f4f0',nBd:'#d4d0c8',nTx:'#5c4b28',nTm:'#8a6d3b',
+    tabAc:'#1a1a1a',dark:false },
+  { id:'indigo', num:'03', name:'Indigo Accent', desc:'Single accent — indigo for all UI chrome. Clean and focused.',
+    bg:'#f8fafc',pBg:'#fff',pBd:'#e2e8f0',hd:'#0f172a',bd:'#334155',mt:'#94a3b8',bdr:'#e2e8f0',
+    ac:'#6366f1',acL:'#eef2ff',acB:'#c7d2fe',
+    amBg:'#eef2ff',amBd:'#a5b4fc',amTx:'#3730a3',amLbl:'#6366f1',
+    nBg:'#eef2ff',nBd:'#c7d2fe',nTx:'#3730a3',nTm:'#6366f1',
+    tabAc:'#6366f1',dark:false },
+  { id:'ocean', num:'04', name:'Ocean Teal', desc:'Teal accent on white. Cool, professional, calming.',
+    bg:'#f0fdfa',pBg:'#fff',pBd:'#ccfbf1',hd:'#0f172a',bd:'#334155',mt:'#94a3b8',bdr:'#ccfbf1',
+    ac:'#0d9488',acL:'#f0fdfa',acB:'#99f6e4',
+    amBg:'#f0fdfa',amBd:'#5eead4',amTx:'#115e59',amLbl:'#0d9488',
+    nBg:'#f0fdfa',nBd:'#99f6e4',nTx:'#115e59',nTm:'#0d9488',
+    tabAc:'#0d9488',dark:false },
+  { id:'warm', num:'05', name:'Warm Sand', desc:'Sand + charcoal. Earthy, approachable, less clinical.',
+    bg:'#faf8f5',pBg:'#fff',pBd:'#e7e0d5',hd:'#292524',bd:'#44403c',mt:'#a8a29e',bdr:'#e7e0d5',
+    ac:'#78716c',acL:'#f5f5f4',acB:'#d6d3d1',
+    amBg:'#f5f5f4',amBd:'#c4b48c',amTx:'#44403c',amLbl:'#78716c',
+    nBg:'#f5f5f4',nBd:'#d6d3d1',nTx:'#44403c',nTm:'#78716c',
+    tabAc:'#78716c',dark:false },
+  { id:'current', num:'06', name:'Current (Full Color)', desc:'What\'s in the app now. Indigo + green + amber + pink.',
+    bg:'#f8fafc',pBg:'#fff',pBd:'#e2e8f0',hd:'#0f172a',bd:'#334155',mt:'#94a3b8',bdr:'#e2e8f0',
+    ac:'#6366f1',acL:'#eef2ff',acB:'#c7d2fe',
+    amBg:'#fefce8',amBd:'#f59e0b',amTx:'#92400e',amLbl:'#d97706',
+    nBg:'#fffbeb',nBd:'#fde68a',nTx:'#92400e',nTm:'#d97706',
+    tabAc:'#db2777',dark:false },
+  { id:'duo', num:'07', name:'Duo — Indigo + Slate', desc:'Indigo for active UI, slate for everything else. Two tones.',
+    bg:'#f8fafc',pBg:'#fff',pBd:'#e2e8f0',hd:'#0f172a',bd:'#334155',mt:'#94a3b8',bdr:'#e2e8f0',
+    ac:'#6366f1',acL:'#eef2ff',acB:'#c7d2fe',
+    amBg:'#eef2ff',amBd:'#818cf8',amTx:'#3730a3',amLbl:'#6366f1',
+    nBg:'#f1f5f9',nBd:'#e2e8f0',nTx:'#334155',nTm:'#64748b',
+    tabAc:'#6366f1',dark:false },
+  { id:'midnight', num:'08', name:'Midnight Dark', desc:'Dark panels, light text. Evening meetings, low-light.',
+    bg:'#0f172a',pBg:'#1e293b',pBd:'#334155',hd:'#f1f5f9',bd:'#cbd5e1',mt:'#64748b',bdr:'#334155',
+    ac:'#818cf8',acL:'#1e1b4b',acB:'#4338ca',
+    amBg:'#1e1b4b',amBd:'#6366f1',amTx:'#c7d2fe',amLbl:'#818cf8',
+    nBg:'#1e293b',nBd:'#475569',nTx:'#cbd5e1',nTm:'#818cf8',
+    tabAc:'#818cf8',dark:true },
+  { id:'muted', num:'09', name:'Muted Pastels', desc:'Colors present but whisper-quiet. Desaturated everything.',
+    bg:'#f8fafc',pBg:'#fff',pBd:'#e8ecf0',hd:'#1e293b',bd:'#475569',mt:'#94a3b8',bdr:'#e8ecf0',
+    ac:'#8b97b0',acL:'#f0f2f6',acB:'#d0d5de',
+    amBg:'#f0f2f6',amBd:'#b0b8c8',amTx:'#4b5568',amLbl:'#7885a0',
+    nBg:'#f0f2f6',nBd:'#d0d5de',nTx:'#4b5568',nTm:'#7885a0',
+    tabAc:'#6b7a94',dark:false },
+  { id:'navy', num:'10', name:'Navy Professional', desc:'Dark navy accent on white. Boardroom-ready, serious.',
+    bg:'#f8fafc',pBg:'#fff',pBd:'#e2e8f0',hd:'#0f172a',bd:'#334155',mt:'#94a3b8',bdr:'#e2e8f0',
+    ac:'#1e3a5f',acL:'#eff6ff',acB:'#bfdbfe',
+    amBg:'#eff6ff',amBd:'#60a5fa',amTx:'#1e3a5f',amLbl:'#2563eb',
+    nBg:'#eff6ff',nBd:'#bfdbfe',nTx:'#1e3a5f',nTm:'#3b82f6',
+    tabAc:'#1e3a5f',dark:false },
+];
+
+function r(t) {
+  const w = t.dark ? VOTE_WAIT_DARK : VOTE_WAIT_LIGHT;
+
+  // Carried card
+  const c1 = `<div class="mc" style="background:${t.pBg};border:1px solid ${t.bdr};">
+    <div class="mc-bar" style="background:linear-gradient(90deg,${CARRIED.color},transparent);"></div>
+    <div class="mc-h"><div class="mc-m" style="color:${t.mt};">Motion · Item 2</div><div class="mc-r"><div class="mc-t" style="color:${t.hd};">Adopt Agenda</div><div class="mc-bg" style="background:${CARRIED.bg};border:1px solid ${CARRIED.border};color:${CARRIED.color};"><div class="d" style="background:${CARRIED.color};"></div>CARRIED</div></div></div>
+    <div class="mc-q" style="border-left:2px solid ${CARRIED.color};background:${CARRIED.bg};color:${t.bd};">THAT Council adopted the agenda as presented.</div>
+    <div class="mc-tl"><div class="mc-ti" style="background:${t.acL};border:1px solid ${t.acB};"><div class="mc-ti-l" style="color:${t.ac};">Moved</div><div class="mc-ti-n" style="color:${t.ac};">Cllr Rabel</div></div><div class="mc-ti" style="background:${CARRIED.bg};border:1px solid ${CARRIED.border};"><div class="mc-ti-l" style="color:${CARRIED.color};">Sec'd</div><div class="mc-ti-n" style="color:${t.hd};">Cllr Johnston</div></div></div>
+    <div class="mc-v">${[1,2,3,4,5].map(()=>`<div class="vo" style="background:${VOTE_YES.bg};border:1px solid ${VOTE_YES.border};color:${VOTE_YES.color};">✓</div>`).join('')}</div>
+  </div>`;
+
+  // Amendment card
+  const c2 = `<div class="mc" style="background:${t.pBg};border:1px solid ${t.bdr};">
+    <div class="mc-bar" style="background:linear-gradient(90deg,${t.ac},transparent);"></div>
+    <div class="mc-h"><div class="mc-m" style="color:${t.mt};">Motion · Item 5</div><div class="mc-r"><div class="mc-t" style="color:${t.hd};">Bylaw 1021</div><div class="mc-bg" style="background:${t.amBg};border:1px solid ${t.amBd};color:${t.amLbl};"><div class="d" style="background:${t.amLbl};"></div>AMENDMENT</div></div></div>
+    <div class="mc-q" style="border-left:2px solid ${t.ac};background:${t.acL};color:${t.mt};opacity:.4;">THAT Council adopts Bylaw 1021 as presented.</div>
+    <div class="mc-am" style="border-left:3px solid ${t.amBd};background:${t.amBg};">
+      <div class="mc-am-l" style="color:${t.amLbl};">✎ Amendment — Focus Here</div>
+      <div class="mc-am-t" style="color:${t.amTx};">"...with section 14 re: public consultation."</div>
+    </div>
+    <div class="mc-tl"><div class="mc-ti" style="background:${t.acL};border:1px solid ${t.acB};"><div class="mc-ti-l" style="color:${t.ac};">Moved</div><div class="mc-ti-n" style="color:${t.ac};">Cllr Rabel</div></div><div class="mc-ti" style="background:${CARRIED.bg};border:1px solid ${CARRIED.border};"><div class="mc-ti-l" style="color:${CARRIED.color};">Sec'd</div><div class="mc-ti-n" style="color:${t.hd};">Cllr Wall</div></div></div>
+    <div class="mc-v">
+      <div class="vo" style="background:${VOTE_YES.bg};border:1px solid ${VOTE_YES.border};color:${VOTE_YES.color};">✓</div>
+      <div class="vo" style="background:${VOTE_YES.bg};border:1px solid ${VOTE_YES.border};color:${VOTE_YES.color};">✓</div>
+      <div class="vo" style="background:${VOTE_NO.bg};border:1px solid ${VOTE_NO.border};color:${VOTE_NO.color};">✗</div>
+      <div class="vo" style="background:${w.bg};border:1px dashed ${w.border};color:${w.color};font-size:5px;">?</div>
+      <div class="vo" style="background:${w.bg};border:1px dashed ${w.border};color:${w.color};font-size:5px;">?</div>
+    </div>
+  </div>`;
+
+  // Agenda
+  const ag = `<div class="tabs2" style="background:${t.dark?t.pBd:t.acL};">
+    <div class="tab2" style="background:${t.pBg};color:${t.tabAc};box-shadow:0 1px 2px rgba(0,0,0,.06);">Agenda</div>
+    <div class="tab2" style="color:${t.mt};">Rules</div>
+    <div class="tab2" style="color:${t.mt};">Transcript</div>
+  </div>
+  <div class="ap2" style="background:${t.bdr};"><div style="width:23%;background:${CARRIED.color};"></div><div style="width:8%;background:${t.ac};"></div></div>
+  <div class="ai2"><div class="an3" style="background:${CARRIED.bg};border:1px solid ${CARRIED.border};color:${CARRIED.color};">✓</div><div class="at2" style="color:${t.bd};">Call to Order</div></div>
+  <div class="ai2"><div class="an3" style="background:${CARRIED.bg};border:1px solid ${CARRIED.border};color:${CARRIED.color};">✓</div><div class="at2" style="color:${t.bd};">Adopt Agenda</div></div>
+  <div class="ai2"><div class="an3" style="background:${CARRIED.bg};border:1px solid ${CARRIED.border};color:${CARRIED.color};">✓</div><div class="at2" style="color:${t.bd};">Minutes</div></div>
+  <div class="ai2 act" style="background:${t.acL};border-color:${t.ac};"><div class="an3" style="background:${t.acL};border:1px solid ${t.acB};color:${t.ac};">4</div><div class="at2" style="color:${t.ac};">Delegation — Pine Ave</div></div>
+  <div class="ai2"><div class="an3" style="background:${t.dark?t.pBg:'#f8fafc'};border:1px solid ${t.bdr};color:${t.mt};">5</div><div class="at2" style="color:${t.bd};">Bylaw 1021</div></div>
+  <div class="ai2"><div class="an3" style="background:${t.dark?t.pBg:'#f8fafc'};border:1px solid ${t.bdr};color:${t.mt};">6</div><div class="at2" style="color:${t.bd};">Water Rates</div></div>
+  <div class="ai2"><div class="an3" style="background:${t.dark?t.pBg:'#f8fafc'};border:1px solid ${t.bdr};color:${t.mt};">7</div><div class="at2" style="color:${t.bd};">Roads</div></div>`;
+
+  // Category-colored bubbles — always the same
+  const bubs = CAT_BUBBLES.map(b=>`<div class="bb2" style="width:${b.size}px;height:${b.size}px;background:${b.bg};border:1px solid ${b.border};font-size:${Math.max(4,b.size/6)}px;"><span style="color:${b.text};">${b.label}</span></div>`).join('');
+
+  // Notes
+  const notes = `
+    <div class="nt2" style="background:${t.nBg};border:1px solid ${t.nBd};">
+      <div class="nt2-t" style="color:${t.nTm};">7:02 PM</div>
+      <div class="nt2-x" style="color:${t.nTx};">Quorum. Called to order.</div>
+    </div>
+    <div class="nt2" style="background:${t.nBg};border:1px solid ${t.nBd};">
+      <div class="nt2-t" style="color:${t.nTm};">7:05 PM</div>
+      <div class="nt2-x" style="color:${t.nTx};">Pine Ave — drainage $18K.</div>
+    </div>
+    <div class="nt2" style="background:${t.nBg};border:1px solid ${t.nBd};">
+      <div class="nt2-t" style="color:${t.nTm};">7:07 PM</div>
+      <div class="nt2-x" style="color:${t.nTx};">Bylaw 1021 — amendment proposed by Cllr Wall.</div>
+    </div>`;
+
+  return `<div class="sw" onclick="select(this,'${t.id}')">
+    <div class="sh"><span class="tag">${t.num}</span><h2>${t.name}</h2><p>${t.desc}</p></div>
+    <div class="mock" style="background:${t.bg};">
+      <div class="pnl" style="grid-row:1/3;background:${t.pBg};border:1px solid ${t.pBd};">
+        <div class="pnl-h" style="--border:${t.bdr};"><div class="ic" style="background:${t.ac};"></div><span class="tt" style="color:${t.hd};">Agenda</span><span class="bd" style="background:${t.acL};color:${t.ac};border:1px solid ${t.acB};">3/13</span></div>
+        <div class="pnl-b" style="overflow-y:auto;padding:3px 4px;">${ag}</div>
+      </div>
+      <div class="pnl" style="grid-row:1/3;background:${t.pBg};border:1px solid ${t.pBd};">
+        <div class="pnl-h" style="--border:${t.bdr};"><div class="ic" style="background:${t.ac};"></div><span class="tt" style="color:${t.hd};">Procedural Bites</span><span class="bd" style="background:${t.acL};color:${t.ac};border:1px solid ${t.acB};">2</span></div>
+        <div class="pnl-b" style="overflow-y:auto;">${c1}${c2}</div>
+      </div>
+      <div class="pnl" style="background:${t.pBg};border:1px solid ${t.pBd};">
+        <div class="pnl-h" style="--border:${t.bdr};"><div class="ic" style="background:#8b5cf6;"></div><span class="tt" style="color:${t.hd};">Topics</span><span class="bd" style="background:${t.acL};color:${t.ac};border:1px solid ${t.acB};">5</span></div>
+        <div class="pnl-b"><div class="bbc">${bubs}</div></div>
+      </div>
+      <div class="pnl" style="background:${t.pBg};border:1px solid ${t.pBd};">
+        <div class="pnl-h" style="--border:${t.bdr};"><div class="ic" style="background:${t.nTm};"></div><span class="tt" style="color:${t.hd};">Clerk Notes</span></div>
+        <div class="pnl-b" style="overflow-y:auto;">${notes}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('grid').innerHTML = themes.map(r).join('');
+
+const nm = {};
+themes.forEach(t => nm[t.id] = `${t.num} — ${t.name}`);
+function select(el, id) {
+  document.querySelectorAll('.sw').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('pick-text').textContent = nm[id];
+}
+</script>
+</body>
+</html>

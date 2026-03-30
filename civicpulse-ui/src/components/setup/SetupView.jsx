@@ -69,7 +69,11 @@ export default function SetupView({ session }) {
           {session.status === 'READY' && (
             <>
               <div style={{ borderTop: `1px solid ${COLORS.subtleBorder}`, margin: '8px 0 16px' }} />
-              <AgendaPicker selectedAgenda={agendaId} onSelect={setAgendaId} />
+              <AgendaPicker
+                selectedAgenda={agendaId}
+                onSelect={setAgendaId}
+                onAgendaLoaded={(items) => session.setAgendaItems(items)}
+              />
               <div style={{ borderTop: `1px solid ${COLORS.subtleBorder}`, margin: '16px 0' }} />
 
               <button
@@ -95,6 +99,47 @@ export default function SetupView({ session }) {
               </button>
             </>
           )}
+
+          {/* Demo / Test buttons */}
+          <div style={{ borderTop: `1px solid ${COLORS.subtleBorder}`, margin: '16px 0' }} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => session.startDemoPlayback()}
+              style={{
+                flex: 1, padding: '12px',
+                background: COLORS.primaryGradient, border: 'none',
+                borderRadius: 10, cursor: 'pointer',
+                fontSize: 13, fontWeight: 700, color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'all .15s',
+                boxShadow: `0 4px 14px ${COLORS.primaryShadow}`,
+              }}
+            >
+              <svg width="14" height="14" fill="none" stroke="#fff" strokeWidth="2.5" viewBox="0 0 24 24">
+                <polygon points="5,3 19,12 5,21" fill="#fff" stroke="none" />
+              </svg>
+              Test — Live Playback
+            </button>
+            <button
+              onClick={() => session.startDemo()}
+              style={{
+                flex: 1, padding: '12px',
+                background: '#f8fafc', border: `1.5px solid ${COLORS.cardBorder}`,
+                borderRadius: 10, cursor: 'pointer',
+                fontSize: 13, fontWeight: 700, color: COLORS.secondaryText,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'all .15s',
+              }}
+              onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.primary; e.currentTarget.style.color = COLORS.primary; }}
+              onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.cardBorder; e.currentTarget.style.color = COLORS.secondaryText; }}
+            >
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+              </svg>
+              Demo — All Data
+            </button>
+          </div>
 
           {session.error && (
             <div style={{

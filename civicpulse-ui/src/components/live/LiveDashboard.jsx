@@ -1,3 +1,4 @@
+import { useRef, useEffect, useCallback } from 'react';
 import { COLORS } from '../../styles/tokens';
 import BentoPanel from '../shared/BentoPanel';
 import TranscriptPanel from './TranscriptPanel';
@@ -40,6 +41,21 @@ const iconAgenda = (
 );
 
 export default function LiveDashboard({ session }) {
+  // Smart scroll — only auto-scroll if user is near the bottom
+  const pbScrollRef = useRef(null);
+  const pbCountRef = useRef(0);
+  const motionCount = Array.from(session.topics.values()).filter(t => t.category === 'motion').length;
+  useEffect(() => {
+    if (motionCount > pbCountRef.current && pbScrollRef.current) {
+      const el = pbScrollRef.current;
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+      if (nearBottom) {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      }
+    }
+    pbCountRef.current = motionCount;
+  }, [motionCount]);
+
   const activeTopics = Array.from(session.topics.values()).filter(
     t => t.state === 'ACTIVE' || t.state === 'DETECTED' || t.state === 'REAPPEARED'
   ).length;
@@ -49,19 +65,38 @@ export default function LiveDashboard({ session }) {
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* Bento grid: Layout 1 from layout-final */}
+      {/* Bento grid: PB left, Agenda + right stack */}
       <div style={{
         flex: 1,
         display: 'grid',
-        gridTemplateColumns: '1.3fr 1fr',
-        gridTemplateRows: '1.2fr 0.8fr',
+        gridTemplateColumns: '0.45fr 1.2fr 0.8fr',
+        gridTemplateRows: '1fr 1fr',
         gap: 10,
         padding: 10,
         overflow: 'hidden',
       }}>
 
-        {/* LEFT: Procedural Bites + Quick Motion (full height) */}
+        {/* LEFT: Agenda rail (full height) */}
         <div style={{ gridColumn: '1', gridRow: '1 / 3', display: 'flex', minHeight: 0 }}>
+          <BentoPanel
+            title="Agenda"
+            icon={iconAgenda}
+            badge={agendaBadge}
+            style={{ flex: 1, minHeight: 0 }}
+          >
+            <AgendaSidebar
+              agendaItems={session.agendaItems}
+              currentAgendaItem={session.currentAgendaItem}
+              topics={session.topics}
+              transcript={session.transcript}
+              status={session.status}
+              embedded
+            />
+          </BentoPanel>
+        </div>
+
+        {/* CENTER: Procedural Bites (full height) */}
+        <div style={{ gridColumn: '2', gridRow: '1 / 3', display: 'flex', minHeight: 0 }}>
           <BentoPanel
             title="Procedural Bites"
             icon={iconBites}
@@ -69,8 +104,7 @@ export default function LiveDashboard({ session }) {
             style={{ flex: 1, minHeight: 0 }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-              {/* Bites list — scrollable, newest at bottom */}
-              <div ref={el => { if (el) el.scrollTop = el.scrollHeight; }} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'flex-end' }}>
+              <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {Array.from(session.topics.values())
                   .filter(t => t.state !== 'EVICTED' && t.category === 'motion')
                   .map((topic, i, arr) => (
@@ -90,56 +124,29 @@ export default function LiveDashboard({ session }) {
                   </div>
                 )}
               </div>
-              {/* Quick Motion — bottom ~15% */}
               <QuickMotion />
             </div>
           </BentoPanel>
         </div>
 
-        {/* TOP-RIGHT: Transcript + Topics side by side */}
-        <div style={{ gridColumn: '2', gridRow: '1', display: 'grid', gridTemplateColumns: '1fr 0.5fr', gap: 10, minHeight: 0 }}>
-          {/* Transcript */}
-          <BentoPanel
-            title="Transcript"
-            icon={iconTranscript}
-            badge={`${session.transcript.length}`}
-            style={{ minHeight: 0 }}
-          >
-            <TranscriptPanel transcript={session.transcript} status={session.status} embedded />
-          </BentoPanel>
-
-          {/* Topics — compact */}
+        {/* RIGHT TOP: Topics */}
+        <div style={{ gridColumn: '3', gridRow: '1', display: 'flex', minHeight: 0 }}>
           <BentoPanel
             title="Topics"
             icon={iconTopics}
             badge={`${activeTopics}`}
-            style={{ minHeight: 0 }}
+            style={{ flex: 1, minHeight: 0 }}
           >
             <TopicBubbles topics={session.topics} status={session.status} compact />
           </BentoPanel>
         </div>
 
-        {/* BOTTOM-RIGHT: Agenda + Clerk Notes */}
-        <div style={{ gridColumn: '2', gridRow: '2', display: 'grid', gridTemplateColumns: '1.3fr 0.7fr', gap: 10, minHeight: 0 }}>
-          <BentoPanel
-            title="Agenda"
-            icon={iconAgenda}
-            badge={agendaBadge}
-            style={{ minHeight: 0 }}
-          >
-            <AgendaSidebar
-              agendaItems={session.agendaItems}
-              currentAgendaItem={session.currentAgendaItem}
-              topics={session.topics}
-              transcript={session.transcript}
-              embedded
-            />
-          </BentoPanel>
-
+        {/* RIGHT BOTTOM: Clerk Notes */}
+        <div style={{ gridColumn: '3', gridRow: '2', display: 'flex', minHeight: 0 }}>
           <BentoPanel
             title="Clerk Notes"
             icon={iconNotes}
-            style={{ minHeight: 0 }}
+            style={{ flex: 1, minHeight: 0 }}
           >
             <ClerkNotes />
           </BentoPanel>

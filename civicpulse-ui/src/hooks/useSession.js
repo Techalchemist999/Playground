@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import * as api from '../api/client';
 import { connectSSE } from '../api/sse';
+import { DEMO_AGENDA_ITEMS, DEMO_TOPICS, DEMO_TRANSCRIPT, DEMO_PLAYBACK, buildDemoTopicsMap } from '../data/demo';
 
 export function useSession() {
   const [view, setView] = useState('setup'); // setup | live | minutes
@@ -106,13 +107,38 @@ export function useSession() {
     if (!sessionId) return;
     try {
       setError(null);
-      await api.startSession(sessionId, agendaId);
+      const result = await api.startSession(sessionId, agendaId);
+
+      // If the backend returned agenda items directly, use them
+      if (result?.agenda_items?.length) {
+        setAgendaItems(result.agenda_items.map((item, idx) => ({
+          ...item,
+          number: item.number || (idx + 1),
+          status: item.status || 'pending',
+        })));
+      }
+
       setStatus('ACTIVE');
       setStartTime(Date.now());
       setView('live');
 
       // Connect SSE
       sseClose.current = connectSSE(sessionId, handleSSE());
+
+      // Also try fetching agenda progress in case items weren't in the start response
+      if (agendaId && !result?.agenda_items?.length) {
+        api.getAgendaProgress(sessionId)
+          .then(data => {
+            if (data?.items?.length) {
+              setAgendaItems(prev => prev.length > 0 ? prev : data.items.map((item, idx) => ({
+                ...item,
+                number: item.number || (idx + 1),
+                status: item.status || 'pending',
+              })));
+            }
+          })
+          .catch(() => {}); // Silently fail — SSE will populate later
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -141,8 +167,86 @@ export function useSession() {
     return result;
   }, [sessionId]);
 
+  // Instant demo — all data visible at once
+  const startDemo = useCallback(() => {
+    setSessionId('demo');
+    setSource('demo');
+    setStatus('ACTIVE');
+    setStartTime(Date.now());
+    setAgendaItems(DEMO_AGENDA_ITEMS);
+    setCurrentAgendaItem(DEMO_AGENDA_ITEMS.find(i => i.status === 'active') || null);
+    setTopics(buildDemoTopicsMap());
+    setTranscript(DEMO_TRANSCRIPT);
+    setError(null);
+    setView('live');
+  }, []);
+
+  // Timed playback demo — data feeds in progressively
+  const demoTimers = useRef([]);
+  const startDemoPlayback = useCallback(() => {
+    // Clear any existing timers
+    demoTimers.current.forEach(t => clearTimeout(t));
+    demoTimers.current = [];
+
+    setSessionId('demo-playback');
+    setSource('demo');
+    setStatus('ACTIVE');
+    setStartTime(Date.now());
+    setError(null);
+
+    // Start with initial agenda (first 3 discussed)
+    const initialAgenda = DEMO_AGENDA_ITEMS.map(item => ({
+      ...item,
+      status: item.number <= 3 ? 'discussed' : (item.number === 4 ? 'active' : 'pending'),
+    }));
+    setAgendaItems(initialAgenda);
+    setCurrentAgendaItem(initialAgenda.find(i => i.status === 'active'));
+
+    // Start with empty topics and transcript
+    setTopics(new Map());
+    setTranscript([]);
+
+    setView('live');
+
+    // Build a lookup for topic data
+    const topicLookup = {};
+    DEMO_TOPICS.forEach(t => { topicLookup[t.normalized_id] = t; });
+
+    // Schedule all playback events
+    DEMO_PLAYBACK.forEach(event => {
+      const timer = setTimeout(() => {
+        if (event.type === 'transcript') {
+          const entry = DEMO_TRANSCRIPT[event.index];
+          if (entry) setTranscript(prev => [...prev, entry]);
+        }
+        else if (event.type === 'topic') {
+          setTopics(prev => {
+            const next = new Map(prev);
+            const existing = next.get(event.id) || topicLookup[event.id] || {};
+            next.set(event.id, { ...existing, state: event.stateChange });
+            return next;
+          });
+        }
+        else if (event.type === 'agenda') {
+          setAgendaItems(prev => prev.map(item => {
+            if (item.number === event.number) return { ...item, status: event.status };
+            if (event.status === 'active' && item.status === 'active' && item.number !== event.number) return { ...item, status: 'discussed' };
+            return item;
+          }));
+          setCurrentAgendaItem(prev => {
+            const found = DEMO_AGENDA_ITEMS.find(i => i.number === event.number);
+            return found || prev;
+          });
+        }
+      }, event.delay);
+      demoTimers.current.push(timer);
+    });
+  }, []);
+
   const reset = useCallback(() => {
     if (sseClose.current) sseClose.current();
+    demoTimers.current.forEach(t => clearTimeout(t));
+    demoTimers.current = [];
     setView('setup');
     setSessionId(null);
     setStatus('IDLE');
@@ -158,6 +262,6 @@ export function useSession() {
   return {
     view, setView, sessionId, status, source, startTime, error,
     topics, transcript, agendaItems, currentAgendaItem, setAgendaItems,
-    ingest, start, pause, resume, stop, reset,
+    ingest, start, startDemo, startDemoPlayback, pause, resume, stop, reset,
   };
 }

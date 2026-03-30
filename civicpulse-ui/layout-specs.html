@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — All 10 Layout Specs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; background: linear-gradient(135deg, #6366f1, #4f46e5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #64748b; font-size: 12px; margin-bottom: 20px; }
+  .specs { display: flex; flex-direction: column; gap: 28px; max-width: 1200px; margin: 0 auto; }
+  .sw { background: #fff; border-radius: 16px; border: 2px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 14px rgba(99,102,241,.07); cursor: pointer; transition: all .3s; }
+  .sw:hover { border-color: #a5b4fc; box-shadow: 0 6px 24px rgba(99,102,241,.12); }
+  .sw.selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+  .sh { padding: 12px 18px 10px; display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid #f1f5f9; }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  .sh h2 { font-size: 15px; font-weight: 700; }
+  .sh p { font-size: 10px; color: #94a3b8; margin-left: auto; font-style: italic; }
+  .mk { padding: 8px; background: #f1f5f9; }
+  .mg { display: grid; gap: 6px; height: 480px; }
+
+  .pnl { background: #fff; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 1px 4px rgba(0,0,0,.02); }
+  .ph { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .ph .ic { width: 10px; height: 10px; border-radius: 3px; }
+  .ph .tt { font-size: 9px; font-weight: 700; color: #334155; }
+  .ph .bd { font-size: 7px; font-weight: 700; padding: 1px 5px; border-radius: 999px; margin-left: auto; }
+  .pb-h .ic { background: #6366f1; } .pb-h .bd { background: #eef2ff; color: #6366f1; border: 1px solid #c7d2fe; }
+  .ag-h .ic { background: #db2777; } .ag-h .bd { background: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8; }
+  .tp-h .ic { background: #8b5cf6; } .tp-h .bd { background: #f5f3ff; color: #8b5cf6; border: 1px solid #ddd6fe; }
+  .cn-h .ic { background: #f59e0b; } .cn-h .bd { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .bdy { flex: 1; overflow: hidden; padding: 6px 8px; }
+
+  /* Motion cards */
+  .mc { background: #fff; border-radius: 7px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 5px; }
+  .mb { height: 2px; } .mb.bl { background: linear-gradient(90deg, #6366f1, transparent); } .mb.gr { background: linear-gradient(90deg, #22c55e, transparent); }
+  .mh { padding: 5px 7px 0; }
+  .mm { font-size: 6px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; }
+  .mr { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; margin: 2px 0 4px; }
+  .mt { font-size: 8.5px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+  .bg { font-size: 6px; font-weight: 700; padding: 1px 5px; border-radius: 999px; white-space: nowrap; display: flex; align-items: center; gap: 2px; }
+  .bg .d { width: 3px; height: 3px; border-radius: 50%; }
+  .bg.vt { background: #fffbeb; border: 1px solid #fde68a; color: #b45309; } .bg.vt .d { background: #f59e0b; }
+  .bg.cr { background: #f0fdf4; border: 1px solid #bbf7d0; color: #22c55e; } .bg.cr .d { background: #22c55e; }
+  .mq { font-size: 7px; color: #64748b; border-left: 2px solid #6366f1; padding: 3px 6px; margin: 0 7px 4px; background: #f8fafc; border-radius: 0 4px 4px 0; line-height: 1.5; }
+  .mq.g { border-left-color: #22c55e; }
+  .ml { display: flex; gap: 3px; padding: 0 7px 4px; }
+  .mi { flex: 1; border-radius: 4px; padding: 3px 5px; }
+  .mi-l { font-size: 5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+  .mi-n { font-size: 7px; font-weight: 700; }
+  .mi.mv { background: #eef2ff; border: 1px solid #c7d2fe; } .mi.mv .mi-l { color: #6366f1; } .mi.mv .mi-n { color: #4f46e5; }
+  .mi.sc { background: #f0fdf4; border: 1px solid #bbf7d0; } .mi.sc .mi-l { color: #22c55e; } .mi.sc .mi-n { color: #0f172a; }
+  .mv2 { display: flex; gap: 4px; justify-content: center; padding: 4px 7px 6px; }
+  .o { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; position: relative; }
+  .o::before { content: ''; position: absolute; top: 1px; left: 3px; width: 6px; height: 3px; border-radius: 50%; background: rgba(255,255,255,.5); }
+  .o.y { background: linear-gradient(135deg, #dcfce7, #bbf7d0aa); border: 1px solid #86efac; color: #16a34a; }
+  .o.w { background: #f1f5f9; border: 1px dashed #cbd5e1; color: #94a3b8; font-size: 6px; }
+  .on { font-size: 4.5px; color: #94a3b8; text-align: center; margin-top: 1px; }
+
+  /* Agenda */
+  .tabs { display: flex; background: #f1f5f9; border-radius: 4px; padding: 1px; margin-bottom: 4px; }
+  .tab { padding: 2px 6px; font-size: 6.5px; font-weight: 600; border-radius: 3px; color: #94a3b8; }
+  .tab.a { background: #fff; color: #db2777; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  .ap { height: 3px; border-radius: 2px; background: #f1f5f9; margin-bottom: 4px; overflow: hidden; display: flex; }
+  .apd { background: #22c55e; } .apa { background: #6366f1; }
+  .ai { display: flex; gap: 5px; padding: 3px 4px; align-items: flex-start; }
+  .ai.act { background: #eef2ff; border-left: 2px solid #6366f1; }
+  .an2 { width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 6px; font-weight: 700; flex-shrink: 0; border: 1px solid; }
+  .an2.d { background: #f0fdf4; border-color: #bbf7d0; color: #22c55e; }
+  .an2.ac { background: #eef2ff; border-color: #c7d2fe; color: #6366f1; }
+  .an2.p { background: #f8fafc; border-color: #e2e8f0; color: #94a3b8; }
+  .atx { font-size: 7px; font-weight: 600; color: #334155; line-height: 1.3; }
+  .atx.ac { color: #6366f1; }
+  .adsc { font-size: 6px; color: #94a3b8; }
+
+  /* Bubbles */
+  .bc { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; align-items: center; padding: 4px; }
+  .bb { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; position: relative; overflow: hidden; }
+  .bb::before { content: ''; position: absolute; top: -10%; left: -10%; width: 70%; height: 60%; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,.6), transparent 80%); transform: rotate(-20deg); }
+  .bb span { position: relative; z-index: 1; }
+
+  /* Notes */
+  .nt { background: #fffbeb; border: 1px solid #fde68a; border-radius: 5px; padding: 4px 6px; margin-bottom: 3px; }
+  .nt-t { font-size: 5px; color: #d97706; font-weight: 700; }
+  .nt-x { font-size: 6.5px; color: #92400e; line-height: 1.4; }
+  .ni { display: flex; gap: 3px; margin-top: 4px; }
+  .ni input { flex: 1; border: 1px solid #e2e8f0; border-radius: 4px; padding: 3px 6px; font-size: 6px; font-family: inherit; }
+  .ni button { background: #f59e0b; color: #fff; border: none; border-radius: 4px; padding: 3px 8px; font-size: 6px; font-weight: 700; }
+
+  #result { display: none; max-width: 1200px; margin: 24px auto 0; background: #fff; border-radius: 16px; border: 2px solid #6366f1; padding: 18px; text-align: center; }
+  #result .label { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  #result .pick { font-size: 18px; font-weight: 800; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div style="max-width:1200px;margin:0 auto;">
+  <div class="tag">LAYOUT SPECS</div>
+  <h1>All 10 Layouts — Full Detail</h1>
+  <p class="subtitle">Real Pouce Coupe meeting data. Click to select.</p>
+</div>
+
+<div class="specs">
+
+<script>
+// Reusable HTML fragments
+const CARRIED_CARD = `<div class="mc"><div class="mb gr"></div><div class="mh"><div class="mm">Motion · Item 2</div><div class="mr"><div class="mt">Adopt Agenda</div><div class="bg cr"><div class="d"></div>CARRIED UNANIMOUSLY</div></div></div><div class="mq g">THAT Council adopted the agenda as presented.</div><div class="ml"><div class="mi mv"><div class="mi-l">Moved By</div><div class="mi-n">Cllr Rabel</div></div><div class="mi sc"><div class="mi-l">Seconded By</div><div class="mi-n">Cllr Johnston</div></div></div><div class="mv2"><div style="text-align:center"><div class="o y">✓</div><div class="on">Veach</div></div><div style="text-align:center"><div class="o y">✓</div><div class="on">Rabel</div></div><div style="text-align:center"><div class="o y">✓</div><div class="on">Wall</div></div><div style="text-align:center"><div class="o y">✓</div><div class="on">Johnston</div></div><div style="text-align:center"><div class="o y">✓</div><div class="on">Woodill</div></div></div></div>`;
+
+const VOTING_CARD = `<div class="mc"><div class="mb bl"></div><div class="mh"><div class="mm">Motion · Item 5</div><div class="mr"><div class="mt">Bylaw 1021 — Third Reading</div><div class="bg vt"><div class="d"></div>AWAITING VOTE</div></div></div><div class="mq">THAT Council adopts Bylaw 1021 as presented.</div><div class="ml"><div class="mi mv"><div class="mi-l">Moved By</div><div class="mi-n">Cllr Rabel</div></div><div class="mi sc"><div class="mi-l">Seconded By</div><div class="mi-n">Cllr Wall</div></div></div><div class="mv2"><div style="text-align:center"><div class="o y">✓</div><div class="on">Veach</div></div><div style="text-align:center"><div class="o y">✓</div><div class="on">Rabel</div></div><div style="text-align:center"><div class="o y">✓</div><div class="on">Wall</div></div><div style="text-align:center"><div class="o w">?</div><div class="on">Johnston</div></div><div style="text-align:center"><div class="o w">?</div><div class="on">Woodill</div></div></div></div>`;
+
+const PB_CARDS = CARRIED_CARD + VOTING_CARD;
+
+// Horizontal PB cards
+const PB_HORIZ = `<div style="display:flex;gap:8px;overflow-x:auto;padding:2px;">
+<div style="min-width:260px;flex-shrink:0;">${CARRIED_CARD}</div>
+<div style="min-width:260px;flex-shrink:0;">${VOTING_CARD}</div></div>`;
+
+const AGENDA_FULL = `<div class="tabs"><span class="tab a">Agenda</span><span class="tab">Rules</span><span class="tab">Transcript</span></div>
+<div class="ap"><div class="apd" style="width:23%;"></div><div class="apa" style="width:8%;"></div></div>
+<div class="ai"><div class="an2 d">✓</div><div><div class="atx">Call to Order</div></div></div>
+<div class="ai"><div class="an2 d">✓</div><div><div class="atx">Adoption of Agenda</div></div></div>
+<div class="ai"><div class="an2 d">✓</div><div><div class="atx">Adoption of Minutes</div><div class="adsc">Feb 10, 2025</div></div></div>
+<div class="ai act"><div class="an2 ac">4</div><div><div class="atx ac">Delegation — Pine Ave</div><div class="adsc">Drainage concerns</div></div></div>
+<div class="ai"><div class="an2 p">5</div><div><div class="atx">Bylaw 1021 — Third Reading</div></div></div>
+<div class="ai"><div class="an2 p">6</div><div><div class="atx">Water Rate Increase</div></div></div>
+<div class="ai"><div class="an2 p">7</div><div><div class="atx">Road Maintenance Budget</div></div></div>
+<div class="ai"><div class="an2 p">8</div><div><div class="atx">Park Improvement Grant</div></div></div>
+<div class="ai"><div class="an2 p">9</div><div><div class="atx">Zoning Amendment</div></div></div>
+<div class="ai"><div class="an2 p">10</div><div><div class="atx">CAO Report</div></div></div>`;
+
+const AGENDA_SHORT = `<div class="tabs"><span class="tab a">Agenda</span><span class="tab">Rules</span><span class="tab">Transcript</span></div>
+<div class="ap"><div class="apd" style="width:23%;"></div><div class="apa" style="width:8%;"></div></div>
+<div class="ai"><div class="an2 d">✓</div><div><div class="atx">Call to Order</div></div></div>
+<div class="ai"><div class="an2 d">✓</div><div><div class="atx">Adopt Agenda</div></div></div>
+<div class="ai"><div class="an2 d">✓</div><div><div class="atx">Minutes</div></div></div>
+<div class="ai act"><div class="an2 ac">4</div><div><div class="atx ac">Pine Ave</div></div></div>
+<div class="ai"><div class="an2 p">5</div><div><div class="atx">Bylaw 1021</div></div></div>
+<div class="ai"><div class="an2 p">6</div><div><div class="atx">Water Rates</div></div></div>`;
+
+const BUBBLES_LG = `<div class="bc" style="gap:7px;">
+<div class="bb" style="width:48px;height:48px;background:linear-gradient(145deg,#fefce8,#fde68a,#fcd34d,#fbbf24bb);border:1px solid rgba(253,230,138,.5);font-size:7px;"><span style="color:#92400e;">Bylaw 1021</span></div>
+<div class="bb" style="width:40px;height:40px;background:linear-gradient(145deg,#ecfdf5,#a7f3d0,#6ee7b7,#34d399bb);border:1px solid rgba(110,231,183,.4);font-size:6.5px;"><span style="color:#065f46;">Pine Ave</span></div>
+<div class="bb" style="width:34px;height:34px;background:linear-gradient(145deg,#fffbeb,#fde68a,#fcd34d,#f59e0bbb);border:1px solid rgba(253,230,138,.5);font-size:6px;"><span style="color:#92400e;">Rates</span></div>
+<div class="bb" style="width:30px;height:30px;background:linear-gradient(145deg,#eef2ff,#c7d2fe,#a5b4fc,#818cf8bb);border:1px solid rgba(165,180,252,.5);font-size:5.5px;"><span style="color:#4338ca;">Roads</span></div>
+<div class="bb" style="width:26px;height:26px;background:linear-gradient(145deg,#fdf2f8,#fbcfe8,#f9a8d4,#f472b6bb);border:1px solid rgba(251,207,232,.5);font-size:5px;"><span style="color:#9d174d;">Zoning</span></div>
+<div class="bb" style="width:24px;height:24px;background:linear-gradient(145deg,#eef2ff,#c7d2fe,#a5b4fc,#818cf8bb);border:1px solid rgba(165,180,252,.5);font-size:4.5px;"><span style="color:#4338ca;">Drainage</span></div>
+<div class="bb" style="width:20px;height:20px;background:linear-gradient(145deg,#f5f3ff,#ddd6fe,#c4b5fd,#a78bfabb);border:1px solid rgba(196,181,253,.5);font-size:4px;"><span style="color:#5b21b6;">Park</span></div></div>`;
+
+const BUBBLES_SM = `<div class="bc">
+<div class="bb" style="width:40px;height:40px;background:linear-gradient(145deg,#fefce8,#fde68a,#fcd34d,#fbbf24bb);border:1px solid rgba(253,230,138,.5);font-size:6px;"><span style="color:#92400e;">Bylaw</span></div>
+<div class="bb" style="width:34px;height:34px;background:linear-gradient(145deg,#ecfdf5,#a7f3d0,#6ee7b7,#34d399bb);border:1px solid rgba(110,231,183,.4);font-size:5.5px;"><span style="color:#065f46;">Pine</span></div>
+<div class="bb" style="width:28px;height:28px;background:linear-gradient(145deg,#fffbeb,#fde68a,#fcd34d,#f59e0bbb);border:1px solid rgba(253,230,138,.5);font-size:5px;"><span style="color:#92400e;">Rates</span></div>
+<div class="bb" style="width:24px;height:24px;background:linear-gradient(145deg,#eef2ff,#c7d2fe,#a5b4fc,#818cf8bb);border:1px solid rgba(165,180,252,.5);font-size:4.5px;"><span style="color:#4338ca;">Roads</span></div>
+<div class="bb" style="width:22px;height:22px;background:linear-gradient(145deg,#fdf2f8,#fbcfe8,#f9a8d4,#f472b6bb);border:1px solid rgba(251,207,232,.5);font-size:4px;"><span style="color:#9d174d;">Zone</span></div></div>`;
+
+const BUBBLES_WIDE = `<div class="bc" style="gap:8px;">
+<div class="bb" style="width:52px;height:52px;background:linear-gradient(145deg,#fefce8,#fde68a,#fcd34d,#fbbf24bb);border:1px solid rgba(253,230,138,.5);font-size:7.5px;"><span style="color:#92400e;">Bylaw 1021</span></div>
+<div class="bb" style="width:44px;height:44px;background:linear-gradient(145deg,#ecfdf5,#a7f3d0,#6ee7b7,#34d399bb);border:1px solid rgba(110,231,183,.4);font-size:6.5px;"><span style="color:#065f46;">Pine Ave</span></div>
+<div class="bb" style="width:38px;height:38px;background:linear-gradient(145deg,#fffbeb,#fde68a,#fcd34d,#f59e0bbb);border:1px solid rgba(253,230,138,.5);font-size:6px;"><span style="color:#92400e;">Water Rates</span></div>
+<div class="bb" style="width:34px;height:34px;background:linear-gradient(145deg,#eef2ff,#c7d2fe,#a5b4fc,#818cf8bb);border:1px solid rgba(165,180,252,.5);font-size:5.5px;"><span style="color:#4338ca;">Roads</span></div>
+<div class="bb" style="width:30px;height:30px;background:linear-gradient(145deg,#fdf2f8,#fbcfe8,#f9a8d4,#f472b6bb);border:1px solid rgba(251,207,232,.5);font-size:5px;"><span style="color:#9d174d;">Zoning</span></div>
+<div class="bb" style="width:26px;height:26px;background:linear-gradient(145deg,#eef2ff,#c7d2fe,#a5b4fc,#818cf8bb);border:1px solid rgba(165,180,252,.5);font-size:5px;"><span style="color:#4338ca;">Drainage</span></div>
+<div class="bb" style="width:24px;height:24px;background:linear-gradient(145deg,#f5f3ff,#ddd6fe,#c4b5fd,#a78bfabb);border:1px solid rgba(196,181,253,.5);font-size:4.5px;"><span style="color:#5b21b6;">Park</span></div>
+<div class="bb" style="width:22px;height:22px;background:linear-gradient(145deg,#fff7ed,#fed7aa,#fdba74,#fb923cbb);border:1px solid rgba(253,186,116,.5);font-size:4px;"><span style="color:#c2410c;">CAO</span></div></div>`;
+
+const NOTES_FULL = `<div style="flex:1;overflow-y:auto;">
+<div class="nt"><div class="nt-t">7:02 PM</div><div class="nt-x">Quorum present (5/5). Meeting called to order.</div></div>
+<div class="nt"><div class="nt-t">7:03 PM</div><div class="nt-x">Agenda adopted unanimously. Minutes from Feb 10 adopted.</div></div>
+<div class="nt"><div class="nt-t">7:05 PM</div><div class="nt-x">Pine Ave delegation — 12 households, drainage since 2021. CAO: $18K in roads budget.</div></div>
+</div><div class="ni"><input placeholder="Add a note..." /><button>Add</button></div>`;
+
+const NOTES_SHORT = `<div style="flex:1;overflow-y:auto;">
+<div class="nt"><div class="nt-t">7:02 PM</div><div class="nt-x">Quorum. Called to order.</div></div>
+<div class="nt"><div class="nt-t">7:05 PM</div><div class="nt-x">Pine Ave — drainage $18K.</div></div>
+</div><div class="ni"><input placeholder="Add a note..." /><button>Add</button></div>`;
+
+const layouts = [
+  { id:'l1', num:'01', name:'Current Layout', desc:'PB left, Agenda mid, Topics + Notes right',
+    grid:'grid-template-columns:1.3fr .7fr 1fr;grid-template-rows:1fr;',
+    cells:[
+      {cls:'pb-h',t:'Procedural Bites',b:'2 motions',style:'grid-row:1;',html:PB_CARDS,scroll:true},
+      {cls:'ag-h',t:'Agenda',b:'3/13',style:'grid-row:1;',html:AGENDA_FULL,scroll:true,pad:true},
+      {stack:true,style:'grid-row:1;',children:[
+        {cls:'tp-h',t:'Topics',b:'8',flex:1,html:BUBBLES_LG},
+        {cls:'cn-h',t:'Clerk Notes',flex:.8,html:NOTES_FULL,col:true}
+      ]}
+    ]},
+  { id:'l2', num:'02', name:'Classic 2×2', desc:'Even quadrants — simple and balanced',
+    grid:'grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;',
+    cells:[
+      {cls:'pb-h',t:'Procedural Bites',b:'2 motions',html:PB_CARDS,scroll:true},
+      {cls:'ag-h',t:'Agenda',b:'3/13',html:AGENDA_FULL,scroll:true,pad:true},
+      {cls:'tp-h',t:'Topics',b:'8',html:BUBBLES_LG},
+      {cls:'cn-h',t:'Clerk Notes',html:NOTES_FULL,col:true}
+    ]},
+  { id:'l3', num:'03', name:'Command Center', desc:'PB dominates left, Topics → Agenda → Notes stacked right',
+    grid:'grid-template-columns:1.5fr 1fr;grid-template-rows:.8fr 1fr .7fr;',
+    cells:[
+      {cls:'pb-h',t:'Procedural Bites',b:'2 motions',style:'grid-row:1/4;',html:PB_CARDS,scroll:true},
+      {cls:'tp-h',t:'Topics',b:'8',html:BUBBLES_LG},
+      {cls:'ag-h',t:'Agenda',b:'3/13',html:AGENDA_FULL,scroll:true,pad:true},
+      {cls:'cn-h',t:'Clerk Notes',html:NOTES_SHORT,col:true}
+    ]},
+  { id:'l4', num:'04', name:'Agenda Banner', desc:'Agenda full width top, PB + Topics + Notes below',
+    grid:'grid-template-columns:1fr 1fr 1fr;grid-template-rows:.5fr 1fr;',
+    cells:[
+      {cls:'ag-h',t:'Agenda',b:'3/13',style:'grid-column:1/4;',html:AGENDA_FULL,scroll:true,pad:true},
+      {cls:'pb-h',t:'Procedural Bites',b:'2 motions',html:PB_CARDS,scroll:true},
+      {cls:'tp-h',t:'Topics',b:'8',html:BUBBLES_SM},
+      {cls:'cn-h',t:'Clerk Notes',html:NOTES_SHORT,col:true}
+    ]},
+  { id:'l5', num:'05', name:'Top Heavy', desc:'PB + Agenda split top, Topics + Notes below',
+    grid:'grid-template-columns:1.3fr 1fr;grid-template-rows:1.2fr .8fr;',
+    cells:[
+      {cls:'pb-h',t:'Procedural Bites',b:'2 motions',html:PB_CARDS,scroll:true},
+      {cls:'ag-h',t:'Agenda',b:'3/13',html:AGENDA_FULL,scroll:true,pad:true},
+      {cls:'tp-h',t:'Topics',b:'8',html:BUBBLES_LG},
+      {cls:'cn-h',t:'Clerk Notes',html:NOTES_FULL,col:true}
+    ]},
+  { id:'l6', num:'06', name:'L-Shape', desc:'PB big top-left, Agenda right, Topics + Notes bottom',
+    grid:'grid-template-columns:1.4fr 1fr;grid-template-rows:1.3fr .7fr;',
+    cells:[
+      {cls:'pb-h',t:'Procedural Bites',b:'2 motions',html:PB_CARDS,scroll:true},
+      {cls:'ag-h',t:'Agenda',b:'3/13',html:AGENDA_FULL,scroll:true,pad:true},
+      {cls:'tp-h',t:'Topics',b:'8',html:BUBBLES_LG},
+      {cls:'cn-h',t:'Clerk Notes',html:NOTES_SHORT,col:true}
+    ]},
+  { id:'l7', num:'07', name:'Sidebar Agenda', desc:'Narrow Agenda rail left, PB center, Topics + Notes right',
+    grid:'grid-template-columns:.45fr 1.2fr .8fr;grid-template-rows:1fr 1fr;',
+    cells:[
+      {cls:'ag-h',t:'Agenda',b:'3/13',style:'grid-row:1/3;',html:AGENDA_SHORT,scroll:true,pad:true},
+      {cls:'pb-h',t:'Procedural Bites',b:'2 motions',style:'grid-row:1/3;',html:PB_CARDS,scroll:true},
+      {cls:'tp-h',t:'Topics',b:'8',html:BUBBLES_SM},
+      {cls:'cn-h',t:'Clerk Notes',html:NOTES_SHORT,col:true}
+    ]},
+  { id:'l8', num:'08', name:'Triple Column', desc:'PB left, Agenda over Topics center, Notes right',
+    grid:'grid-template-columns:1fr 1fr .7fr;grid-template-rows:1fr 1fr;',
+    cells:[
+      {cls:'pb-h',t:'Procedural Bites',b:'2 motions',style:'grid-row:1/3;',html:PB_CARDS,scroll:true},
+      {cls:'ag-h',t:'Agenda',b:'3/13',html:AGENDA_SHORT,scroll:true,pad:true},
+      {cls:'cn-h',t:'Clerk Notes',style:'grid-row:1/3;',html:NOTES_FULL,col:true},
+      {cls:'tp-h',t:'Topics',b:'8',html:BUBBLES_SM}
+    ]},
+  { id:'l9', num:'09', name:'Topics Banner', desc:'Topics full width top, PB + Agenda + Notes below',
+    grid:'grid-template-columns:1fr 1fr 1fr;grid-template-rows:.35fr 1fr;',
+    cells:[
+      {cls:'tp-h',t:'Topics',b:'8 active',style:'grid-column:1/4;',html:BUBBLES_WIDE},
+      {cls:'pb-h',t:'Procedural Bites',b:'2 motions',html:PB_CARDS,scroll:true},
+      {cls:'ag-h',t:'Agenda',b:'3/13',html:AGENDA_SHORT,scroll:true,pad:true},
+      {cls:'cn-h',t:'Clerk Notes',html:NOTES_FULL,col:true}
+    ]},
+  { id:'l10', num:'10', name:'PB Stage', desc:'PB full width top (horizontal scroll), Agenda + Topics + Notes below',
+    grid:'grid-template-columns:1fr 1fr 1fr;grid-template-rows:1.2fr .8fr;',
+    cells:[
+      {cls:'pb-h',t:'Procedural Bites',b:'2 motions',style:'grid-column:1/4;',html:PB_HORIZ},
+      {cls:'ag-h',t:'Agenda',b:'3/13',html:AGENDA_SHORT,scroll:true,pad:true},
+      {cls:'tp-h',t:'Topics',b:'8',html:BUBBLES_SM},
+      {cls:'cn-h',t:'Clerk Notes',html:NOTES_SHORT,col:true}
+    ]}
+];
+
+function renderCell(c) {
+  if (c.stack) {
+    return `<div style="display:flex;flex-direction:column;gap:6px;min-height:0;${c.style||''}">
+      ${c.children.map(ch => `<div class="pnl" style="flex:${ch.flex||1};min-height:0;">
+        <div class="ph ${ch.cls}"><div class="ic"></div><span class="tt">${ch.t}</span>${ch.b?`<span class="bd">${ch.b}</span>`:''}</div>
+        <div class="bdy" style="${ch.col?'display:flex;flex-direction:column;':''}">${ch.html}</div>
+      </div>`).join('')}
+    </div>`;
+  }
+  return `<div class="pnl" style="${c.style||''}">
+    <div class="ph ${c.cls}"><div class="ic"></div><span class="tt">${c.t}</span>${c.b?`<span class="bd">${c.b}</span>`:''}</div>
+    <div class="bdy" style="${c.scroll?'overflow-y:auto;':''}${c.pad?'padding:4px 6px;':''}${c.col?'display:flex;flex-direction:column;':''}">${c.html}</div>
+  </div>`;
+}
+
+document.querySelector('.specs').innerHTML = layouts.map(l =>
+  `<div class="sw" onclick="select(this,'${l.id}')">
+    <div class="sh"><span class="tag">${l.num}</span><h2>${l.name}</h2><p>${l.desc}</p></div>
+    <div class="mk"><div class="mg" style="${l.grid}">${l.cells.map(renderCell).join('')}</div></div>
+  </div>`
+).join('');
+</script>
+
+</div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const layoutNames = {l1:'01 — Current',l2:'02 — Classic 2×2',l3:'03 — Command Center',l4:'04 — Agenda Banner',l5:'05 — Top Heavy',l6:'06 — L-Shape',l7:'07 — Sidebar Agenda',l8:'08 — Triple Column',l9:'09 — Topics Banner',l10:'10 — PB Stage'};
+function select(el, id) {
+  document.querySelectorAll('.sw').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('pick-text').textContent = layoutNames[id];
+}
+</script>
+</body>
+</html>

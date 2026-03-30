@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Procedure Rules Display Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; padding: 32px; }
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { color: #64748b; font-size: 13px; margin-bottom: 28px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1100px; margin: 0 auto; }
+  .card {
+    background: #fff; border-radius: 14px; border: 2px solid #e2e8f0; padding: 22px;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 2px 14px rgba(99,102,241,.07);
+  }
+  .card:hover { border-color: #a5b4fc; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,.12); }
+  .card.selected { border-color: #6366f1; background: #eef2ff; box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; margin-bottom: 6px; }
+  .card h2 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .card p { font-size: 12px; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
+  .preview { background: #f8fafc; border-radius: 10px; padding: 16px; min-height: 160px; overflow: hidden; }
+
+  #result { display: none; max-width: 1100px; margin: 28px auto 0; background: #fff; border-radius: 14px; border: 2px solid #6366f1; padding: 20px; text-align: center; }
+  #result .label { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  #result .pick { font-size: 18px; font-weight: 800; margin-top: 4px; }
+
+  /* Amber palette for bylaws */
+  .amber-border { border-left: 3px solid #ca8a04; }
+  .amber-bg { background: #fefce8; }
+  .amber-text { color: #ca8a04; }
+  .amber-badge { background: #fefce8; color: #ca8a04; border: 1px solid #fde68a; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 4px; }
+
+  /* ---- Option 1: Accordion Sidebar ---- */
+  .accordion { display: flex; flex-direction: column; gap: 4px; }
+  .acc-item { border-radius: 8px; overflow: hidden; }
+  .acc-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .acc-header .sec { background: #fefce8; color: #ca8a04; font-size: 9px; font-weight: 700;
+    padding: 2px 6px; border-radius: 4px; min-width: 28px; text-align: center; }
+  .acc-header .arrow { margin-left: auto; color: #94a3b8; font-size: 10px; }
+  .acc-body { padding: 6px 12px 10px 42px; font-size: 10px; color: #64748b; line-height: 1.6;
+    border-left: 3px solid #fde68a; margin-left: 16px; display: none; }
+  .acc-item.open .acc-body { display: block; }
+  .acc-item.open .acc-header { background: #fffbeb; border-color: #fde68a; }
+  .acc-item.open .arrow { transform: rotate(90deg); }
+
+  /* ---- Option 2: Toast Alerts ---- */
+  .toast-stack { display: flex; flex-direction: column; gap: 6px; }
+  .toast { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-radius: 0 8px 8px 0;
+    background: linear-gradient(to right, #fffbeb, #fff); border-left: 3px solid #ca8a04;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+  .toast .t-icon { font-size: 14px; margin-top: 1px; }
+  .toast .t-body { flex: 1; }
+  .toast .t-title { font-size: 11px; font-weight: 700; color: #ca8a04; }
+  .toast .t-rule { font-size: 10px; color: #64748b; margin-top: 2px; line-height: 1.4; }
+  .toast .t-time { font-size: 9px; color: #b45309; margin-top: 3px; }
+  .toast .t-dismiss { color: #ca8a04; font-size: 12px; cursor: pointer; opacity: .5; margin-left: 4px; }
+
+  /* ---- Option 3: Banner Strip ---- */
+  .banner-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .banner { padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; gap: 10px; }
+  .banner-active { background: linear-gradient(135deg, #fefce8, #fffbeb); border: 1.5px solid #fde68a; }
+  .banner-active .b-sec { background: #ca8a04; color: #fff; font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 6px; }
+  .banner-active .b-text { font-size: 11px; font-weight: 600; color: #92400e; flex: 1; }
+  .banner-active .b-live { font-size: 9px; font-weight: 700; color: #ca8a04; letter-spacing: .8px;
+    text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
+  .banner-active .b-dot { width: 6px; height: 6px; border-radius: 50%; background: #ca8a04; animation: pulse 1.5s infinite; }
+  .banner-queue { background: #fff; border: 1px solid #e2e8f0; opacity: .5; }
+  .banner-queue .b-sec { background: #f1f5f9; color: #94a3b8; font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 6px; }
+  .banner-queue .b-text { font-size: 11px; color: #94a3b8; }
+
+  /* ---- Option 4: Margin Notes ---- */
+  .agenda-mock { display: flex; flex-direction: column; gap: 4px; }
+  .ag-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; }
+  .ag-num { font-size: 11px; font-weight: 700; color: #94a3b8; min-width: 20px; }
+  .ag-text { font-size: 11px; color: #334155; font-weight: 500; flex: 1; }
+  .ag-note { background: #fefce8; border: 1px solid #fde68a; border-radius: 6px; padding: 4px 8px;
+    font-size: 9px; color: #92400e; font-weight: 500; max-width: 120px; line-height: 1.4;
+    box-shadow: 0 1px 4px rgba(202,138,4,.1); }
+  .ag-note .n-sec { font-weight: 700; color: #ca8a04; }
+  .ag-divider { border-top: 1px dashed #e2e8f0; margin: 2px 0; }
+
+  /* ---- Option 5: Traffic Light ---- */
+  .traffic-list { display: flex; flex-direction: column; gap: 6px; }
+  .tl-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fff;
+    border-radius: 8px; border: 1px solid #e2e8f0; }
+  .tl-light { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .tl-green { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,.4); }
+  .tl-amber { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,.4); }
+  .tl-red { background: #dc2626; box-shadow: 0 0 6px rgba(220,38,38,.4); }
+  .tl-label { font-size: 11px; font-weight: 600; flex: 1; }
+  .tl-status { font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+  .tl-status.ok { color: #16a34a; }
+  .tl-status.warn { color: #d97706; }
+  .tl-status.alert { color: #dc2626; }
+
+  /* ---- Option 6: Quick Reference Cards ---- */
+  .qr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .qr-card { background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; padding: 10px;
+    display: flex; flex-direction: column; gap: 4px; }
+  .qr-card.active { border-color: #fde68a; background: #fffbeb; }
+  .qr-sec { font-size: 18px; font-weight: 800; color: #ca8a04; }
+  .qr-title { font-size: 10px; font-weight: 700; color: #334155; }
+  .qr-desc { font-size: 9px; color: #64748b; line-height: 1.4; }
+  .qr-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 8px; font-weight: 700;
+    color: #ca8a04; text-transform: uppercase; letter-spacing: .6px; }
+  .qr-badge .qr-dot { width: 5px; height: 5px; border-radius: 50%; background: #ca8a04; animation: pulse 1.5s infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+</style>
+</head>
+<body>
+
+<div style="max-width:1100px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>Procedure Rules (Agenda Box)</h1>
+  <p class="subtitle">Choose how bylaw procedure rules appear in the agenda panel. Click to select.</p>
+</div>
+
+<div class="grid">
+
+  <!-- OPTION 1: Accordion Sidebar -->
+  <div class="card" onclick="select(this,'accordion')">
+    <div class="tag">OPTION 1</div>
+    <h2>Accordion Sections</h2>
+    <p>Collapsible rule groups that expand on click. Keeps things tidy — only show what's relevant right now.</p>
+    <div class="preview">
+      <div class="accordion">
+        <div class="acc-item open">
+          <div class="acc-header"><span class="sec">s.5</span> Motions <span class="arrow">&#9654;</span></div>
+          <div class="acc-body">A motion must be moved and seconded before debate. The mover speaks first. Amendments must be dealt with before the main motion.</div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header"><span class="sec">s.6</span> Voting <span class="arrow">&#9654;</span></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header"><span class="sec">s.7</span> Bylaws <span class="arrow">&#9654;</span></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header"><span class="sec">s.8</span> Delegations <span class="arrow">&#9654;</span></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header"><span class="sec">s.9</span> In-Camera <span class="arrow">&#9654;</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 2: Toast Alerts -->
+  <div class="card" onclick="select(this,'toast-alerts')">
+    <div class="tag">OPTION 2</div>
+    <h2>Toast Alerts</h2>
+    <p>Slide-in notifications triggered by meeting activity. Rules surface only when they're needed — no clutter.</p>
+    <div class="preview">
+      <div class="toast-stack">
+        <div class="toast">
+          <span class="t-icon">&#9888;</span>
+          <div class="t-body">
+            <div class="t-title">s.5 — Motion Procedure</div>
+            <div class="t-rule">A motion requires a mover and seconder before any debate can begin.</div>
+            <div class="t-time">Triggered 7:14 PM</div>
+          </div>
+          <span class="t-dismiss">&times;</span>
+        </div>
+        <div class="toast">
+          <span class="t-icon">&#9888;</span>
+          <div class="t-body">
+            <div class="t-title">s.6 — Voting</div>
+            <div class="t-rule">All members present must vote unless they declare a conflict of interest.</div>
+            <div class="t-time">Triggered 7:22 PM</div>
+          </div>
+          <span class="t-dismiss">&times;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 3: Banner Strip -->
+  <div class="card" onclick="select(this,'banner-strip')">
+    <div class="tag">OPTION 3</div>
+    <h2>Sticky Banner</h2>
+    <p>A persistent banner at the top of the agenda showing the currently active rule. Queued rules wait below.</p>
+    <div class="preview">
+      <div class="banner-wrap">
+        <div class="banner banner-active">
+          <div class="b-sec">s.5</div>
+          <div class="b-text">Motion must be moved and seconded before debate</div>
+          <div class="b-live"><span class="b-dot"></span> ACTIVE</div>
+        </div>
+        <div class="banner banner-queue">
+          <div class="b-sec">s.6</div>
+          <div class="b-text">All members present must vote</div>
+        </div>
+        <div class="banner banner-queue">
+          <div class="b-sec">s.7</div>
+          <div class="b-text">Bylaws require three readings</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 4: Margin Notes -->
+  <div class="card" onclick="select(this,'margin-notes')">
+    <div class="tag">OPTION 4</div>
+    <h2>Margin Notes</h2>
+    <p>Small notes pinned next to the relevant agenda items. Rules appear in context — right where you need them.</p>
+    <div class="preview">
+      <div class="agenda-mock">
+        <div class="ag-item">
+          <span class="ag-num">4.</span>
+          <span class="ag-text">Adoption of Minutes — Feb 10</span>
+        </div>
+        <div class="ag-item">
+          <span class="ag-num">5.</span>
+          <span class="ag-text">Bylaw 1021 — First Reading</span>
+          <div class="ag-note"><span class="n-sec">s.7</span> Bylaw requires three separate readings at regular meetings</div>
+        </div>
+        <div class="ag-divider"></div>
+        <div class="ag-item">
+          <span class="ag-num">6.</span>
+          <span class="ag-text">Public Hearing — Zoning Amendment</span>
+          <div class="ag-note"><span class="n-sec">s.8</span> Delegations limited to 10 min unless extended by motion</div>
+        </div>
+        <div class="ag-item">
+          <span class="ag-num">7.</span>
+          <span class="ag-text">New Business</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 5: Traffic Light -->
+  <div class="card" onclick="select(this,'traffic-light')">
+    <div class="tag">OPTION 5</div>
+    <h2>Traffic Light</h2>
+    <p>Rules shown as compliance status indicators. Green = followed, amber = heads up, red = action needed.</p>
+    <div class="preview">
+      <div class="traffic-list">
+        <div class="tl-row">
+          <div class="tl-light tl-red"></div>
+          <span class="tl-label">s.5 Motion needs a seconder</span>
+          <span class="tl-status alert">ACTION</span>
+        </div>
+        <div class="tl-row">
+          <div class="tl-light tl-amber"></div>
+          <span class="tl-label">s.6 Vote coming — all must vote</span>
+          <span class="tl-status warn">HEADS UP</span>
+        </div>
+        <div class="tl-row">
+          <div class="tl-light tl-green"></div>
+          <span class="tl-label">s.3 Quorum met (4/5 present)</span>
+          <span class="tl-status ok">OK</span>
+        </div>
+        <div class="tl-row">
+          <div class="tl-light tl-green"></div>
+          <span class="tl-label">s.4 Agenda adopted</span>
+          <span class="tl-status ok">OK</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 6: Quick Reference Cards -->
+  <div class="card" onclick="select(this,'quick-ref')">
+    <div class="tag">OPTION 6</div>
+    <h2>Quick Reference Cards</h2>
+    <p>Compact cards with the section number prominent. Active rules highlight — the rest stay ready for quick lookup.</p>
+    <div class="preview">
+      <div class="qr-grid">
+        <div class="qr-card active">
+          <div class="qr-sec">s.5</div>
+          <div class="qr-title">Motions</div>
+          <div class="qr-desc">Must be moved and seconded. Mover speaks first.</div>
+          <div class="qr-badge"><span class="qr-dot"></span> ACTIVE NOW</div>
+        </div>
+        <div class="qr-card active">
+          <div class="qr-sec">s.6</div>
+          <div class="qr-title">Voting</div>
+          <div class="qr-desc">All present must vote unless conflict declared.</div>
+          <div class="qr-badge"><span class="qr-dot"></span> ACTIVE NOW</div>
+        </div>
+        <div class="qr-card">
+          <div class="qr-sec">s.7</div>
+          <div class="qr-title">Bylaws</div>
+          <div class="qr-desc">Three readings required at regular meetings.</div>
+        </div>
+        <div class="qr-card">
+          <div class="qr-sec">s.9</div>
+          <div class="qr-title">In-Camera</div>
+          <div class="qr-desc">Requires 2/3 vote. No minutes released.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const names = {
+  'accordion': 'Accordion Sections',
+  'toast-alerts': 'Toast Alerts',
+  'banner-strip': 'Sticky Banner',
+  'margin-notes': 'Margin Notes',
+  'traffic-light': 'Traffic Light',
+  'quick-ref': 'Quick Reference Cards'
+};
+function select(el, id) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('pick-text').textContent = names[id];
+}
+</script>
+</body>
+</html>

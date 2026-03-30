@@ -1,12 +1,12 @@
 export const COLORS = {
-  bg: '#f1f5f9',
+  bg: '#f8fafc',
   cardBg: '#ffffff',
   cardBorder: '#e2e8f0',
-  primary: '#6366f1',
-  primaryLight: '#eef2ff',
-  primaryBorder: '#c7d2fe',
-  primaryGradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-  primaryShadow: 'rgba(99,102,241,.28)',
+  primary: '#475569',
+  primaryLight: '#f1f5f9',
+  primaryBorder: '#cbd5e1',
+  primaryGradient: 'linear-gradient(135deg, #475569, #64748b)',
+  primaryShadow: 'rgba(71,85,105,.2)',
   headingText: '#0f172a',
   bodyText: '#334155',
   mutedText: '#94a3b8',
@@ -19,9 +19,9 @@ export const COLORS = {
   dangerRed: '#dc2626',
   dangerLight: '#fef2f2',
   dangerBorder: '#fecaca',
-  warningAmber: '#f59e0b',
-  warningLight: '#fffbeb',
-  warningBorder: '#fde68a',
+  warningAmber: '#94a3b8',
+  warningLight: '#f1f5f9',
+  warningBorder: '#cbd5e1',
   subtleBg: '#f8fafc',
   subtleBorder: '#f1f5f9',
 };
@@ -40,10 +40,10 @@ export const CATEGORY_COLORS = {
 };
 
 export const TOPIC_STATE_COLORS = {
-  DETECTED:    '#6366f1',
-  ACTIVE:      '#22c55e',
+  DETECTED:    '#64748b',
+  ACTIVE:      '#475569',
   EXPIRED:     '#94a3b8',
-  REAPPEARED:  '#f59e0b',
+  REAPPEARED:  '#64748b',
   EVICTED:     '#e2e8f0',
 };
 
@@ -53,7 +53,7 @@ export const TYPOGRAPHY = {
 
 export const SPACING = {
   cardRadius: 14,
-  cardShadow: '0 2px 14px rgba(99,102,241,.07)',
+  cardShadow: '0 2px 14px rgba(0,0,0,.04)',
   topBarHeight: 44,
   sidebarWidth: 290,
   controlBarHeight: 56,

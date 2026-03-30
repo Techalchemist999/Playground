@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Topic Display Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; padding: 32px; }
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { color: #64748b; font-size: 13px; margin-bottom: 28px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1100px; margin: 0 auto; }
+  .card {
+    background: #fff; border-radius: 14px; border: 2px solid #e2e8f0; padding: 22px;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 2px 14px rgba(99,102,241,.07);
+  }
+  .card:hover { border-color: #a5b4fc; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,.12); }
+  .card.selected { border-color: #6366f1; background: #eef2ff; box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; margin-bottom: 6px; }
+  .card h2 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .card p { font-size: 12px; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
+  .preview { background: #f8fafc; border-radius: 10px; padding: 18px; min-height: 160px; overflow: hidden; position: relative; }
+
+  #result { display: none; max-width: 1100px; margin: 28px auto 0; background: #fff; border-radius: 14px; border: 2px solid #6366f1; padding: 20px; text-align: center; }
+  #result .label { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  #result .pick { font-size: 18px; font-weight: 800; margin-top: 4px; }
+
+  /* Category colours */
+  .cat-topic { --ring: #a5b4fc; --bg: #eef2ff; --text: #6366f1; }
+  .cat-bylaw { --ring: #fcd34d; --bg: #fefce8; --text: #ca8a04; }
+  .cat-location { --ring: #6ee7b7; --bg: #ecfdf5; --text: #059669; }
+  .cat-budget { --ring: #fcd34d; --bg: #fffbeb; --text: #d97706; }
+  .cat-policy { --ring: #f9a8d4; --bg: #fdf2f8; --text: #db2777; }
+  .cat-person { --ring: #cbd5e1; --bg: #f8fafc; --text: #64748b; }
+
+  /* ---- Option 1: Bubble Cloud ---- */
+  .bubble-cloud { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+  .bubble { border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; text-align: center; line-height: 1.2;
+    border: 3px solid var(--ring); background: var(--bg); color: var(--text);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--ring) 30%, transparent); }
+
+  /* ---- Option 2: Tag Wall ---- */
+  .tag-wall { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tw-pill { padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 600;
+    background: var(--bg); color: var(--text); border: 1.5px solid var(--ring);
+    display: flex; align-items: center; gap: 5px; }
+  .tw-pill .cnt { background: var(--ring); color: #fff; font-size: 9px; font-weight: 700;
+    width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+  /* ---- Option 3: Timeline Stream ---- */
+  .timeline { position: relative; padding-left: 20px; }
+  .timeline::before { content: ''; position: absolute; left: 5px; top: 0; bottom: 0; width: 2px; background: #e2e8f0; border-radius: 999px; }
+  .tl-item { position: relative; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+  .tl-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--ring); border: 2px solid var(--text);
+    position: absolute; left: -20px; top: 50%; transform: translateY(-50%); z-index: 1; }
+  .tl-card { background: #fff; border-radius: 8px; padding: 6px 12px; border: 1px solid #e2e8f0;
+    font-size: 11px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; flex: 1; }
+  .tl-time { font-size: 9px; color: #94a3b8; font-weight: 500; margin-left: auto; white-space: nowrap; }
+  .tl-cat { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+    background: var(--bg); padding: 1px 6px; border-radius: 4px; color: var(--text); }
+
+  /* ---- Option 4: Heat Grid ---- */
+  .heat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .heat-cell { border-radius: 8px; padding: 10px 8px; text-align: center; font-size: 10px; font-weight: 600;
+    border: 1.5px solid var(--ring); background: var(--bg); color: var(--text); position: relative; }
+  .heat-cell .hcount { font-size: 16px; font-weight: 800; display: block; margin-bottom: 2px; }
+  .heat-cell.hot { box-shadow: 0 0 16px color-mix(in srgb, var(--ring) 50%, transparent); }
+
+  /* ---- Option 5: Stacked Cards ---- */
+  .stack-fan { position: relative; height: 120px; display: flex; align-items: flex-end; justify-content: center; }
+  .fan-card { position: absolute; width: 130px; background: #fff; border-radius: 10px;
+    border: 2px solid var(--ring); padding: 10px; text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06); transition: transform .2s; }
+  .fan-card .fc-cat { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text); }
+  .fan-card .fc-name { font-size: 11px; font-weight: 700; margin-top: 2px; color: #0f172a; }
+  .fan-card .fc-mentions { font-size: 9px; color: #94a3b8; margin-top: 2px; }
+
+  /* ---- Option 6: Orbit Rings ---- */
+  .orbit-wrap { position: relative; width: 200px; height: 160px; margin: 0 auto; }
+  .orbit-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #818cf8);
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 700;
+    text-align: center; line-height: 1.2; z-index: 2; box-shadow: 0 0 20px rgba(99,102,241,.25); }
+  .orbit-ring { position: absolute; top: 50%; left: 50%; border: 1.5px dashed #e2e8f0; border-radius: 50%;
+    transform: translate(-50%, -50%); }
+  .orbit-dot { position: absolute; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 7px; font-weight: 700; color: var(--text);
+    background: var(--bg); border: 2px solid var(--ring); z-index: 3;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+</style>
+</head>
+<body>
+
+<div style="max-width:1100px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>Topic Display</h1>
+  <p class="subtitle">Choose how detected topics appear in the topic panel. Click to select.</p>
+</div>
+
+<div class="grid">
+
+  <!-- OPTION 1: Bubble Cloud -->
+  <div class="card" onclick="select(this,'bubble-cloud')">
+    <div class="tag">OPTION 1</div>
+    <h2>Bubble Cloud</h2>
+    <p>Floating circles that grow with mentions. Organic and visual — size tells the story at a glance.</p>
+    <div class="preview">
+      <div class="bubble-cloud">
+        <div class="bubble cat-bylaw" style="width:72px;height:72px;">Bylaw 1021</div>
+        <div class="bubble cat-budget" style="width:58px;height:58px;">Water<br>Rates</div>
+        <div class="bubble cat-location" style="width:48px;height:48px;">Pine<br>Ave</div>
+        <div class="bubble cat-policy" style="width:64px;height:64px;">Zoning</div>
+        <div class="bubble cat-person" style="width:42px;height:42px;">CAO</div>
+        <div class="bubble cat-topic" style="width:54px;height:54px;">Roads</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 2: Tag Wall -->
+  <div class="card" onclick="select(this,'tag-wall')">
+    <div class="tag">OPTION 2</div>
+    <h2>Tag Wall</h2>
+    <p>Flat pill tags grouped by category. Compact, scannable, and fits lots of topics in a small space.</p>
+    <div class="preview">
+      <div class="tag-wall">
+        <div class="tw-pill cat-bylaw">Bylaw 1021 <span class="cnt">5</span></div>
+        <div class="tw-pill cat-budget">Water Rates <span class="cnt">3</span></div>
+        <div class="tw-pill cat-policy">Zoning <span class="cnt">4</span></div>
+        <div class="tw-pill cat-location">Pine Ave <span class="cnt">2</span></div>
+        <div class="tw-pill cat-topic">Roads <span class="cnt">3</span></div>
+        <div class="tw-pill cat-person">CAO <span class="cnt">1</span></div>
+        <div class="tw-pill cat-topic">Drainage <span class="cnt">2</span></div>
+        <div class="tw-pill cat-budget">Grants <span class="cnt">1</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 3: Timeline Stream -->
+  <div class="card" onclick="select(this,'timeline-stream')">
+    <div class="tag">OPTION 3</div>
+    <h2>Timeline Stream</h2>
+    <p>Topics appear chronologically as they're detected. Shows the meeting's narrative flow over time.</p>
+    <div class="preview">
+      <div class="timeline">
+        <div class="tl-item cat-bylaw"><div class="tl-dot"></div><div class="tl-card"><span class="tl-cat">BYLAW</span> Bylaw 1021 <span class="tl-time">7:02 PM</span></div></div>
+        <div class="tl-item cat-budget"><div class="tl-dot"></div><div class="tl-card"><span class="tl-cat">BUDGET</span> Water Rates <span class="tl-time">7:08 PM</span></div></div>
+        <div class="tl-item cat-policy"><div class="tl-dot"></div><div class="tl-card"><span class="tl-cat">POLICY</span> Zoning <span class="tl-time">7:15 PM</span></div></div>
+        <div class="tl-item cat-location"><div class="tl-dot"></div><div class="tl-card"><span class="tl-cat">LOCATION</span> Pine Ave <span class="tl-time">7:22 PM</span></div></div>
+        <div class="tl-item cat-topic"><div class="tl-dot"></div><div class="tl-card"><span class="tl-cat">TOPIC</span> Roads <span class="tl-time">7:31 PM</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 4: Heat Grid -->
+  <div class="card" onclick="select(this,'heat-grid')">
+    <div class="tag">OPTION 4</div>
+    <h2>Heat Grid</h2>
+    <p>Grid tiles that glow brighter with more mentions. Hot topics literally light up — you can't miss them.</p>
+    <div class="preview">
+      <div class="heat-grid">
+        <div class="heat-cell cat-bylaw hot"><span class="hcount">5</span>Bylaw 1021</div>
+        <div class="heat-cell cat-policy hot"><span class="hcount">4</span>Zoning</div>
+        <div class="heat-cell cat-budget"><span class="hcount">3</span>Water Rates</div>
+        <div class="heat-cell cat-topic"><span class="hcount">3</span>Roads</div>
+        <div class="heat-cell cat-location"><span class="hcount">2</span>Pine Ave</div>
+        <div class="heat-cell cat-topic"><span class="hcount">2</span>Drainage</div>
+        <div class="heat-cell cat-person"><span class="hcount">1</span>CAO</div>
+        <div class="heat-cell cat-budget"><span class="hcount">1</span>Grants</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 5: Stacked Cards -->
+  <div class="card" onclick="select(this,'stacked-cards')">
+    <div class="tag">OPTION 5</div>
+    <h2>Stacked Cards</h2>
+    <p>Overlapping cards that fan out. The most-mentioned topic sits on top. Hover to peek at the stack beneath.</p>
+    <div class="preview">
+      <div class="stack-fan">
+        <div class="fan-card cat-person" style="transform: rotate(-8deg) translateX(-60px); bottom: 0; z-index:1;">
+          <div class="fc-cat">PERSON</div><div class="fc-name">CAO</div><div class="fc-mentions">1 mention</div>
+        </div>
+        <div class="fan-card cat-location" style="transform: rotate(-3deg) translateX(-20px); bottom: 5px; z-index:2;">
+          <div class="fc-cat">LOCATION</div><div class="fc-name">Pine Ave</div><div class="fc-mentions">2 mentions</div>
+        </div>
+        <div class="fan-card cat-policy" style="transform: rotate(2deg) translateX(20px); bottom: 5px; z-index:3;">
+          <div class="fc-cat">POLICY</div><div class="fc-name">Zoning</div><div class="fc-mentions">4 mentions</div>
+        </div>
+        <div class="fan-card cat-bylaw" style="transform: rotate(0deg) translateX(0); bottom: 15px; z-index:4;">
+          <div class="fc-cat">BYLAW</div><div class="fc-name">Bylaw 1021</div><div class="fc-mentions">5 mentions</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 6: Orbit Rings -->
+  <div class="card" onclick="select(this,'orbit-rings')">
+    <div class="tag">OPTION 6</div>
+    <h2>Orbit Rings</h2>
+    <p>Topics orbit around the active agenda item like planets. Closer orbit = more mentions. Spatial and dynamic.</p>
+    <div class="preview">
+      <div class="orbit-wrap">
+        <div class="orbit-ring" style="width:160px;height:130px;"></div>
+        <div class="orbit-ring" style="width:110px;height:90px;"></div>
+        <div class="orbit-center">Active<br>Item</div>
+        <div class="orbit-dot cat-bylaw" style="top:8px;left:75px;">Bylaw</div>
+        <div class="orbit-dot cat-budget" style="top:35px;left:155px;">Rates</div>
+        <div class="orbit-dot cat-policy" style="top:100px;left:148px;">Zoning</div>
+        <div class="orbit-dot cat-location" style="top:115px;left:30px;">Pine</div>
+        <div class="orbit-dot cat-topic" style="top:30px;left:10px;">Roads</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const names = {
+  'bubble-cloud': 'Bubble Cloud',
+  'tag-wall': 'Tag Wall',
+  'timeline-stream': 'Timeline Stream',
+  'heat-grid': 'Heat Grid',
+  'stacked-cards': 'Stacked Cards',
+  'orbit-rings': 'Orbit Rings'
+};
+function select(el, id) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('pick-text').textContent = names[id];
+}
+</script>
+</body>
+</html>

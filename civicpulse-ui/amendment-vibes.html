@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Amendment Flow Design Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; background: linear-gradient(135deg, #6366f1, #4f46e5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #64748b; font-size: 12px; margin-bottom: 24px; line-height: 1.6; }
+  .specs { display: flex; flex-direction: column; gap: 28px; max-width: 1050px; margin: 0 auto; }
+  .sw { background: #fff; border-radius: 16px; border: 2px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 14px rgba(99,102,241,.07); cursor: pointer; transition: all .3s; }
+  .sw:hover { border-color: #a5b4fc; box-shadow: 0 6px 24px rgba(99,102,241,.12); transform: translateY(-2px); }
+  .sw.selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+  .sh { padding: 12px 18px 10px; display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid #f1f5f9; }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  .sh h2 { font-size: 14px; font-weight: 700; }
+  .sh p { font-size: 10px; color: #94a3b8; margin-left: auto; font-style: italic; }
+
+  /* 3-stage flow area */
+  .flow { padding: 16px; background: #f8fafc; display: flex; gap: 10px; overflow-x: auto; }
+  .flow-stage { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 4px; }
+  .flow-label { font-size: 8px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; text-align: center; padding: 3px 8px; border-radius: 999px; align-self: center; margin-bottom: 4px; }
+  .fl-1 { background: #eef2ff; color: #6366f1; border: 1px solid #c7d2fe; }
+  .fl-2 { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .fl-3 { background: #f0fdf4; color: #22c55e; border: 1px solid #bbf7d0; }
+  .flow-arrow { display: flex; align-items: center; justify-content: center; font-size: 18px; color: #cbd5e1; flex-shrink: 0; min-width: 20px; padding-top: 20px; }
+
+  /* Card shell */
+  .card { border-radius: 10px; overflow: hidden; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 6px rgba(0,0,0,.03); }
+  .card.dimmed { opacity: .45; }
+  .card.focus { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,.15), 0 2px 10px rgba(245,158,11,.08); }
+  .card.done { border-color: #bbf7d0; }
+  .tb { height: 3px; }
+  .tb.blue { background: linear-gradient(90deg, #6366f1, #6366f155, transparent); }
+  .tb.amber { background: linear-gradient(90deg, #f59e0b, #fbbf2455, transparent); }
+  .tb.green { background: linear-gradient(90deg, #22c55e, #22c55e55, transparent); }
+  .ch { padding: 8px 10px 0; }
+  .cm { font-size: 6px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #94a3b8; margin-bottom: 2px; }
+  .cr { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; margin-bottom: 6px; }
+  .ct { font-size: 10px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+  .cb { font-size: 6px; font-weight: 700; padding: 2px 6px; border-radius: 999px; white-space: nowrap; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .cb .cd { width: 4px; height: 4px; border-radius: 50%; }
+  .cb.vote { background: #fffbeb; border: 1px solid #fde68a; color: #b45309; } .cb.vote .cd { background: #f59e0b; animation: pulse 1.5s infinite; }
+  .cb.carried { background: #f0fdf4; border: 1px solid #bbf7d0; color: #22c55e; } .cb.carried .cd { background: #22c55e; }
+  .cb.paused { background: #f1f5f9; border: 1px solid #e2e8f0; color: #94a3b8; } .cb.paused .cd { background: #94a3b8; }
+  .cb.amend { background: #fffbeb; border: 1px solid #fde68a; color: #d97706; } .cb.amend .cd { background: #f59e0b; animation: pulse 1.5s infinite; }
+  .cq { font-size: 9px; color: #334155; border-left: 2px solid; padding: 5px 8px; margin: 0 10px 6px; border-radius: 0 6px 6px 0; line-height: 1.6; }
+  .cq.blue { border-color: #6366f1; background: #f8fafc; }
+  .cq.amber { border-color: #f59e0b; background: #fefce8; color: #92400e; }
+  .cq.green { border-color: #22c55e; background: #f0fdf4; }
+  .cq.grey { border-color: #e2e8f0; background: #f8fafc; color: #94a3b8; }
+  .ctl { display: flex; gap: 3px; padding: 0 10px 6px; }
+  .cti { flex: 1; border-radius: 5px; padding: 3px 6px; }
+  .cti-l { font-size: 5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+  .cti-n { font-size: 8px; font-weight: 700; }
+  .cti.mv { background: #eef2ff; border: 1px solid #c7d2fe; } .cti.mv .cti-l { color: #6366f1; } .cti.mv .cti-n { color: #4f46e5; }
+  .cti.sc { background: #f0fdf4; border: 1px solid #bbf7d0; } .cti.sc .cti-l { color: #22c55e; } .cti.sc .cti-n { color: #0f172a; }
+  .cti.amv { background: #fffbeb; border: 1px solid #fde68a; } .cti.amv .cti-l { color: #d97706; } .cti.amv .cti-n { color: #92400e; }
+
+  /* Vote orbs */
+  .cv { display: flex; gap: 4px; justify-content: center; padding: 4px 10px 8px; }
+  .vo { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; position: relative; }
+  .vo::before { content: ''; position: absolute; top: 2px; left: 4px; width: 7px; height: 3px; border-radius: 50%; background: rgba(255,255,255,.5); }
+  .vo.y { background: linear-gradient(135deg, #dcfce7, #bbf7d0aa); border: 1px solid #86efac; color: #16a34a; }
+  .vo.n { background: linear-gradient(135deg, #fee2e2, #fecacaaa); border: 1px solid #fca5a5; color: #dc2626; }
+  .vo.w { background: #f1f5f9; border: 1px dashed #cbd5e1; color: #94a3b8; font-size: 7px; }
+  .vn { font-size: 5px; color: #94a3b8; text-align: center; margin-top: 1px; }
+
+  /* Status indicator between stages */
+  .status-line { text-align: center; font-size: 7px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; padding: 2px 0; }
+  .status-line.active { color: #f59e0b; }
+  .status-line.done { color: #22c55e; }
+  .status-line.paused { color: #94a3b8; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  #result { display: none; max-width: 1050px; margin: 24px auto 0; background: #fff; border-radius: 16px; border: 2px solid #6366f1; padding: 18px; text-align: center; }
+  #result .label { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  #result .pick { font-size: 18px; font-weight: 800; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div style="max-width:1050px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>Amendment Flow — 10 Options</h1>
+  <p class="subtitle">Each shows the 3-stage lifecycle: <strong>Stage 1</strong> — main motion on the floor, amendment proposed (focus shifts). <strong>Stage 2</strong> — amendment debated & voted on (main motion paused). <strong>Stage 3</strong> — return to main motion in its final form for the final vote.</p>
+</div>
+
+<div class="specs">
+
+<!-- ===== 1: NESTED INDENT ===== -->
+<div class="sw" onclick="select(this,'v1')">
+  <div class="sh"><span class="tag">01</span><h2>Nested Indent</h2><p>Amendment nests inside the main motion card as an indented amber block</p></div>
+  <div class="flow">
+    <!-- Stage 1: Amendment proposed -->
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 1 — Amendment Proposed</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Motion · Item 5</div><div class="cr"><div class="ct">Bylaw 1021 — Third Reading</div><div class="cb amend"><div class="cd"></div>AMENDMENT</div></div></div>
+        <div class="cq blue">THAT Council adopts Bylaw 1021 as presented.</div>
+        <div style="margin:0 10px 6px;padding:7px 9px;background:#fefce8;border:1.5px solid #fde68a;border-left:3px solid #f59e0b;border-radius:0 7px 7px 0;">
+          <div style="font-size:6px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#d97706;margin-bottom:2px;">&#9998; Amendment — Focus here</div>
+          <div style="font-size:9px;color:#92400e;line-height:1.6;">"...with the addition of section 14 regarding public consultation."</div>
+          <div style="font-size:8px;color:#b45309;margin-top:3px;font-weight:600;">Moved: Cllr Wall · Sec'd: Cllr Johnston</div>
+        </div>
+        <div class="status-line active">&#9679; Debating amendment first</div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <!-- Stage 2: Vote on amendment -->
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 2 — Vote on Amendment</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment Vote · Item 5</div><div class="cr"><div class="ct" style="color:#92400e;">Amendment to Bylaw 1021</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="cq amber">"...with the addition of section 14 regarding public consultation."</div>
+        <div class="ctl"><div class="cti amv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Wall</div></div><div class="cti amv"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Johnston</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+        <div class="status-line active">&#9679; Main motion paused until decided</div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <!-- Stage 3: Return to amended main motion -->
+    <div class="flow-stage">
+      <div class="flow-label fl-3">Stage 3 — Final Vote (Amended)</div>
+      <div class="card done">
+        <div class="tb green"></div>
+        <div class="ch"><div class="cm">Motion · Item 5 (as amended)</div><div class="cr"><div class="ct">Bylaw 1021 — Third Reading</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="cq green">THAT Council adopts Bylaw 1021 <strong>with the addition of section 14 regarding public consultation.</strong></div>
+        <div style="margin:0 10px 4px;font-size:7px;color:#22c55e;font-weight:600;display:flex;align-items:center;gap:3px;">
+          <span style="background:#f0fdf4;padding:1px 5px;border-radius:3px;border:1px solid #bbf7d0;">&#10003; Amendment carried 3-1</span>
+        </div>
+        <div class="ctl"><div class="cti mv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Rabel</div></div><div class="cti sc"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Wall</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 2: STACKED SUB-CARD ===== -->
+<div class="sw" onclick="select(this,'v2')">
+  <div class="sh"><span class="tag">02</span><h2>Stacked Sub-Card</h2><p>Amendment is a separate card that slides on top, main motion dimmed behind</p></div>
+  <div class="flow">
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 1 — Amendment Proposed</div>
+      <div class="card dimmed" style="margin-bottom:4px;">
+        <div class="tb blue"></div>
+        <div class="ch"><div class="cm">Motion · Item 5</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb paused"><div class="cd"></div>PAUSED</div></div></div>
+        <div class="cq grey">THAT Council adopts Bylaw 1021 as presented.</div>
+      </div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment · Item 5</div><div class="cr"><div class="ct" style="color:#92400e;">Add section 14</div><div class="cb amend"><div class="cd"></div>ON THE FLOOR</div></div></div>
+        <div class="cq amber">"...with the addition of section 14 regarding public consultation."</div>
+        <div class="ctl"><div class="cti amv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Wall</div></div><div class="cti amv"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Johnston</div></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 2 — Vote on Amendment</div>
+      <div class="card dimmed" style="margin-bottom:4px;">
+        <div class="tb blue"></div>
+        <div class="ch"><div class="cm">Motion · Item 5</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb paused"><div class="cd"></div>PAUSED</div></div></div>
+      </div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment Vote</div><div class="cr"><div class="ct" style="color:#92400e;">Add section 14</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Woodill</div></div></div>
+        <div style="text-align:center;padding:0 0 6px;"><span style="font-size:7px;font-weight:700;color:#22c55e;background:#f0fdf4;padding:2px 8px;border-radius:999px;border:1px solid #bbf7d0;">CARRIED 4-1</span></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-3">Stage 3 — Final Vote (Amended)</div>
+      <div class="card done">
+        <div class="tb green"></div>
+        <div class="ch"><div class="cm">Motion · Item 5 (as amended)</div><div class="cr"><div class="ct">Bylaw 1021 — Third Reading</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="cq green">THAT Council adopts Bylaw 1021 <strong>with the addition of section 14 regarding public consultation.</strong></div>
+        <div class="ctl"><div class="cti mv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Rabel</div></div><div class="cti sc"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Wall</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3: INLINE REDLINE ===== -->
+<div class="sw" onclick="select(this,'v3')">
+  <div class="sh"><span class="tag">03</span><h2>Inline Redline</h2><p>Struck-through original + highlighted insertion right in the quote text</p></div>
+  <div class="flow">
+    <div class="flow-stage">
+      <div class="flow-label fl-1">Stage 1 — Main Motion</div>
+      <div class="card"><div class="tb blue"></div><div class="ch"><div class="cm">Motion · Item 5</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb vote"><div class="cd"></div>ON THE FLOOR</div></div></div><div class="cq blue">THAT Council adopts Bylaw 1021 as presented.</div><div class="ctl"><div class="cti mv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Rabel</div></div><div class="cti sc"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Wall</div></div></div></div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 2 — Amendment Vote</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment Vote · Item 5</div><div class="cr"><div class="ct" style="color:#92400e;">Amending Bylaw 1021</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div style="margin:0 10px 6px;padding:6px 9px;background:#f8fafc;border-left:3px solid #6366f1;border-radius:0 6px 6px 0;">
+          <div style="font-size:9px;color:#334155;line-height:1.8;">THAT Council adopts Bylaw 1021 <span style="text-decoration:line-through;color:#dc2626;opacity:.5;">as presented.</span> <span style="background:#fefce8;color:#92400e;padding:1px 4px;border-radius:3px;border:1px solid #fde68a;font-weight:600;">with the addition of section 14 regarding public consultation.</span> <span style="font-size:6px;font-weight:700;color:#d97706;background:#fffbeb;padding:1px 4px;border-radius:3px;vertical-align:middle;">&#9998; AMEND</span></div>
+        </div>
+        <div class="ctl"><div class="cti amv"><div class="cti-l">Amend By</div><div class="cti-n">Cllr Wall</div></div><div class="cti amv"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Johnston</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-3">Stage 3 — Final Vote</div>
+      <div class="card done"><div class="tb green"></div><div class="ch"><div class="cm">Motion · Item 5 (as amended)</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div><div class="cq green">THAT Council adopts Bylaw 1021 <strong>with the addition of section 14 regarding public consultation.</strong></div><div class="ctl"><div class="cti mv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Rabel</div></div><div class="cti sc"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Wall</div></div></div><div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4: TIMELINE THREAD ===== -->
+<div class="sw" onclick="select(this,'v4')">
+  <div class="sh"><span class="tag">04</span><h2>Timeline Thread</h2><p>Vertical timeline inside the card showing motion → amendment → result progression</p></div>
+  <div class="flow">
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 1 — Amendment On Floor</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Motion · Item 5</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb amend"><div class="cd"></div>AMENDMENT</div></div></div>
+        <div style="margin:0 10px 8px;padding-left:14px;position:relative;">
+          <div style="position:absolute;left:5px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#6366f1,#f59e0b);border-radius:1px;"></div>
+          <div style="position:relative;margin-bottom:8px;padding-left:10px;">
+            <div style="position:absolute;left:-14px;top:3px;width:10px;height:10px;border-radius:50%;background:#eef2ff;border:2px solid #6366f1;"></div>
+            <div style="font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#94a3b8;">Main Motion</div>
+            <div style="font-size:9px;color:#94a3b8;line-height:1.5;text-decoration:line-through;">THAT Council adopts Bylaw 1021 as presented.</div>
+          </div>
+          <div style="position:relative;padding-left:10px;">
+            <div style="position:absolute;left:-14px;top:3px;width:10px;height:10px;border-radius:50%;background:#fefce8;border:2px solid #f59e0b;"></div>
+            <div style="font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#d97706;">&#9998; Amendment — Debating Now</div>
+            <div style="font-size:9px;color:#92400e;line-height:1.5;background:#fefce8;padding:4px 7px;border-radius:5px;border:1px solid #fde68a;">"...with section 14 regarding public consultation."</div>
+            <div style="font-size:7px;color:#b45309;margin-top:2px;font-weight:600;">Cllr Wall · Sec'd Cllr Johnston</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 2 — Amendment Vote</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment Vote · Item 5</div><div class="cr"><div class="ct" style="color:#92400e;">Add section 14</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="cq amber">"...with the addition of section 14 regarding public consultation."</div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Woodill</div></div></div>
+        <div style="text-align:center;padding:0 0 6px;"><span style="font-size:7px;font-weight:700;color:#22c55e;background:#f0fdf4;padding:2px 8px;border-radius:999px;border:1px solid #bbf7d0;">CARRIED 4-1</span></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-3">Stage 3 — Final Vote</div>
+      <div class="card done">
+        <div class="tb green"></div>
+        <div class="ch"><div class="cm">Motion · Item 5 (as amended)</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div style="margin:0 10px 8px;padding-left:14px;position:relative;">
+          <div style="position:absolute;left:5px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#94a3b8,#22c55e);border-radius:1px;"></div>
+          <div style="position:relative;margin-bottom:6px;padding-left:10px;">
+            <div style="position:absolute;left:-14px;top:3px;width:10px;height:10px;border-radius:50%;background:#f0fdf4;border:2px solid #22c55e;"></div>
+            <div style="font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#22c55e;">&#10003; Amendment Carried</div>
+          </div>
+          <div style="position:relative;padding-left:10px;">
+            <div style="position:absolute;left:-14px;top:3px;width:10px;height:10px;border-radius:50%;background:#eef2ff;border:2px solid #6366f1;"></div>
+            <div style="font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#6366f1;">Final Motion</div>
+            <div style="font-size:9px;color:#334155;line-height:1.5;">THAT Council adopts Bylaw 1021 <strong>with section 14 re: public consultation.</strong></div>
+          </div>
+        </div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 5: PILL CHAIN ===== -->
+<div class="sw" onclick="select(this,'v5')">
+  <div class="sh"><span class="tag">05</span><h2>Pill Chain</h2><p>Clickable pills at top: Motion → Amend #1 — active one shown below</p></div>
+  <div class="flow">
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 1 — Focus on Amendment</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Motion · Item 5</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb amend"><div class="cd"></div>AMENDMENT</div></div></div>
+        <div style="display:flex;gap:4px;padding:0 10px 6px;align-items:center;flex-wrap:wrap;">
+          <span style="padding:3px 8px;border-radius:999px;font-size:7px;font-weight:700;background:#f1f5f9;border:1px solid #e2e8f0;color:#94a3b8;">Main Motion</span>
+          <span style="color:#cbd5e1;font-size:10px;">→</span>
+          <span style="padding:3px 8px;border-radius:999px;font-size:7px;font-weight:700;background:#fffbeb;border:1.5px solid #f59e0b;color:#d97706;box-shadow:0 0 0 2px rgba(245,158,11,.12);">&#9998; Amendment #1 &#9679;</span>
+        </div>
+        <div class="cq amber">"...with the addition of section 14 regarding public consultation."</div>
+        <div class="ctl"><div class="cti amv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Wall</div></div><div class="cti amv"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Johnston</div></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 2 — Amendment Vote</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment Vote</div><div class="cr"><div class="ct" style="color:#92400e;">Amendment #1</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div style="display:flex;gap:4px;padding:0 10px 6px;align-items:center;">
+          <span style="padding:3px 8px;border-radius:999px;font-size:7px;font-weight:700;background:#f1f5f9;border:1px solid #e2e8f0;color:#94a3b8;">Main ⏸</span>
+          <span style="color:#cbd5e1;font-size:10px;">→</span>
+          <span style="padding:3px 8px;border-radius:999px;font-size:7px;font-weight:700;background:#fffbeb;border:1.5px solid #f59e0b;color:#d97706;">&#9998; #1 Voting...</span>
+        </div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-3">Stage 3 — Final Vote</div>
+      <div class="card done">
+        <div class="tb green"></div>
+        <div class="ch"><div class="cm">Motion · Item 5 (as amended)</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div style="display:flex;gap:4px;padding:0 10px 6px;align-items:center;">
+          <span style="padding:3px 8px;border-radius:999px;font-size:7px;font-weight:700;background:#eef2ff;border:1.5px solid #6366f1;color:#6366f1;box-shadow:0 0 0 2px rgba(99,102,241,.12);">Main Motion &#9679;</span>
+          <span style="color:#cbd5e1;font-size:10px;">→</span>
+          <span style="padding:3px 8px;border-radius:999px;font-size:7px;font-weight:700;background:#f0fdf4;border:1px solid #bbf7d0;color:#22c55e;">&#10003; #1 Carried</span>
+        </div>
+        <div class="cq green">THAT Council adopts Bylaw 1021 <strong>with section 14 re: public consultation.</strong></div>
+        <div class="ctl"><div class="cti mv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Rabel</div></div><div class="cti sc"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Wall</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6: DEFEATED AMENDMENT (shows what happens when amendment fails) ===== -->
+<div class="sw" onclick="select(this,'v6')">
+  <div class="sh"><span class="tag">06</span><h2>Defeated Amendment</h2><p>What it looks like when the amendment is voted down — motion returns unchanged</p></div>
+  <div class="flow">
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 1 — Amendment Proposed</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment · Item 5</div><div class="cr"><div class="ct" style="color:#92400e;">Add section 14</div><div class="cb amend"><div class="cd"></div>ON THE FLOOR</div></div></div>
+        <div class="cq amber">"...with the addition of section 14 regarding public consultation."</div>
+        <div class="ctl"><div class="cti amv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Wall</div></div><div class="cti amv"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Johnston</div></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 2 — Amendment Defeated</div>
+      <div class="card" style="border-color:#fecaca;">
+        <div class="tb" style="background:linear-gradient(90deg,#dc2626,#dc262655,transparent);"></div>
+        <div class="ch"><div class="cm">Amendment Vote · Item 5</div><div class="cr"><div class="ct" style="color:#dc2626;">Add section 14</div><div class="cb" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;"><div class="cd" style="background:#dc2626;"></div>DEFEATED 2-3</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-3">Stage 3 — Original Unchanged</div>
+      <div class="card">
+        <div class="tb blue"></div>
+        <div class="ch"><div class="cm">Motion · Item 5 (unchanged)</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="cq blue">THAT Council adopts Bylaw 1021 as presented.</div>
+        <div style="margin:0 10px 4px;"><span style="font-size:6px;font-weight:700;color:#dc2626;background:#fef2f2;padding:1px 5px;border-radius:3px;border:1px solid #fecaca;">&#10007; Amendment defeated — original text restored</span></div>
+        <div class="ctl"><div class="cti mv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Rabel</div></div><div class="cti sc"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Wall</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 7: SIDE-BY-SIDE ===== -->
+<div class="sw" onclick="select(this,'v7')">
+  <div class="sh"><span class="tag">07</span><h2>Side-by-Side Compare</h2><p>Original vs amended in two columns during the amendment phase</p></div>
+  <div class="flow">
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 1 — Compare View</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Motion · Item 5</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb amend"><div class="cd"></div>AMENDMENT</div></div></div>
+        <div style="display:flex;gap:4px;margin:0 10px 6px;">
+          <div style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:5px 7px;">
+            <div style="font-size:5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:2px;">Original</div>
+            <div style="font-size:8px;color:#94a3b8;line-height:1.5;text-decoration:line-through;">...adopts Bylaw 1021 as presented.</div>
+          </div>
+          <div style="flex:1;background:#fefce8;border:1.5px solid #fde68a;border-radius:6px;padding:5px 7px;">
+            <div style="font-size:5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#d97706;margin-bottom:2px;">&#9998; Proposed</div>
+            <div style="font-size:8px;color:#92400e;line-height:1.5;">...adopts Bylaw 1021 <strong>with section 14 re: public consultation.</strong></div>
+          </div>
+        </div>
+        <div class="ctl"><div class="cti amv"><div class="cti-l">Amend By</div><div class="cti-n">Cllr Wall</div></div><div class="cti amv"><div class="cti-l">Sec'd By</div><div class="cti-n">Cllr Johnston</div></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 2 — Amendment Vote</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment Vote</div><div class="cr"><div class="ct" style="color:#92400e;">Add section 14</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Woodill</div></div></div>
+        <div style="text-align:center;padding:0 0 6px;"><span style="font-size:7px;font-weight:700;color:#22c55e;background:#f0fdf4;padding:2px 8px;border-radius:999px;border:1px solid #bbf7d0;">CARRIED 4-1</span></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-3">Stage 3 — Final Vote</div>
+      <div class="card done"><div class="tb green"></div><div class="ch"><div class="cm">Motion (as amended)</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div><div class="cq green">THAT Council adopts Bylaw 1021 <strong>with section 14 re: public consultation.</strong></div><div class="ctl"><div class="cti mv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Rabel</div></div><div class="cti sc"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Wall</div></div></div><div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 8: TAB SWITCH ===== -->
+<div class="sw" onclick="select(this,'v8')">
+  <div class="sh"><span class="tag">08</span><h2>Tab Switch</h2><p>Tabs toggle between "Main Motion" and "Amendment #1" — active tab highlighted</p></div>
+  <div class="flow">
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 1 — Amendment Tab Active</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Motion · Item 5</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb amend"><div class="cd"></div>AMENDMENT</div></div></div>
+        <div style="margin:0 10px 6px;">
+          <div style="display:flex;background:#f1f5f9;border-radius:6px 6px 0 0;padding:2px;">
+            <span style="padding:4px 10px;font-size:7px;font-weight:700;border-radius:4px;color:#94a3b8;">Main Motion</span>
+            <span style="padding:4px 10px;font-size:7px;font-weight:700;border-radius:4px;background:#fff;color:#d97706;box-shadow:0 1px 3px rgba(0,0,0,.06);">&#9998; Amendment #1</span>
+          </div>
+          <div style="padding:8px 10px;border:1.5px solid #fde68a;border-top:none;border-radius:0 0 6px 6px;background:#fefce8;">
+            <div style="font-size:10px;color:#92400e;line-height:1.6;">THAT Council adopts Bylaw 1021 <strong>with the addition of section 14 regarding public consultation.</strong></div>
+            <div style="font-size:8px;color:#b45309;margin-top:4px;font-weight:600;">Moved: Cllr Wall · Sec'd: Cllr Johnston</div>
+          </div>
+        </div>
+        <div class="status-line active">&#9679; Vote on amendment before main motion</div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 2 — Amendment Vote</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment Vote</div><div class="cr"><div class="ct" style="color:#92400e;">Amendment #1</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="cq amber">"...with section 14 regarding public consultation."</div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-3">Stage 3 — Main Motion Tab (Amended)</div>
+      <div class="card done">
+        <div class="tb green"></div>
+        <div class="ch"><div class="cm">Motion (as amended)</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div style="margin:0 10px 6px;">
+          <div style="display:flex;background:#f1f5f9;border-radius:6px 6px 0 0;padding:2px;">
+            <span style="padding:4px 10px;font-size:7px;font-weight:700;border-radius:4px;background:#fff;color:#6366f1;box-shadow:0 1px 3px rgba(0,0,0,.06);">Main Motion</span>
+            <span style="padding:4px 10px;font-size:7px;font-weight:700;border-radius:4px;color:#22c55e;">&#10003; #1 Carried</span>
+          </div>
+          <div style="padding:8px 10px;border:1.5px solid #bbf7d0;border-top:none;border-radius:0 0 6px 6px;background:#f0fdf4;">
+            <div style="font-size:10px;color:#334155;line-height:1.6;">THAT Council adopts Bylaw 1021 <strong>with section 14 re: public consultation.</strong></div>
+          </div>
+        </div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 9: ACCORDION EXPAND ===== -->
+<div class="sw" onclick="select(this,'v9')">
+  <div class="sh"><span class="tag">09</span><h2>Accordion Expand</h2><p>Amendment lives as a collapsible amber section inside the motion card</p></div>
+  <div class="flow">
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 1 — Expanded</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Motion · Item 5</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb amend"><div class="cd"></div>AMENDMENT</div></div></div>
+        <div class="cq blue" style="opacity:.5;">THAT Council adopts Bylaw 1021 as presented.</div>
+        <div style="margin:0 10px 6px;border:1.5px solid #fde68a;border-radius:8px;overflow:hidden;">
+          <div style="padding:6px 10px;background:#fffbeb;display:flex;align-items:center;gap:6px;border-bottom:1px solid #fde68a;">
+            <span style="font-size:10px;color:#d97706;">&#9660;</span>
+            <span style="font-size:8px;font-weight:700;color:#d97706;flex:1;">Amendment #1 — Cllr Wall</span>
+            <span style="font-size:6px;font-weight:700;padding:1px 5px;border-radius:999px;background:#fef3c7;color:#b45309;">DEBATING</span>
+          </div>
+          <div style="padding:8px 10px;background:#fefce8;">
+            <div style="font-size:9px;color:#92400e;line-height:1.6;">"...with the addition of section 14 regarding public consultation."</div>
+            <div style="display:flex;gap:4px;margin-top:6px;">
+              <div style="flex:1;background:#fff;border:1px solid #fde68a;border-radius:5px;padding:3px 6px;"><div style="font-size:5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#d97706;">Moved</div><div style="font-size:8px;font-weight:700;color:#92400e;">Cllr Wall</div></div>
+              <div style="flex:1;background:#fff;border:1px solid #fde68a;border-radius:5px;padding:3px 6px;"><div style="font-size:5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#d97706;">Sec'd</div><div style="font-size:8px;font-weight:700;color:#92400e;">Cllr Johnston</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Stage 2 — Amendment Vote</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment Vote</div><div class="cr"><div class="ct" style="color:#92400e;">Amendment #1</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="cq amber">"...with section 14 regarding public consultation."</div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo n">✗</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Woodill</div></div></div>
+        <div style="text-align:center;padding:0 0 6px;"><span style="font-size:7px;font-weight:700;color:#22c55e;background:#f0fdf4;padding:2px 8px;border-radius:999px;border:1px solid #bbf7d0;">CARRIED 4-1</span></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-3">Stage 3 — Collapsed, Final Vote</div>
+      <div class="card done">
+        <div class="tb green"></div>
+        <div class="ch"><div class="cm">Motion (as amended)</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="cq green">THAT Council adopts Bylaw 1021 <strong>with section 14 re: public consultation.</strong></div>
+        <div style="margin:0 10px 6px;padding:5px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;display:flex;align-items:center;gap:5px;">
+          <span style="font-size:9px;color:#22c55e;">&#9654;</span>
+          <span style="font-size:8px;font-weight:700;color:#22c55e;">&#10003; Amendment #1 — Carried 4-1</span>
+        </div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 10: MULTIPLE AMENDMENTS ===== -->
+<div class="sw" onclick="select(this,'v10')">
+  <div class="sh"><span class="tag">10</span><h2>Multiple Amendments</h2><p>Shows how 2+ amendments chain — each handled in order before final vote</p></div>
+  <div class="flow">
+    <div class="flow-stage">
+      <div class="flow-label fl-2">Amendment #1 — Carried</div>
+      <div class="card" style="border-color:#bbf7d0;margin-bottom:4px;">
+        <div class="tb" style="background:linear-gradient(90deg,#22c55e,transparent);"></div>
+        <div class="ch"><div class="cm">Amendment #1</div><div class="cr"><div class="ct" style="font-size:9px;">Add section 14</div><div class="cb carried"><div class="cd"></div>CARRIED 4-1</div></div></div>
+        <div class="cv" style="padding:2px 10px 6px;"><div style="text-align:center"><div class="vo y" style="width:16px;height:16px;font-size:7px;">✓</div></div><div style="text-align:center"><div class="vo y" style="width:16px;height:16px;font-size:7px;">✓</div></div><div style="text-align:center"><div class="vo n" style="width:16px;height:16px;font-size:7px;">✗</div></div><div style="text-align:center"><div class="vo y" style="width:16px;height:16px;font-size:7px;">✓</div></div><div style="text-align:center"><div class="vo y" style="width:16px;height:16px;font-size:7px;">✓</div></div></div>
+      </div>
+      <div class="flow-label fl-2" style="margin-top:4px;">Amendment #2 — Voting Now</div>
+      <div class="card focus">
+        <div class="tb amber"></div>
+        <div class="ch"><div class="cm">Amendment #2</div><div class="cr"><div class="ct" style="font-size:9px;color:#92400e;">Change "adopts" to "receives"</div><div class="cb vote"><div class="cd"></div>VOTING</div></div></div>
+        <div class="ctl"><div class="cti amv"><div class="cti-l">Moved</div><div class="cti-n">Cllr Rabel</div></div><div class="cti amv"><div class="cti-l">Sec'd</div><div class="cti-n">Cllr Woodill</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-stage">
+      <div class="flow-label fl-3">Final — All Amendments Resolved</div>
+      <div class="card done">
+        <div class="tb green"></div>
+        <div class="ch"><div class="cm">Motion · Item 5 (as amended x2)</div><div class="cr"><div class="ct">Bylaw 1021</div><div class="cb vote"><div class="cd"></div>FINAL VOTE</div></div></div>
+        <div style="display:flex;gap:3px;padding:0 10px 4px;flex-wrap:wrap;">
+          <span style="font-size:6px;font-weight:700;padding:2px 6px;border-radius:999px;background:#f0fdf4;color:#22c55e;border:1px solid #bbf7d0;">&#10003; Amend #1 Carried</span>
+          <span style="font-size:6px;font-weight:700;padding:2px 6px;border-radius:999px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">&#10007; Amend #2 Defeated</span>
+        </div>
+        <div class="cq green">THAT Council adopts Bylaw 1021 <strong>with section 14 re: public consultation.</strong></div>
+        <div class="ctl"><div class="cti mv"><div class="cti-l">Moved By</div><div class="cti-n">Cllr Rabel</div></div><div class="cti sc"><div class="cti-l">Seconded By</div><div class="cti-n">Cllr Wall</div></div></div>
+        <div class="cv"><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Rabel</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vn">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vn">Woodill</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const names = {v1:'01 — Nested Indent',v2:'02 — Stacked Sub-Card',v3:'03 — Inline Redline',v4:'04 — Timeline Thread',v5:'05 — Pill Chain',v6:'06 — Defeated Amendment',v7:'07 — Side-by-Side',v8:'08 — Tab Switch',v9:'09 — Accordion Expand',v10:'10 — Multiple Amendments'};
+function select(el, id) {
+  document.querySelectorAll('.sw').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('pick-text').textContent = names[id];
+}
+</script>
+</body>
+</html>

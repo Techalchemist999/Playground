@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Apple Glass Vote Tweaks</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; padding: 32px; }
+  h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; background: linear-gradient(135deg, #6366f1, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #64748b; font-size: 13px; margin-bottom: 28px; }
+  .options { display: flex; flex-direction: column; gap: 24px; max-width: 960px; margin: 0 auto; }
+
+  .option-wrap {
+    border-radius: 16px; border: 2px solid #e2e8f0; cursor: pointer; transition: all .3s; overflow: hidden;
+    background: #fff; box-shadow: 0 2px 14px rgba(99,102,241,.07);
+  }
+  .option-wrap:hover { border-color: #a5b4fc; box-shadow: 0 6px 24px rgba(99,102,241,.12); transform: translateY(-2px); }
+  .option-wrap.selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+
+  .oh { padding: 14px 20px 12px; display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid #f1f5f9; }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  .oh h2 { font-size: 15px; font-weight: 700; }
+  .oh p { font-size: 11px; color: #94a3b8; margin-left: auto; font-style: italic; }
+  .stage { display: flex; gap: 14px; padding: 20px; justify-content: center; flex-wrap: wrap; background: #f8fafc; }
+
+  /* Motion card shell */
+  .card { border-radius: 14px; overflow: hidden; max-width: 370px; width: 100%; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,.03); }
+  .topbar { height: 3px; }
+  .topbar.v { background: linear-gradient(90deg, #6366f1, #6366f155, transparent); }
+  .topbar.c { background: linear-gradient(90deg, #22c55e, #22c55e55, transparent); }
+  .hdr { padding: 10px 12px 0; }
+  .meta { font-size: 8px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: #94a3b8; margin-bottom: 3px; }
+  .tr { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .ttl { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+  .bdg { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 3px 9px; flex-shrink: 0; }
+  .bdg .d { width: 5px; height: 5px; border-radius: 50%; }
+  .bdg span { font-size: 9px; font-weight: 700; }
+  .bv { background: #fffbeb; border: 1.5px solid #fde68a; }
+  .bv .d { background: #f59e0b; animation: pulse 1.5s infinite; }
+  .bv span { color: #b45309; }
+  .bc { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+  .bc .d { background: #22c55e; }
+  .bc span { color: #22c55e; }
+  .qt { background: #f8fafc; border-left: 3px solid #6366f1; border-radius: 0 8px 8px 0; padding: 8px 11px; margin: 0 12px 8px; font-size: 11.5px; color: #334155; line-height: 1.7; }
+  .qt.cc { border-left-color: #22c55e; }
+  .tiles { display: flex; gap: 6px; padding: 0 12px 8px; }
+  .tl { flex: 1; border-radius: 7px; padding: 5px 8px; }
+  .tl-l { font-size: 7px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+  .tl-n { font-size: 11px; font-weight: 700; }
+  .tm { background: #eef2ff; border: 1.5px solid #c7d2fe; }
+  .tm .tl-l { color: #6366f1; } .tm .tl-n { color: #4f46e5; }
+  .ts { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+  .ts .tl-l { color: #22c55e; } .ts .tl-n { color: #0f172a; }
+  .va { margin: 0 12px 10px; padding: 10px; border-radius: 10px; }
+  .va.vt { background: #fafaff; border: 1px solid #e2e8f0; }
+  .va.ct { background: #f0fdf4; border: 1px solid #dcfce7; }
+  .vl { font-size: 7.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .vl.vi { color: #6366f1; } .vl.ci { color: #22c55e; }
+  .tally { display: flex; justify-content: center; gap: 8px; margin-top: 8px; font-size: 9px; font-weight: 700; }
+  .tally .ty { color: #16a34a; } .tally .tn { color: #dc2626; } .tally .tp { color: #94a3b8; }
+
+  /* Result */
+  #result { display: none; max-width: 960px; margin: 28px auto 0; background: #fff; border-radius: 16px; border: 2px solid #6366f1; padding: 20px; text-align: center; }
+  #result .label { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  #result .pick { font-size: 18px; font-weight: 800; margin-top: 4px; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  @keyframes fl { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+
+  /* ========== SHARED ORB BASE ========== */
+  .row { display: flex; gap: 10px; justify-content: center; }
+  .col { text-align: center; }
+  .nm { font-size: 7px; font-weight: 600; color: #94a3b8; }
+  .nm.y { color: #16a34a; } .nm.n { color: #dc2626; }
+
+  /* ========== V1: Current — Frosted Orbs (baseline) ========== */
+  .o1 { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; position: relative; transition: all .3s; }
+  .o1::before { content: ''; position: absolute; top: 4px; left: 8px; width: 14px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.5); filter: blur(2px); }
+  .o1.y { background: linear-gradient(135deg, #dcfce7, rgba(187,247,208,.4)); border: 1.5px solid #86efac; color: #16a34a; box-shadow: 0 4px 16px rgba(34,197,94,.15); }
+  .o1.n { background: linear-gradient(135deg, #fee2e2, rgba(254,202,202,.4)); border: 1.5px solid #fca5a5; color: #dc2626; box-shadow: 0 4px 16px rgba(239,68,68,.15); }
+  .o1.w { background: linear-gradient(135deg, #f1f5f9, rgba(226,232,240,.4)); border: 1.5px dashed #cbd5e1; color: #94a3b8; animation: fl 2.5s ease infinite; }
+  .o1.w::before { display: none; }
+  .nm1 { margin-top: 4px; }
+
+  /* ========== V2: Bigger orbs + thicker ring + bold symbol ========== */
+  .o2 { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; position: relative; transition: all .3s; }
+  .o2::before { content: ''; position: absolute; top: 5px; left: 9px; width: 16px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.5); filter: blur(2px); }
+  .o2.y { background: linear-gradient(135deg, #dcfce7, rgba(187,247,208,.4)); border: 2.5px solid #4ade80; color: #15803d; box-shadow: 0 4px 20px rgba(34,197,94,.2); }
+  .o2.n { background: linear-gradient(135deg, #fee2e2, rgba(254,202,202,.4)); border: 2.5px solid #f87171; color: #b91c1c; box-shadow: 0 4px 20px rgba(239,68,68,.2); }
+  .o2.w { background: linear-gradient(135deg, #f1f5f9, rgba(226,232,240,.4)); border: 2.5px dashed #94a3b8; color: #94a3b8; animation: fl 2.5s ease infinite; }
+  .o2.w::before { display: none; }
+  .nm2 { margin-top: 5px; }
+
+  /* ========== V3: Soft square (squircle) with rounded corners ========== */
+  .o3 { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; position: relative; transition: all .3s; }
+  .o3::before { content: ''; position: absolute; top: 4px; left: 7px; width: 14px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.45); filter: blur(2px); }
+  .o3.y { background: linear-gradient(135deg, #dcfce7, #bbf7d0); border: 1.5px solid #86efac; color: #16a34a; box-shadow: 0 3px 12px rgba(34,197,94,.12); }
+  .o3.n { background: linear-gradient(135deg, #fee2e2, #fecaca); border: 1.5px solid #fca5a5; color: #dc2626; box-shadow: 0 3px 12px rgba(239,68,68,.12); }
+  .o3.w { background: #f8fafc; border: 1.5px dashed #cbd5e1; color: #94a3b8; animation: fl 2.5s ease infinite; }
+  .o3.w::before { display: none; }
+  .nm3 { margin-top: 4px; }
+
+  /* ========== V4: Orb + name inside (no name below) ========== */
+  .o4 { width: 46px; height: 46px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; transition: all .3s; gap: 1px; }
+  .o4::before { content: ''; position: absolute; top: 5px; left: 10px; width: 16px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.5); filter: blur(2px); }
+  .o4 .sym { font-size: 13px; font-weight: 700; line-height: 1; }
+  .o4 .inm { font-size: 7px; font-weight: 600; line-height: 1; }
+  .o4.y { background: linear-gradient(135deg, #dcfce7, rgba(187,247,208,.4)); border: 1.5px solid #86efac; box-shadow: 0 4px 16px rgba(34,197,94,.15); }
+  .o4.y .sym { color: #16a34a; } .o4.y .inm { color: #22c55e; }
+  .o4.n { background: linear-gradient(135deg, #fee2e2, rgba(254,202,202,.4)); border: 1.5px solid #fca5a5; box-shadow: 0 4px 16px rgba(239,68,68,.15); }
+  .o4.n .sym { color: #dc2626; } .o4.n .inm { color: #ef4444; }
+  .o4.w { background: linear-gradient(135deg, #f1f5f9, rgba(226,232,240,.4)); border: 1.5px dashed #cbd5e1; animation: fl 2.5s ease infinite; }
+  .o4.w .sym { color: #94a3b8; } .o4.w .inm { color: #94a3b8; }
+  .o4.w::before { display: none; }
+
+  /* ========== V5: Double ring halo ========== */
+  .o5 { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; position: relative; background: #fff; transition: all .3s; }
+  .o5.y { color: #22c55e; box-shadow: 0 0 0 2.5px #22c55e, 0 0 0 5px rgba(34,197,94,.12), 0 0 0 8px rgba(34,197,94,.05), 0 3px 10px rgba(34,197,94,.1); }
+  .o5.n { color: #ef4444; box-shadow: 0 0 0 2.5px #ef4444, 0 0 0 5px rgba(239,68,68,.12), 0 0 0 8px rgba(239,68,68,.05), 0 3px 10px rgba(239,68,68,.1); }
+  .o5.w { color: #cbd5e1; box-shadow: 0 0 0 2px #e2e8f0, 0 0 0 5px rgba(226,232,240,.3); animation: fl 2s ease infinite; }
+  .o5::after { content: ''; position: absolute; top: 3px; left: 8px; width: 12px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.6); filter: blur(1.5px); }
+  .nm5 { margin-top: 6px; }
+
+  /* ========== V6: Orb + subtle progress arc ========== */
+  .o6-wrap { position: relative; width: 42px; height: 42px; }
+  .o6-svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+  .o6 { position: absolute; top: 3px; left: 3px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .o6::before { content: ''; position: absolute; top: 4px; left: 8px; width: 12px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.45); filter: blur(2px); }
+  .o6.y { background: linear-gradient(135deg, #dcfce7, rgba(187,247,208,.4)); color: #16a34a; }
+  .o6.n { background: linear-gradient(135deg, #fee2e2, rgba(254,202,202,.4)); color: #dc2626; }
+  .o6.w { background: #f8fafc; color: #cbd5e1; animation: fl 2.5s ease infinite; }
+  .o6.w::before { display: none; }
+  .nm6 { margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div style="max-width:960px;margin:0 auto;">
+  <div class="tag">TWEAK PICKER</div>
+  <h1>Apple Glass — 6 Variations</h1>
+  <p class="subtitle">Same base style, subtle differences. Click to select your favourite.</p>
+</div>
+
+<div class="options">
+
+<!-- V1: CURRENT BASELINE -->
+<div class="option-wrap" onclick="select(this,'v1')">
+  <div class="oh"><span class="tag">A</span><h2>Current — Frosted Orbs</h2><p>What's in the app right now</p></div>
+  <div class="stage">
+    <div class="card">
+      <div class="topbar v"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bv"><div class="d"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="qt">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="row">
+          <div class="col"><div class="o1 y">&#10003;</div><div class="nm nm1 y">Veach</div></div>
+          <div class="col"><div class="o1 y">&#10003;</div><div class="nm nm1 y">Rabel</div></div>
+          <div class="col"><div class="o1 n">&#10007;</div><div class="nm nm1 n">Wall</div></div>
+          <div class="col"><div class="o1 w">?</div><div class="nm nm1">Johnston</div></div>
+          <div class="col"><div class="o1 w">?</div><div class="nm nm1">Woodill</div></div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 2</span><span class="tn">No: 1</span><span class="tp">Pending: 2</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="topbar c"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bc"><div class="d"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="qt cc">THAT Council adopted Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va ct"><div class="vl ci">Vote Result</div>
+        <div class="row">
+          <div class="col"><div class="o1 y">&#10003;</div><div class="nm nm1 y">Veach</div></div>
+          <div class="col"><div class="o1 y">&#10003;</div><div class="nm nm1 y">Rabel</div></div>
+          <div class="col"><div class="o1 n">&#10007;</div><div class="nm nm1 n">Wall</div></div>
+          <div class="col"><div class="o1 y">&#10003;</div><div class="nm nm1 y">Johnston</div></div>
+          <div class="col"><div class="o1 y">&#10003;</div><div class="nm nm1 y">Woodill</div></div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 4</span><span class="tn">No: 1</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- V2: BIGGER + BOLDER -->
+<div class="option-wrap" onclick="select(this,'v2')">
+  <div class="oh"><span class="tag">B</span><h2>Bigger + Bolder</h2><p>Larger orbs, thicker borders, heavier symbols</p></div>
+  <div class="stage">
+    <div class="card">
+      <div class="topbar v"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bv"><div class="d"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="qt">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="row">
+          <div class="col"><div class="o2 y">&#10003;</div><div class="nm nm2 y">Veach</div></div>
+          <div class="col"><div class="o2 y">&#10003;</div><div class="nm nm2 y">Rabel</div></div>
+          <div class="col"><div class="o2 n">&#10007;</div><div class="nm nm2 n">Wall</div></div>
+          <div class="col"><div class="o2 w">?</div><div class="nm nm2">Johnston</div></div>
+          <div class="col"><div class="o2 w">?</div><div class="nm nm2">Woodill</div></div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 2</span><span class="tn">No: 1</span><span class="tp">Pending: 2</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="topbar c"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bc"><div class="d"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="qt cc">THAT Council adopted Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va ct"><div class="vl ci">Vote Result</div>
+        <div class="row">
+          <div class="col"><div class="o2 y">&#10003;</div><div class="nm nm2 y">Veach</div></div>
+          <div class="col"><div class="o2 y">&#10003;</div><div class="nm nm2 y">Rabel</div></div>
+          <div class="col"><div class="o2 n">&#10007;</div><div class="nm nm2 n">Wall</div></div>
+          <div class="col"><div class="o2 y">&#10003;</div><div class="nm nm2 y">Johnston</div></div>
+          <div class="col"><div class="o2 y">&#10003;</div><div class="nm nm2 y">Woodill</div></div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 4</span><span class="tn">No: 1</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- V3: SQUIRCLE -->
+<div class="option-wrap" onclick="select(this,'v3')">
+  <div class="oh"><span class="tag">C</span><h2>Soft Squircle</h2><p>Rounded squares instead of circles — iOS app icon shape</p></div>
+  <div class="stage">
+    <div class="card">
+      <div class="topbar v"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bv"><div class="d"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="qt">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="row">
+          <div class="col"><div class="o3 y">&#10003;</div><div class="nm nm3 y">Veach</div></div>
+          <div class="col"><div class="o3 y">&#10003;</div><div class="nm nm3 y">Rabel</div></div>
+          <div class="col"><div class="o3 n">&#10007;</div><div class="nm nm3 n">Wall</div></div>
+          <div class="col"><div class="o3 w">?</div><div class="nm nm3">Johnston</div></div>
+          <div class="col"><div class="o3 w">?</div><div class="nm nm3">Woodill</div></div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 2</span><span class="tn">No: 1</span><span class="tp">Pending: 2</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="topbar c"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bc"><div class="d"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="qt cc">THAT Council adopted Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va ct"><div class="vl ci">Vote Result</div>
+        <div class="row">
+          <div class="col"><div class="o3 y">&#10003;</div><div class="nm nm3 y">Veach</div></div>
+          <div class="col"><div class="o3 y">&#10003;</div><div class="nm nm3 y">Rabel</div></div>
+          <div class="col"><div class="o3 n">&#10007;</div><div class="nm nm3 n">Wall</div></div>
+          <div class="col"><div class="o3 y">&#10003;</div><div class="nm nm3 y">Johnston</div></div>
+          <div class="col"><div class="o3 y">&#10003;</div><div class="nm nm3 y">Woodill</div></div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 4</span><span class="tn">No: 1</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- V4: NAME INSIDE -->
+<div class="option-wrap" onclick="select(this,'v4')">
+  <div class="oh"><span class="tag">D</span><h2>Name Inside</h2><p>Symbol + name both inside the orb — no text below</p></div>
+  <div class="stage">
+    <div class="card">
+      <div class="topbar v"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bv"><div class="d"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="qt">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="row">
+          <div class="col"><div class="o4 y"><span class="sym">&#10003;</span><span class="inm">Veach</span></div></div>
+          <div class="col"><div class="o4 y"><span class="sym">&#10003;</span><span class="inm">Rabel</span></div></div>
+          <div class="col"><div class="o4 n"><span class="sym">&#10007;</span><span class="inm">Wall</span></div></div>
+          <div class="col"><div class="o4 w"><span class="sym">?</span><span class="inm">Johnston</span></div></div>
+          <div class="col"><div class="o4 w"><span class="sym">?</span><span class="inm">Woodill</span></div></div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 2</span><span class="tn">No: 1</span><span class="tp">Pending: 2</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="topbar c"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bc"><div class="d"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="qt cc">THAT Council adopted Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va ct"><div class="vl ci">Vote Result</div>
+        <div class="row">
+          <div class="col"><div class="o4 y"><span class="sym">&#10003;</span><span class="inm">Veach</span></div></div>
+          <div class="col"><div class="o4 y"><span class="sym">&#10003;</span><span class="inm">Rabel</span></div></div>
+          <div class="col"><div class="o4 n"><span class="sym">&#10007;</span><span class="inm">Wall</span></div></div>
+          <div class="col"><div class="o4 y"><span class="sym">&#10003;</span><span class="inm">Johnston</span></div></div>
+          <div class="col"><div class="o4 y"><span class="sym">&#10003;</span><span class="inm">Woodill</span></div></div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 4</span><span class="tn">No: 1</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- V5: DOUBLE RING HALO -->
+<div class="option-wrap" onclick="select(this,'v5')">
+  <div class="oh"><span class="tag">E</span><h2>Double Ring Halo</h2><p>White center with radiating colored rings — cleaner, more contrast</p></div>
+  <div class="stage">
+    <div class="card">
+      <div class="topbar v"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bv"><div class="d"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="qt">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="row" style="gap:14px;">
+          <div class="col"><div class="o5 y">&#10003;</div><div class="nm nm5 y">Veach</div></div>
+          <div class="col"><div class="o5 y">&#10003;</div><div class="nm nm5 y">Rabel</div></div>
+          <div class="col"><div class="o5 n">&#10007;</div><div class="nm nm5 n">Wall</div></div>
+          <div class="col"><div class="o5 w">?</div><div class="nm nm5">Johnston</div></div>
+          <div class="col"><div class="o5 w">?</div><div class="nm nm5">Woodill</div></div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 2</span><span class="tn">No: 1</span><span class="tp">Pending: 2</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="topbar c"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bc"><div class="d"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="qt cc">THAT Council adopted Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va ct"><div class="vl ci">Vote Result</div>
+        <div class="row" style="gap:14px;">
+          <div class="col"><div class="o5 y">&#10003;</div><div class="nm nm5 y">Veach</div></div>
+          <div class="col"><div class="o5 y">&#10003;</div><div class="nm nm5 y">Rabel</div></div>
+          <div class="col"><div class="o5 n">&#10007;</div><div class="nm nm5 n">Wall</div></div>
+          <div class="col"><div class="o5 y">&#10003;</div><div class="nm nm5 y">Johnston</div></div>
+          <div class="col"><div class="o5 y">&#10003;</div><div class="nm nm5 y">Woodill</div></div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 4</span><span class="tn">No: 1</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- V6: PROGRESS ARC -->
+<div class="option-wrap" onclick="select(this,'v6')">
+  <div class="oh"><span class="tag">F</span><h2>Progress Arc</h2><p>Orb wrapped in a colored SVG ring — feels like a loading indicator that completes</p></div>
+  <div class="stage">
+    <div class="card">
+      <div class="topbar v"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bv"><div class="d"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="qt">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="row" style="gap:8px;">
+          <div class="col">
+            <div class="o6-wrap"><svg class="o6-svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="none" stroke="#f1f5f9" stroke-width="3"/><circle cx="21" cy="21" r="19" fill="none" stroke="#22c55e" stroke-width="3" stroke-dasharray="119.4 119.4" stroke-linecap="round"/></svg><div class="o6 y">&#10003;</div></div>
+            <div class="nm nm6 y">Veach</div>
+          </div>
+          <div class="col">
+            <div class="o6-wrap"><svg class="o6-svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="none" stroke="#f1f5f9" stroke-width="3"/><circle cx="21" cy="21" r="19" fill="none" stroke="#22c55e" stroke-width="3" stroke-dasharray="119.4 119.4" stroke-linecap="round"/></svg><div class="o6 y">&#10003;</div></div>
+            <div class="nm nm6 y">Rabel</div>
+          </div>
+          <div class="col">
+            <div class="o6-wrap"><svg class="o6-svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="none" stroke="#f1f5f9" stroke-width="3"/><circle cx="21" cy="21" r="19" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="119.4 119.4" stroke-linecap="round"/></svg><div class="o6 n">&#10007;</div></div>
+            <div class="nm nm6 n">Wall</div>
+          </div>
+          <div class="col">
+            <div class="o6-wrap"><svg class="o6-svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="21" cy="21" r="19" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="30 119.4" stroke-linecap="round" style="animation:pulse 2s infinite;"/></svg><div class="o6 w">?</div></div>
+            <div class="nm nm6">Johnston</div>
+          </div>
+          <div class="col">
+            <div class="o6-wrap"><svg class="o6-svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="21" cy="21" r="19" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="30 119.4" stroke-linecap="round" style="animation:pulse 2s infinite;"/></svg><div class="o6 w">?</div></div>
+            <div class="nm nm6">Woodill</div>
+          </div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 2</span><span class="tn">No: 1</span><span class="tp">Pending: 2</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="topbar c"></div>
+      <div class="hdr"><div class="meta">Motion &middot; Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bc"><div class="d"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="qt cc">THAT Council adopted Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tl tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tl ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="va ct"><div class="vl ci">Vote Result</div>
+        <div class="row" style="gap:8px;">
+          <div class="col">
+            <div class="o6-wrap"><svg class="o6-svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="none" stroke="#f0fdf4" stroke-width="3"/><circle cx="21" cy="21" r="19" fill="none" stroke="#22c55e" stroke-width="3" stroke-dasharray="119.4 119.4" stroke-linecap="round"/></svg><div class="o6 y">&#10003;</div></div>
+            <div class="nm nm6 y">Veach</div>
+          </div>
+          <div class="col">
+            <div class="o6-wrap"><svg class="o6-svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="none" stroke="#f0fdf4" stroke-width="3"/><circle cx="21" cy="21" r="19" fill="none" stroke="#22c55e" stroke-width="3" stroke-dasharray="119.4 119.4" stroke-linecap="round"/></svg><div class="o6 y">&#10003;</div></div>
+            <div class="nm nm6 y">Rabel</div>
+          </div>
+          <div class="col">
+            <div class="o6-wrap"><svg class="o6-svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="none" stroke="#fef2f2" stroke-width="3"/><circle cx="21" cy="21" r="19" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="119.4 119.4" stroke-linecap="round"/></svg><div class="o6 n">&#10007;</div></div>
+            <div class="nm nm6 n">Wall</div>
+          </div>
+          <div class="col">
+            <div class="o6-wrap"><svg class="o6-svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="none" stroke="#f0fdf4" stroke-width="3"/><circle cx="21" cy="21" r="19" fill="none" stroke="#22c55e" stroke-width="3" stroke-dasharray="119.4 119.4" stroke-linecap="round"/></svg><div class="o6 y">&#10003;</div></div>
+            <div class="nm nm6 y">Johnston</div>
+          </div>
+          <div class="col">
+            <div class="o6-wrap"><svg class="o6-svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="19" fill="none" stroke="#f0fdf4" stroke-width="3"/><circle cx="21" cy="21" r="19" fill="none" stroke="#22c55e" stroke-width="3" stroke-dasharray="119.4 119.4" stroke-linecap="round"/></svg><div class="o6 y">&#10003;</div></div>
+            <div class="nm nm6 y">Woodill</div>
+          </div>
+        </div>
+        <div class="tally"><span class="ty">Yes: 4</span><span class="tn">No: 1</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const names = {
+  v1: 'A — Current Frosted Orbs',
+  v2: 'B — Bigger + Bolder',
+  v3: 'C — Soft Squircle',
+  v4: 'D — Name Inside',
+  v5: 'E — Double Ring Halo',
+  v6: 'F — Progress Arc'
+};
+function select(el, id) {
+  document.querySelectorAll('.option-wrap').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('pick-text').textContent = names[id];
+}
+</script>
+</body>
+</html>

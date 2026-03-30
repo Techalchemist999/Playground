@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Amendment #1 Nested Indent (Full Spec)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; padding: 32px; }
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; background: linear-gradient(135deg, #6366f1, #4f46e5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #64748b; font-size: 12px; margin-bottom: 28px; line-height: 1.6; }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  .scenarios { display: flex; gap: 24px; max-width: 1100px; margin: 0 auto; align-items: flex-start; }
+  .scenario { flex: 1; }
+  .scenario-label { text-align: center; margin-bottom: 12px; padding: 6px 16px; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-block; }
+  .scenario-head { text-align: center; margin-bottom: 12px; }
+  .sl-carried { background: #f0fdf4; color: #22c55e; border: 1.5px solid #bbf7d0; }
+  .sl-defeated { background: #fef2f2; color: #dc2626; border: 1.5px solid #fecaca; }
+
+  /* Stage wrapper */
+  .stage { margin-bottom: 8px; position: relative; }
+  .stage-label { font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; text-align: center; padding: 3px 10px; border-radius: 999px; display: inline-block; margin-bottom: 6px; }
+  .stage-head { text-align: center; margin-bottom: 6px; }
+  .s1 { background: #eef2ff; color: #6366f1; border: 1px solid #c7d2fe; }
+  .s2 { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .s3 { background: #f0fdf4; color: #22c55e; border: 1px solid #bbf7d0; }
+  .s3r { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+  /* Arrow between stages */
+  .arrow { text-align: center; color: #cbd5e1; font-size: 16px; margin: 4px 0; }
+
+  /* Motion card */
+  .card { border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,.03); }
+  .card.amber-focus { border-color: #fde68a; box-shadow: 0 0 0 2px rgba(245,158,11,.12), 0 2px 10px rgba(245,158,11,.06); }
+  .card.green-focus { border-color: #bbf7d0; box-shadow: 0 0 0 2px rgba(34,197,94,.1), 0 2px 10px rgba(34,197,94,.04); }
+  .card.red-focus { border-color: #fecaca; box-shadow: 0 0 0 2px rgba(220,38,38,.1), 0 2px 10px rgba(220,38,38,.04); }
+
+  .topbar { height: 3px; }
+  .topbar.blue { background: linear-gradient(90deg, #6366f1, #6366f155, transparent); }
+  .topbar.amber { background: linear-gradient(90deg, #f59e0b, #fbbf2455, transparent); }
+  .topbar.green { background: linear-gradient(90deg, #22c55e, #22c55e55, transparent); }
+  .topbar.red { background: linear-gradient(90deg, #dc2626, #dc262655, transparent); }
+
+  .hdr { padding: 12px 14px 0; }
+  .meta { font-size: 8px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: #94a3b8; margin-bottom: 3px; }
+  .title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+  .ttl { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+  .bdg { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 3px 9px; flex-shrink: 0; }
+  .bdg .dot { width: 5px; height: 5px; border-radius: 50%; }
+  .bdg span { font-size: 8px; font-weight: 700; }
+  .bdg-vote { background: #fffbeb; border: 1.5px solid #fde68a; } .bdg-vote .dot { background: #f59e0b; animation: pulse 1.5s infinite; } .bdg-vote span { color: #b45309; }
+  .bdg-amend { background: #fffbeb; border: 1.5px solid #fde68a; } .bdg-amend .dot { background: #f59e0b; animation: pulse 1.5s infinite; } .bdg-amend span { color: #d97706; }
+  .bdg-carried { background: #f0fdf4; border: 1.5px solid #bbf7d0; } .bdg-carried .dot { background: #22c55e; } .bdg-carried span { color: #22c55e; }
+  .bdg-defeated { background: #fef2f2; border: 1.5px solid #fecaca; } .bdg-defeated .dot { background: #dc2626; } .bdg-defeated span { color: #dc2626; }
+  .bdg-paused { background: #f1f5f9; border: 1.5px solid #e2e8f0; } .bdg-paused .dot { background: #94a3b8; } .bdg-paused span { color: #94a3b8; }
+
+  .quote { background: #f8fafc; border-left: 3px solid #6366f1; border-radius: 0 8px 8px 0; padding: 9px 12px; margin: 0 14px 10px; font-size: 12px; color: #334155; line-height: 1.75; }
+  .quote.green { border-left-color: #22c55e; background: #f0fdf4; }
+  .quote.dimmed { opacity: .4; }
+
+  .tiles { display: flex; gap: 6px; padding: 0 14px 10px; }
+  .tile { flex: 1; border-radius: 7px; padding: 6px 8px; }
+  .tl-l { font-size: 7px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+  .tl-n { font-size: 11px; font-weight: 700; }
+  .tm { background: #eef2ff; border: 1.5px solid #c7d2fe; } .tm .tl-l { color: #6366f1; } .tm .tl-n { color: #4f46e5; }
+  .ts { background: #f0fdf4; border: 1.5px solid #bbf7d0; } .ts .tl-l { color: #22c55e; } .ts .tl-n { color: #0f172a; }
+  .ta { background: #fffbeb; border: 1.5px solid #fde68a; } .ta .tl-l { color: #d97706; } .ta .tl-n { color: #92400e; }
+
+  /* Amendment indent block */
+  .amend-block { margin: 0 14px 10px; padding: 10px 12px; border-radius: 0 8px 8px 0; border-left: 3px solid #f59e0b; }
+  .amend-block.pending { background: #fefce8; border-color: #f59e0b; }
+  .amend-block.carried { background: #f0fdf4; border-left-color: #22c55e; }
+  .amend-block.defeated { background: #fef2f2; border-left-color: #dc2626; }
+  .amend-label { font-size: 7px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+  .amend-label.pending { color: #d97706; }
+  .amend-label.carried { color: #22c55e; }
+  .amend-label.defeated { color: #dc2626; }
+  .amend-text { font-size: 12px; line-height: 1.7; }
+  .amend-text.pending { color: #92400e; }
+  .amend-text.carried { color: #166534; }
+  .amend-text.defeated { color: #991b1b; text-decoration: line-through; }
+  .amend-mover { font-size: 10px; font-weight: 600; margin-top: 6px; }
+  .amend-mover.pending { color: #b45309; }
+  .amend-mover.carried { color: #16a34a; }
+  .amend-mover.defeated { color: #dc2626; }
+  .amend-result { margin-top: 6px; font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 3px; }
+  .amend-result.carried { background: #dcfce7; color: #22c55e; border: 1px solid #bbf7d0; }
+  .amend-result.defeated { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+
+  /* Status bar */
+  .status-bar { text-align: center; padding: 6px 14px 10px; font-size: 8px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .status-bar.amber { color: #d97706; }
+  .status-bar.green { color: #22c55e; }
+  .status-bar.red { color: #dc2626; }
+  .pulse-dot { width: 5px; height: 5px; border-radius: 50%; animation: pulse 1.5s infinite; }
+
+  /* Vote orbs */
+  .votes { display: flex; gap: 8px; justify-content: center; padding: 8px 14px 12px; }
+  .vcol { text-align: center; }
+  .orb { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; position: relative; }
+  .orb::before { content: ''; position: absolute; top: 3px; left: 7px; width: 12px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.5); filter: blur(1px); }
+  .orb.y { background: linear-gradient(135deg, #dcfce7, #bbf7d0aa); border: 1.5px solid #86efac; color: #16a34a; box-shadow: 0 3px 12px rgba(34,197,94,.12); }
+  .orb.n { background: linear-gradient(135deg, #fee2e2, #fecacaaa); border: 1.5px solid #fca5a5; color: #dc2626; box-shadow: 0 3px 12px rgba(220,38,38,.12); }
+  .orb.w { background: #f1f5f9; border: 1.5px dashed #cbd5e1; color: #94a3b8; font-size: 10px; }
+  .orb-nm { font-size: 7px; color: #94a3b8; margin-top: 3px; font-weight: 600; }
+
+  /* Restored badge */
+  .restored-badge { margin: 0 14px 8px; font-size: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+</style>
+</head>
+<body>
+
+<div style="max-width:1100px;margin:0 auto;">
+  <div class="tag">AMENDMENT SPEC</div>
+  <h1>Nested Indent — Full Lifecycle</h1>
+  <p class="subtitle">Two scenarios side by side. Left: amendment carried — motion text changes. Right: amendment defeated — motion returns unchanged. Each shows the card exactly as it appears at each stage, top to bottom.</p>
+</div>
+
+<div class="scenarios">
+
+<!-- ==========================================
+     SCENARIO A: AMENDMENT CARRIED
+     ========================================== -->
+<div class="scenario">
+  <div class="scenario-head"><span class="scenario-label sl-carried">Scenario A — Amendment Carried</span></div>
+
+  <!-- STAGE 1: Motion on the floor -->
+  <div class="stage">
+    <div class="stage-head"><span class="stage-label s1">Stage 1 — Motion on the Floor</span></div>
+    <div class="card">
+      <div class="topbar blue"></div>
+      <div class="hdr">
+        <div class="meta">Motion · Item 5</div>
+        <div class="title-row"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bdg-vote"><div class="dot"></div><span>ON THE FLOOR</span></div></div>
+      </div>
+      <div class="quote">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tile tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tile ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+    </div>
+  </div>
+
+  <div class="arrow">&#9660;</div>
+
+  <!-- STAGE 2: Amendment proposed — focus shifts -->
+  <div class="stage">
+    <div class="stage-head"><span class="stage-label s2">Stage 2 — Amendment Proposed</span></div>
+    <div class="card amber-focus">
+      <div class="topbar amber"></div>
+      <div class="hdr">
+        <div class="meta">Motion · Item 5</div>
+        <div class="title-row"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bdg-amend"><div class="dot"></div><span>AMENDMENT</span></div></div>
+      </div>
+      <div class="quote dimmed">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="amend-block pending">
+        <div class="amend-label pending">&#9998; Amendment — Focus Here</div>
+        <div class="amend-text pending">"...with the addition of section 14 regarding public consultation requirements."</div>
+        <div class="amend-mover pending">Moved: Cllr Wall · Seconded: Cllr Johnston</div>
+      </div>
+      <div class="tiles"><div class="tile tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tile ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="status-bar amber"><div class="pulse-dot" style="background:#f59e0b;"></div> Debating amendment — main motion paused</div>
+    </div>
+  </div>
+
+  <div class="arrow">&#9660;</div>
+
+  <!-- STAGE 3: Amendment vote -->
+  <div class="stage">
+    <div class="stage-head"><span class="stage-label s2">Stage 3 — Vote on Amendment</span></div>
+    <div class="card amber-focus">
+      <div class="topbar amber"></div>
+      <div class="hdr">
+        <div class="meta">Amendment Vote · Item 5</div>
+        <div class="title-row"><div class="ttl" style="color:#92400e;">Amendment to Bylaw 1021</div><div class="bdg bdg-vote"><div class="dot"></div><span>VOTING</span></div></div>
+      </div>
+      <div class="amend-block pending">
+        <div class="amend-label pending">&#9998; Amendment</div>
+        <div class="amend-text pending">"...with the addition of section 14 regarding public consultation requirements."</div>
+      </div>
+      <div class="tiles"><div class="tile ta"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Wall</div></div><div class="tile ta"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Johnston</div></div></div>
+      <div class="votes">
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Veach</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Rabel</div></div>
+        <div class="vcol"><div class="orb n">✗</div><div class="orb-nm">Wall</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Johnston</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Woodill</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">&#9660;</div>
+
+  <!-- STAGE 4: Amendment carried — return to amended main motion -->
+  <div class="stage">
+    <div class="stage-head"><span class="stage-label s3">Stage 4 — Return to Main Motion (Amended)</span></div>
+    <div class="card green-focus">
+      <div class="topbar green"></div>
+      <div class="hdr">
+        <div class="meta">Motion · Item 5 (as amended)</div>
+        <div class="title-row"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bdg-vote"><div class="dot"></div><span>VOTING</span></div></div>
+      </div>
+      <div class="quote green">THAT Council adopts Bylaw 1021 <strong>with the addition of section 14 regarding public consultation requirements.</strong></div>
+      <div class="amend-block carried">
+        <div class="amend-label carried">&#10003; Amendment Carried</div>
+        <div class="amend-text carried">"...with the addition of section 14 regarding public consultation requirements."</div>
+        <div class="amend-result carried">&#10003; Carried 4-1 · Cllr Wall</div>
+      </div>
+      <div class="tiles"><div class="tile tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tile ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="votes">
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Veach</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Rabel</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Wall</div></div>
+        <div class="vcol"><div class="orb w">?</div><div class="orb-nm">Johnston</div></div>
+        <div class="vcol"><div class="orb w">?</div><div class="orb-nm">Woodill</div></div>
+      </div>
+      <div class="status-bar green"><div class="pulse-dot" style="background:#22c55e;"></div> Final vote on amended motion</div>
+    </div>
+  </div>
+
+  <div class="arrow">&#9660;</div>
+
+  <!-- STAGE 5: Final result -->
+  <div class="stage">
+    <div class="stage-head"><span class="stage-label s3">Stage 5 — Final Result</span></div>
+    <div class="card green-focus">
+      <div class="topbar green"></div>
+      <div class="hdr">
+        <div class="meta">Motion · Item 5 (as amended)</div>
+        <div class="title-row"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bdg-carried"><div class="dot"></div><span>CARRIED UNANIMOUSLY</span></div></div>
+      </div>
+      <div class="quote green">THAT Council adopted Bylaw 1021 <strong>with the addition of section 14 regarding public consultation requirements.</strong></div>
+      <div class="amend-block carried">
+        <div class="amend-label carried">&#10003; Amendment Carried</div>
+        <div class="amend-text carried">"...with the addition of section 14 regarding public consultation requirements."</div>
+        <div class="amend-result carried">&#10003; Carried 4-1 · Cllr Wall</div>
+      </div>
+      <div class="tiles"><div class="tile tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tile ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="votes">
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Veach</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Rabel</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Wall</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Johnston</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Woodill</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================
+     SCENARIO B: AMENDMENT DEFEATED
+     ========================================== -->
+<div class="scenario">
+  <div class="scenario-head"><span class="scenario-label sl-defeated">Scenario B — Amendment Defeated</span></div>
+
+  <!-- STAGE 1: Motion on the floor -->
+  <div class="stage">
+    <div class="stage-head"><span class="stage-label s1">Stage 1 — Motion on the Floor</span></div>
+    <div class="card">
+      <div class="topbar blue"></div>
+      <div class="hdr">
+        <div class="meta">Motion · Item 5</div>
+        <div class="title-row"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bdg-vote"><div class="dot"></div><span>ON THE FLOOR</span></div></div>
+      </div>
+      <div class="quote">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tile tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tile ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+    </div>
+  </div>
+
+  <div class="arrow">&#9660;</div>
+
+  <!-- STAGE 2: Amendment proposed -->
+  <div class="stage">
+    <div class="stage-head"><span class="stage-label s2">Stage 2 — Amendment Proposed</span></div>
+    <div class="card amber-focus">
+      <div class="topbar amber"></div>
+      <div class="hdr">
+        <div class="meta">Motion · Item 5</div>
+        <div class="title-row"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bdg-amend"><div class="dot"></div><span>AMENDMENT</span></div></div>
+      </div>
+      <div class="quote dimmed">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="amend-block pending">
+        <div class="amend-label pending">&#9998; Amendment — Focus Here</div>
+        <div class="amend-text pending">"...with the addition of section 14 regarding public consultation requirements."</div>
+        <div class="amend-mover pending">Moved: Cllr Wall · Seconded: Cllr Johnston</div>
+      </div>
+      <div class="tiles"><div class="tile tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tile ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="status-bar amber"><div class="pulse-dot" style="background:#f59e0b;"></div> Debating amendment — main motion paused</div>
+    </div>
+  </div>
+
+  <div class="arrow">&#9660;</div>
+
+  <!-- STAGE 3: Amendment vote — defeated -->
+  <div class="stage">
+    <div class="stage-head"><span class="stage-label s2">Stage 3 — Vote on Amendment</span></div>
+    <div class="card red-focus">
+      <div class="topbar red"></div>
+      <div class="hdr">
+        <div class="meta">Amendment Vote · Item 5</div>
+        <div class="title-row"><div class="ttl" style="color:#dc2626;">Amendment to Bylaw 1021</div><div class="bdg bdg-defeated"><div class="dot"></div><span>DEFEATED 2-3</span></div></div>
+      </div>
+      <div class="amend-block defeated">
+        <div class="amend-label defeated">&#10007; Amendment Defeated</div>
+        <div class="amend-text defeated">"...with the addition of section 14 regarding public consultation requirements."</div>
+        <div class="amend-result defeated">&#10007; Defeated 2-3 · Cllr Wall</div>
+      </div>
+      <div class="tiles"><div class="tile ta"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Wall</div></div><div class="tile ta"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Johnston</div></div></div>
+      <div class="votes">
+        <div class="vcol"><div class="orb n">✗</div><div class="orb-nm">Veach</div></div>
+        <div class="vcol"><div class="orb n">✗</div><div class="orb-nm">Rabel</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Wall</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Johnston</div></div>
+        <div class="vcol"><div class="orb n">✗</div><div class="orb-nm">Woodill</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">&#9660;</div>
+
+  <!-- STAGE 4: Return to original unchanged -->
+  <div class="stage">
+    <div class="stage-head"><span class="stage-label s3r">Stage 4 — Return to Main Motion (Unchanged)</span></div>
+    <div class="card">
+      <div class="topbar blue"></div>
+      <div class="hdr">
+        <div class="meta">Motion · Item 5 (unchanged)</div>
+        <div class="title-row"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bdg-vote"><div class="dot"></div><span>VOTING</span></div></div>
+      </div>
+      <div class="quote">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="amend-block defeated">
+        <div class="amend-label defeated">&#10007; Amendment Defeated</div>
+        <div class="amend-text defeated">"...with the addition of section 14 regarding public consultation requirements."</div>
+        <div class="amend-result defeated">&#10007; Defeated 2-3 · Original text restored</div>
+      </div>
+      <div class="tiles"><div class="tile tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tile ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="votes">
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Veach</div></div>
+        <div class="vcol"><div class="orb w">?</div><div class="orb-nm">Rabel</div></div>
+        <div class="vcol"><div class="orb w">?</div><div class="orb-nm">Wall</div></div>
+        <div class="vcol"><div class="orb w">?</div><div class="orb-nm">Johnston</div></div>
+        <div class="vcol"><div class="orb w">?</div><div class="orb-nm">Woodill</div></div>
+      </div>
+      <div class="status-bar" style="color:#6366f1;"><div class="pulse-dot" style="background:#6366f1;"></div> Final vote on original motion</div>
+    </div>
+  </div>
+
+  <div class="arrow">&#9660;</div>
+
+  <!-- STAGE 5: Final result -->
+  <div class="stage">
+    <div class="stage-head"><span class="stage-label s3">Stage 5 — Final Result</span></div>
+    <div class="card green-focus">
+      <div class="topbar green"></div>
+      <div class="hdr">
+        <div class="meta">Motion · Item 5</div>
+        <div class="title-row"><div class="ttl">Bylaw 1021 — Third Reading</div><div class="bdg bdg-carried"><div class="dot"></div><span>CARRIED 4-1</span></div></div>
+      </div>
+      <div class="quote green">THAT Council adopted Bylaw 1021 as presented.</div>
+      <div class="tiles"><div class="tile tm"><div class="tl-l">Moved By</div><div class="tl-n">Cllr Rabel</div></div><div class="tile ts"><div class="tl-l">Seconded By</div><div class="tl-n">Cllr Wall</div></div></div>
+      <div class="votes">
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Veach</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Rabel</div></div>
+        <div class="vcol"><div class="orb n">✗</div><div class="orb-nm">Wall</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Johnston</div></div>
+        <div class="vcol"><div class="orb y">✓</div><div class="orb-nm">Woodill</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</body>
+</html>

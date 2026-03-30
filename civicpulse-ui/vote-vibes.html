@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Vote Display Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; padding: 32px; }
+  h1 { font-size: 26px; font-weight: 800; margin-bottom: 4px; background: linear-gradient(135deg, #6366f1, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #64748b; font-size: 13px; margin-bottom: 32px; }
+  .options { display: flex; flex-direction: column; gap: 28px; max-width: 960px; margin: 0 auto; }
+
+  .option-wrap {
+    border-radius: 18px; border: 2px solid #e2e8f0; cursor: pointer; transition: all .3s; overflow: hidden;
+    background: #fff; box-shadow: 0 2px 14px rgba(99,102,241,.07);
+  }
+  .option-wrap:hover { border-color: #a5b4fc; box-shadow: 0 6px 24px rgba(99,102,241,.12); transform: translateY(-2px); }
+  .option-wrap.selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+
+  .option-header { padding: 14px 20px 12px; display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid #f1f5f9; }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  .option-header h2 { font-size: 15px; font-weight: 700; color: #0f172a; }
+  .option-header p { font-size: 11px; color: #94a3b8; margin-left: auto; font-style: italic; }
+  .card-stage { display: flex; gap: 14px; padding: 20px; justify-content: center; flex-wrap: wrap; background: #f8fafc; }
+
+  /* ---- Motion card shell ---- */
+  .bite-card { border-radius: 14px; overflow: hidden; max-width: 370px; width: 100%; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,.03); }
+  .bc-topbar { height: 3px; }
+  .bc-topbar.voting { background: linear-gradient(90deg, #6366f1, #6366f155, transparent); }
+  .bc-topbar.carried { background: linear-gradient(90deg, #22c55e, #22c55e55, transparent); }
+  .bc-header { padding: 10px 12px 0; }
+  .bc-meta { font-size: 8px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: #94a3b8; margin-bottom: 3px; }
+  .bc-tr { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .bc-title { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 3px 9px; flex-shrink: 0; }
+  .badge .bdot { width: 5px; height: 5px; border-radius: 50%; }
+  .badge span { font-size: 9px; font-weight: 700; }
+  .bv { background: #fffbeb; border: 1.5px solid #fde68a; }
+  .bv .bdot { background: #f59e0b; animation: pulse 1.5s infinite; }
+  .bv span { color: #b45309; }
+  .bc2 { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+  .bc2 .bdot { background: #22c55e; }
+  .bc2 span { color: #22c55e; }
+  .bc-q { background: #f8fafc; border-left: 3px solid #6366f1; border-radius: 0 8px 8px 0; padding: 8px 11px; margin: 0 12px 8px; font-size: 11.5px; color: #334155; line-height: 1.7; }
+  .bc-q.c { border-left-color: #22c55e; }
+  .bc-tiles { display: flex; gap: 6px; padding: 0 12px 8px; }
+  .tile { flex: 1; border-radius: 7px; padding: 5px 8px; }
+  .tile-l { font-size: 7px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+  .tile-n { font-size: 11px; font-weight: 700; }
+  .tm { background: #eef2ff; border: 1.5px solid #c7d2fe; }
+  .tm .tile-l { color: #6366f1; } .tm .tile-n { color: #4f46e5; }
+  .ts { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+  .ts .tile-l { color: #22c55e; } .ts .tile-n { color: #0f172a; }
+  .bc-va { margin: 0 12px 10px; padding: 10px; border-radius: 10px; }
+  .bc-va.vt { background: #fafaff; border: 1px solid #e2e8f0; }
+  .bc-va.ct { background: #f0fdf4; border: 1px solid #dcfce7; }
+  .vl { font-size: 7.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .vl.vi { color: #6366f1; }
+  .vl.ci { color: #22c55e; }
+
+  /* Result */
+  #result { display: none; max-width: 960px; margin: 28px auto 0; background: #fff; border-radius: 18px; border: 2px solid #6366f1; padding: 20px; text-align: center; box-shadow: 0 2px 14px rgba(99,102,241,.07); }
+  #result .label { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6366f1; }
+  #result .pick { font-size: 20px; font-weight: 800; margin-top: 4px; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+  @keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+  @keyframes aurora { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+  @keyframes swing { 0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(2deg)} }
+  @keyframes glow-soft { 0%,100%{box-shadow:0 0 8px var(--g)} 50%{box-shadow:0 0 18px var(--g)} }
+
+  /* ========== 1. ABACUS (IMPROVED) ========== */
+  .abacus {
+    background: linear-gradient(180deg, #e8c9a0, #d4a574, #c99560);
+    border-radius: 12px; padding: 14px 16px;
+    border: 3px solid #c08a5c;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.1), 0 6px 16px rgba(0,0,0,.08);
+    position: relative;
+  }
+  .abacus::before { content: ''; position: absolute; top: 5px; left: 10px; right: 10px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); }
+  .abacus::after { content: ''; position: absolute; bottom: 5px; left: 10px; right: 10px; height: 1px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.08), transparent); }
+  .ab-row { display: flex; align-items: center; margin: 7px 0; position: relative; height: 30px; }
+  .ab-rod { position: absolute; left: 60px; right: 10px; top: 50%; height: 3px; background: linear-gradient(180deg, #b8935a, #9a7a48); border-radius: 1.5px; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  .ab-name { font-size: 9px; font-weight: 700; color: #5c3d20; width: 56px; flex-shrink: 0; z-index: 2; }
+  .ab-bead {
+    width: 26px; height: 26px; border-radius: 50%; z-index: 2; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff;
+    transition: transform .6s cubic-bezier(.22,1,.36,1);
+  }
+  .ab-bead::before { content: ''; position: absolute; top: 3px; left: 6px; width: 10px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.35); filter: blur(1px); }
+  .ab-bead.y {
+    background: radial-gradient(circle at 35% 30%, #86efac, #22c55e, #15803d);
+    box-shadow: 0 3px 8px rgba(34,197,94,.35), inset 0 -2px 3px rgba(0,0,0,.15);
+    position: relative; transform: translateX(var(--pos));
+  }
+  .ab-bead.n {
+    background: radial-gradient(circle at 35% 30%, #fca5a5, #ef4444, #b91c1c);
+    box-shadow: 0 3px 8px rgba(239,68,68,.35), inset 0 -2px 3px rgba(0,0,0,.15);
+    position: relative; transform: translateX(var(--pos));
+  }
+  .ab-bead.w {
+    background: radial-gradient(circle at 35% 30%, #e2e8f0, #94a3b8, #64748b);
+    box-shadow: 0 2px 6px rgba(0,0,0,.12); position: relative;
+    animation: float 2s ease infinite;
+  }
+  .ab-footer { display: flex; justify-content: space-between; padding: 8px 4px 0; font-size: 10px; font-weight: 800; border-top: 2px solid rgba(0,0,0,.08); margin-top: 4px; }
+  .ab-footer .ay { color: #15803d; } .ab-footer .an { color: #b91c1c; } .ab-footer .ap { color: #92400e; opacity: .6; }
+
+  /* ========== 2. AURORA ORBS ========== */
+  .aurora-row { display: flex; gap: 10px; justify-content: center; }
+  .aurora-col { text-align: center; }
+  .aurora-orb {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; position: relative;
+  }
+  .aurora-orb.y {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0, #86efac, #4ade80);
+    background-size: 300% 300%; animation: aurora 4s ease infinite;
+    color: #15803d; border: 2px solid #22c55e;
+    box-shadow: 0 0 14px rgba(34,197,94,.25), 0 0 28px rgba(34,197,94,.1);
+  }
+  .aurora-orb.n {
+    background: linear-gradient(135deg, #fee2e2, #fecaca, #fca5a5, #f87171);
+    background-size: 300% 300%; animation: aurora 4s ease infinite;
+    color: #991b1b; border: 2px solid #ef4444;
+    box-shadow: 0 0 14px rgba(239,68,68,.25), 0 0 28px rgba(239,68,68,.1);
+  }
+  .aurora-orb.w {
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff, #c7d2fe, #a5b4fc);
+    background-size: 300% 300%; animation: aurora 5s ease infinite;
+    color: #6366f1; border: 2px dashed #a5b4fc;
+    box-shadow: 0 0 10px rgba(99,102,241,.1);
+  }
+  .aurora-orb::after { content: ''; position: absolute; top: 3px; left: 7px; width: 14px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.4); filter: blur(2px); }
+  .aurora-nm { font-size: 7px; margin-top: 4px; font-weight: 600; color: #64748b; }
+
+  /* ========== 3-5. SCALES OF JUSTICE (3 versions) ========== */
+  .scales { display: flex; flex-direction: column; align-items: center; position: relative; height: 115px; }
+  .s-fulcrum { width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-bottom: 9px solid; position: absolute; top: 6px; z-index: 2; }
+  .s-pillar { width: 4px; height: 42px; border-radius: 2px; position: absolute; top: 14px; z-index: 1; }
+  .s-beam { width: 190px; height: 4px; border-radius: 2px; position: absolute; top: 13px; transform-origin: center center; transition: transform .8s cubic-bezier(.22,1,.36,1); z-index: 1; }
+  .s-chain { position: absolute; top: 15px; width: 1px; height: 22px; }
+  .s-chain.l { left: calc(50% - 86px); } .s-chain.r { right: calc(50% - 86px); }
+  .s-pan { position: absolute; width: 76px; border-radius: 0 0 50% 50%; height: 34px; display: flex; align-items: center; justify-content: center; gap: 3px; flex-wrap: wrap; padding: 5px; border-top: none; transition: top .8s cubic-bezier(.22,1,.36,1); }
+  .s-pan.yp { left: calc(50% - 124px); }
+  .s-pan.np { right: calc(50% - 124px); }
+  .s-marble { width: 16px; height: 16px; border-radius: 50%; font-size: 7px; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; }
+  .s-marble.ym { background: radial-gradient(circle at 35% 30%, #86efac, #22c55e); box-shadow: 0 2px 4px rgba(34,197,94,.3); }
+  .s-marble.nm { background: radial-gradient(circle at 35% 30%, #fca5a5, #ef4444); box-shadow: 0 2px 4px rgba(239,68,68,.3); }
+  .s-lbl { position: absolute; bottom: 6px; font-size: 8px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .s-lbl.ly { left: calc(50% - 110px); color: #22c55e; }
+  .s-lbl.ln { right: calc(50% - 110px); color: #ef4444; }
+  .s-base { position: absolute; bottom: 0; width: 52px; height: 7px; border-radius: 4px; }
+
+  /* v1 Classic Gold */
+  .sc1 .s-fulcrum { border-bottom-color: #c9a96e; }
+  .sc1 .s-pillar { background: linear-gradient(180deg, #c9a96e, #a07850); }
+  .sc1 .s-beam { background: linear-gradient(90deg, #a07850, #c9a96e, #a07850); box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+  .sc1 .s-chain { background: #c9a96e; }
+  .sc1 .s-pan { border: 2px solid; border-top: none; }
+  .sc1 .s-pan.yp { border-color: rgba(34,197,94,.25); background: rgba(34,197,94,.04); }
+  .sc1 .s-pan.np { border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.04); }
+  .sc1 .s-base { background: linear-gradient(180deg, #c9a96e, #a07850); box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+
+  /* v2 Sleek Chrome */
+  .sc2 .s-fulcrum { border-bottom-color: #94a3b8; }
+  .sc2 .s-pillar { background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
+  .sc2 .s-beam { background: linear-gradient(90deg, #cbd5e1, #e2e8f0, #cbd5e1); box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .sc2 .s-chain { background: #cbd5e1; }
+  .sc2 .s-pan { border: 2px solid #e2e8f0; border-top: none; background: #f8fafc; }
+  .sc2 .s-base { background: linear-gradient(180deg, #cbd5e1, #94a3b8); }
+
+  /* v3 Royal Purple */
+  .sc3 .s-fulcrum { border-bottom-color: #8b5cf6; }
+  .sc3 .s-pillar { background: linear-gradient(180deg, #a78bfa, #7c3aed); }
+  .sc3 .s-beam { background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed); box-shadow: 0 1px 6px rgba(124,58,237,.15); }
+  .sc3 .s-chain { background: #a78bfa; }
+  .sc3 .s-pan { border: 2px solid; border-top: none; }
+  .sc3 .s-pan.yp { border-color: rgba(34,197,94,.3); background: rgba(34,197,94,.05); }
+  .sc3 .s-pan.np { border-color: rgba(239,68,68,.3); background: rgba(239,68,68,.05); }
+  .sc3 .s-base { background: linear-gradient(180deg, #a78bfa, #7c3aed); box-shadow: 0 2px 6px rgba(124,58,237,.15); }
+
+  /* ========== 6-8. APPLE GLASS (3 versions) ========== */
+  /* v1: Frosted Orbs */
+  .apple1-row { display: flex; gap: 10px; justify-content: center; }
+  .apple1-col { text-align: center; }
+  .apple1 {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; position: relative;
+    backdrop-filter: blur(8px);
+  }
+  .apple1::before { content: ''; position: absolute; top: 4px; left: 8px; width: 16px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.5); filter: blur(2px); }
+  .apple1.y { background: linear-gradient(135deg, #dcfce7, #bbf7d066); border: 1.5px solid #86efac; color: #16a34a; box-shadow: 0 4px 16px rgba(34,197,94,.15); }
+  .apple1.n { background: linear-gradient(135deg, #fee2e2, #fecaca66); border: 1.5px solid #fca5a5; color: #dc2626; box-shadow: 0 4px 16px rgba(239,68,68,.15); }
+  .apple1.w { background: linear-gradient(135deg, #f1f5f9, #e2e8f066); border: 1.5px solid #cbd5e1; color: #94a3b8; animation: float 2.5s ease infinite; }
+  .apple1.w::before { display: none; }
+  .a1-nm { font-size: 7px; margin-top: 4px; font-weight: 600; color: #94a3b8; }
+
+  /* v2: Pill Capsules */
+  .apple2-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .apple2 {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+    backdrop-filter: blur(8px);
+  }
+  .apple2 .a2-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; }
+  .apple2 .a2-dot::before { content: ''; position: absolute; top: 1px; left: 2px; width: 3px; height: 2px; border-radius: 50%; background: rgba(255,255,255,.5); }
+  .apple2.y { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #bbf7d0; color: #16a34a; }
+  .apple2.y .a2-dot { background: radial-gradient(circle at 35% 30%, #86efac, #22c55e); }
+  .apple2.n { background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1.5px solid #fecaca; color: #dc2626; }
+  .apple2.n .a2-dot { background: radial-gradient(circle at 35% 30%, #fca5a5, #ef4444); }
+  .apple2.w { background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 1.5px dashed #cbd5e1; color: #94a3b8; }
+  .apple2.w .a2-dot { background: #cbd5e1; }
+
+  /* v3: Ring Indicators */
+  .apple3-row { display: flex; gap: 12px; justify-content: center; }
+  .apple3-col { text-align: center; }
+  .apple3 {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; position: relative;
+    background: #fff;
+  }
+  .apple3.y { box-shadow: 0 0 0 3px #22c55e, 0 0 0 6px rgba(34,197,94,.12), 0 4px 12px rgba(34,197,94,.1); color: #22c55e; }
+  .apple3.n { box-shadow: 0 0 0 3px #ef4444, 0 0 0 6px rgba(239,68,68,.12), 0 4px 12px rgba(239,68,68,.1); color: #ef4444; }
+  .apple3.w { box-shadow: 0 0 0 3px #e2e8f0; color: #cbd5e1; animation: float 2s ease infinite; }
+  .apple3.y::after, .apple3.n::after { content: ''; position: absolute; top: 3px; left: 9px; width: 14px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.6); filter: blur(2px); }
+  .a3-nm { font-size: 7px; margin-top: 6px; font-weight: 600; color: #94a3b8; }
+
+  /* ========== 9. ABACUS LITE (compact one-line) ========== */
+  .ab-lite { display: flex; flex-direction: column; gap: 4px; }
+  .ab-lite-row { display: flex; align-items: center; gap: 8px; }
+  .ab-lite-name { font-size: 9px; font-weight: 600; color: #64748b; width: 50px; }
+  .ab-lite-track { flex: 1; height: 8px; background: #f1f5f9; border-radius: 4px; position: relative; border: 1px solid #e2e8f0; }
+  .ab-lite-bead { position: absolute; top: -3px; width: 14px; height: 14px; border-radius: 50%; transition: left .6s cubic-bezier(.22,1,.36,1); }
+  .ab-lite-bead.y { background: radial-gradient(circle at 35% 30%, #86efac, #22c55e); left: calc(100% - 14px); box-shadow: 0 1px 4px rgba(34,197,94,.3); }
+  .ab-lite-bead.n { background: radial-gradient(circle at 35% 30%, #fca5a5, #ef4444); left: 0; box-shadow: 0 1px 4px rgba(239,68,68,.3); }
+  .ab-lite-bead.w { background: #cbd5e1; left: calc(50% - 7px); animation: float 2s ease infinite; }
+  .ab-lite-ends { display: flex; justify-content: space-between; font-size: 7px; font-weight: 700; color: #94a3b8; letter-spacing: .5px; margin-top: 2px; padding: 0 58px; }
+
+  /* ========== 10. TEST TUBES ========== */
+  .lab { display: flex; gap: 14px; justify-content: center; align-items: flex-end; padding: 6px 0 6px; position: relative; }
+  .lab::after { content: ''; position: absolute; bottom: 0; left: 12%; right: 12%; height: 5px; background: linear-gradient(180deg, #cbd5e1, #94a3b8); border-radius: 3px; }
+  .tube-c { display: flex; flex-direction: column; align-items: center; }
+  .tube-rim { width: 30px; height: 6px; background: #cbd5e1; border-radius: 3px 3px 0 0; border: 1.5px solid #94a3b8; border-bottom: none; }
+  .tube { width: 24px; height: 58px; border-radius: 0 0 12px 12px; background: rgba(241,245,249,.6); border: 1.5px solid #cbd5e1; border-top: none; position: relative; overflow: hidden; }
+  .tube-fill { position: absolute; bottom: 0; left: 0; right: 0; border-radius: 0 0 10px 10px; transition: height .8s cubic-bezier(.22,1,.36,1); }
+  .tube-fill.y { background: linear-gradient(180deg, #86efac, #22c55e); box-shadow: 0 0 8px rgba(34,197,94,.2); }
+  .tube-fill.n { background: linear-gradient(180deg, #fca5a5, #ef4444); box-shadow: 0 0 8px rgba(239,68,68,.2); }
+  .tube-fill.w { background: linear-gradient(180deg, #e2e8f0, #cbd5e1); }
+  .tube-bub { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); }
+  .tube-b { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,.5); margin-bottom: 3px; animation: float 1.5s ease infinite; }
+  .tube-nm { font-size: 7px; font-weight: 600; color: #64748b; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div style="max-width:960px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>Vote Display — 10 Options</h1>
+  <p class="subtitle">Full motion card preview. Click to select.</p>
+</div>
+
+<div class="options">
+
+<!-- ===== 1. ABACUS ===== -->
+<div class="option-wrap" onclick="select(this,'abacus')">
+  <div class="option-header"><span class="tag">01</span><h2>Abacus</h2><p>Wooden beads slide right for yes, left for no</p></div>
+  <div class="card-stage">
+    <div class="bite-card">
+      <div class="bc-topbar voting"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 5</div><div class="bc-tr"><div class="bc-title">Bylaw 1021 — Third Reading</div><div class="badge bv"><div class="bdot"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="bc-q">THAT Council adopts Bylaw 1021 as presented.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Wall</div></div></div>
+      <div class="bc-va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="abacus">
+          <div class="ab-row"><div class="ab-rod"></div><span class="ab-name">Veach</span><div class="ab-bead y" style="--pos:160px;">&#10003;</div></div>
+          <div class="ab-row"><div class="ab-rod"></div><span class="ab-name">Rabel</span><div class="ab-bead y" style="--pos:160px;">&#10003;</div></div>
+          <div class="ab-row"><div class="ab-rod"></div><span class="ab-name">Wall</span><div class="ab-bead n" style="--pos:0;">&#10007;</div></div>
+          <div class="ab-row"><div class="ab-rod"></div><span class="ab-name">Johnston</span><div class="ab-bead w">?</div></div>
+          <div class="ab-row"><div class="ab-rod"></div><span class="ab-name">Woodill</span><div class="ab-bead w">?</div></div>
+          <div class="ab-footer"><span class="an">NO: 1</span><span class="ap">2 pending</span><span class="ay">YES: 2</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="bite-card">
+      <div class="bc-topbar carried"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 5</div><div class="bc-tr"><div class="bc-title">Bylaw 1021 — Third Reading</div><div class="badge bc2"><div class="bdot"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="bc-q c">THAT Council adopted Bylaw 1021 as presented.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Wall</div></div></div>
+      <div class="bc-va ct"><div class="vl ci">Vote Result</div>
+        <div class="abacus">
+          <div class="ab-row"><div class="ab-rod"></div><span class="ab-name">Veach</span><div class="ab-bead y" style="--pos:160px;">&#10003;</div></div>
+          <div class="ab-row"><div class="ab-rod"></div><span class="ab-name">Rabel</span><div class="ab-bead y" style="--pos:160px;">&#10003;</div></div>
+          <div class="ab-row"><div class="ab-rod"></div><span class="ab-name">Wall</span><div class="ab-bead n" style="--pos:0;">&#10007;</div></div>
+          <div class="ab-row"><div class="ab-rod"></div><span class="ab-name">Johnston</span><div class="ab-bead y" style="--pos:160px;">&#10003;</div></div>
+          <div class="ab-row"><div class="ab-rod"></div><span class="ab-name">Woodill</span><div class="ab-bead y" style="--pos:160px;">&#10003;</div></div>
+          <div class="ab-footer"><span class="an">NO: 1</span><span class="ay">YES: 4</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 2. AURORA ORBS ===== -->
+<div class="option-wrap" onclick="select(this,'aurora-orbs')">
+  <div class="option-header"><span class="tag">02</span><h2>Aurora Orbs</h2><p>Northern lights shimmer on each vote orb</p></div>
+  <div class="card-stage">
+    <div class="bite-card">
+      <div class="bc-topbar voting"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 3</div><div class="bc-tr"><div class="bc-title">Water Rate Increase</div><div class="badge bv"><div class="bdot"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="bc-q">THAT Council adopts the water rate increase.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Mayor Veach</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Johnston</div></div></div>
+      <div class="bc-va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="aurora-row">
+          <div class="aurora-col"><div class="aurora-orb y">&#10003;</div><div class="aurora-nm">Veach</div></div>
+          <div class="aurora-col"><div class="aurora-orb y">&#10003;</div><div class="aurora-nm">Rabel</div></div>
+          <div class="aurora-col"><div class="aurora-orb n">&#10007;</div><div class="aurora-nm">Wall</div></div>
+          <div class="aurora-col"><div class="aurora-orb w">?</div><div class="aurora-nm">Johnston</div></div>
+          <div class="aurora-col"><div class="aurora-orb w">?</div><div class="aurora-nm">Woodill</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bite-card">
+      <div class="bc-topbar carried"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 3</div><div class="bc-tr"><div class="bc-title">Water Rate Increase</div><div class="badge bc2"><div class="bdot"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="bc-q c">THAT Council adopted the water rate increase.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Mayor Veach</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Johnston</div></div></div>
+      <div class="bc-va ct"><div class="vl ci">Vote Result</div>
+        <div class="aurora-row">
+          <div class="aurora-col"><div class="aurora-orb y">&#10003;</div><div class="aurora-nm">Veach</div></div>
+          <div class="aurora-col"><div class="aurora-orb y">&#10003;</div><div class="aurora-nm">Rabel</div></div>
+          <div class="aurora-col"><div class="aurora-orb n">&#10007;</div><div class="aurora-nm">Wall</div></div>
+          <div class="aurora-col"><div class="aurora-orb y">&#10003;</div><div class="aurora-nm">Johnston</div></div>
+          <div class="aurora-col"><div class="aurora-orb y">&#10003;</div><div class="aurora-nm">Woodill</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3. SCALES — CLASSIC GOLD ===== -->
+<div class="option-wrap" onclick="select(this,'scales-gold')">
+  <div class="option-header"><span class="tag">03</span><h2>Scales of Justice — Classic Gold</h2><p>Warm brass with marble vote weights</p></div>
+  <div class="card-stage">
+    <div class="bite-card">
+      <div class="bc-topbar voting"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 6</div><div class="bc-tr"><div class="bc-title">Road Maintenance Budget</div><div class="badge bv"><div class="bdot"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="bc-q">THAT Council adopts the road budget.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Johnston</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Mayor Veach</div></div></div>
+      <div class="bc-va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="scales sc1"><div class="s-fulcrum"></div><div class="s-pillar"></div><div class="s-beam" style="transform:rotate(-8deg);"></div><div class="s-chain l"></div><div class="s-chain r"></div><div class="s-pan yp" style="top:42px;"><div class="s-marble ym">V</div><div class="s-marble ym">R</div></div><div class="s-pan np" style="top:28px;"><div class="s-marble nm">W</div></div><div class="s-lbl ly">YES: 2</div><div class="s-lbl ln">NO: 1</div><div class="s-base"></div></div>
+      </div>
+    </div>
+    <div class="bite-card">
+      <div class="bc-topbar carried"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 6</div><div class="bc-tr"><div class="bc-title">Road Maintenance Budget</div><div class="badge bc2"><div class="bdot"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="bc-q c">THAT Council adopted the road budget.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Johnston</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Mayor Veach</div></div></div>
+      <div class="bc-va ct"><div class="vl ci">Vote Result</div>
+        <div class="scales sc1"><div class="s-fulcrum"></div><div class="s-pillar"></div><div class="s-beam" style="transform:rotate(-12deg);"></div><div class="s-chain l"></div><div class="s-chain r"></div><div class="s-pan yp" style="top:48px;"><div class="s-marble ym">V</div><div class="s-marble ym">R</div><div class="s-marble ym">J</div><div class="s-marble ym">W</div></div><div class="s-pan np" style="top:22px;"><div class="s-marble nm">W</div></div><div class="s-lbl ly">YES: 4</div><div class="s-lbl ln">NO: 1</div><div class="s-base"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4. SCALES — SLEEK CHROME ===== -->
+<div class="option-wrap" onclick="select(this,'scales-chrome')">
+  <div class="option-header"><span class="tag">04</span><h2>Scales of Justice — Sleek Chrome</h2><p>Modern silver, minimal and clean</p></div>
+  <div class="card-stage">
+    <div class="bite-card">
+      <div class="bc-topbar voting"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 2</div><div class="bc-tr"><div class="bc-title">Zoning Amendment</div><div class="badge bv"><div class="bdot"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="bc-q">THAT Council adopts the zoning amendment.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Wall</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Rabel</div></div></div>
+      <div class="bc-va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="scales sc2"><div class="s-fulcrum"></div><div class="s-pillar"></div><div class="s-beam" style="transform:rotate(-6deg);"></div><div class="s-chain l"></div><div class="s-chain r"></div><div class="s-pan yp" style="top:40px;"><div class="s-marble ym">V</div><div class="s-marble ym">R</div></div><div class="s-pan np" style="top:30px;"><div class="s-marble nm">W</div></div><div class="s-lbl ly">YES: 2</div><div class="s-lbl ln">NO: 1</div><div class="s-base"></div></div>
+      </div>
+    </div>
+    <div class="bite-card">
+      <div class="bc-topbar carried"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 2</div><div class="bc-tr"><div class="bc-title">Zoning Amendment</div><div class="badge bc2"><div class="bdot"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="bc-q c">THAT Council adopted the zoning amendment.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Wall</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Rabel</div></div></div>
+      <div class="bc-va ct"><div class="vl ci">Vote Result</div>
+        <div class="scales sc2"><div class="s-fulcrum"></div><div class="s-pillar"></div><div class="s-beam" style="transform:rotate(-12deg);"></div><div class="s-chain l"></div><div class="s-chain r"></div><div class="s-pan yp" style="top:48px;"><div class="s-marble ym">V</div><div class="s-marble ym">R</div><div class="s-marble ym">J</div><div class="s-marble ym">W</div></div><div class="s-pan np" style="top:22px;"><div class="s-marble nm">W</div></div><div class="s-lbl ly">YES: 4</div><div class="s-lbl ln">NO: 1</div><div class="s-base"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 5. SCALES — ROYAL PURPLE ===== -->
+<div class="option-wrap" onclick="select(this,'scales-purple')">
+  <div class="option-header"><span class="tag">05</span><h2>Scales of Justice — Royal Purple</h2><p>Violet hardware, dramatic tilt, bold</p></div>
+  <div class="card-stage">
+    <div class="bite-card">
+      <div class="bc-topbar voting"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 4</div><div class="bc-tr"><div class="bc-title">Delegation Policy</div><div class="badge bv"><div class="bdot"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="bc-q">THAT Council adopts the delegation policy.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Woodill</div></div></div>
+      <div class="bc-va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="scales sc3"><div class="s-fulcrum"></div><div class="s-pillar"></div><div class="s-beam" style="transform:rotate(-10deg);"></div><div class="s-chain l"></div><div class="s-chain r"></div><div class="s-pan yp" style="top:44px;"><div class="s-marble ym">V</div><div class="s-marble ym">R</div><div class="s-marble ym">J</div></div><div class="s-pan np" style="top:24px;"><div class="s-marble nm">W</div></div><div class="s-lbl ly">YES: 3</div><div class="s-lbl ln">NO: 1</div><div class="s-base"></div></div>
+      </div>
+    </div>
+    <div class="bite-card">
+      <div class="bc-topbar carried"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 4</div><div class="bc-tr"><div class="bc-title">Delegation Policy</div><div class="badge bc2"><div class="bdot"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="bc-q c">THAT Council adopted the delegation policy.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Woodill</div></div></div>
+      <div class="bc-va ct"><div class="vl ci">Vote Result</div>
+        <div class="scales sc3"><div class="s-fulcrum"></div><div class="s-pillar"></div><div class="s-beam" style="transform:rotate(-14deg);"></div><div class="s-chain l"></div><div class="s-chain r"></div><div class="s-pan yp" style="top:50px;"><div class="s-marble ym">V</div><div class="s-marble ym">R</div><div class="s-marble ym">J</div><div class="s-marble ym">W</div></div><div class="s-pan np" style="top:20px;"><div class="s-marble nm">W</div></div><div class="s-lbl ly">YES: 4</div><div class="s-lbl ln">NO: 1</div><div class="s-base"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6. APPLE GLASS — FROSTED ORBS ===== -->
+<div class="option-wrap" onclick="select(this,'apple-orbs')">
+  <div class="option-header"><span class="tag">06</span><h2>Apple Glass — Frosted Orbs</h2><p>Translucent spheres with highlight reflections</p></div>
+  <div class="card-stage">
+    <div class="bite-card">
+      <div class="bc-topbar voting"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 1</div><div class="bc-tr"><div class="bc-title">Strategic Plan Adoption</div><div class="badge bv"><div class="bdot"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="bc-q">THAT Council adopts the strategic plan.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Wall</div></div></div>
+      <div class="bc-va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="apple1-row">
+          <div class="apple1-col"><div class="apple1 y">&#10003;</div><div class="a1-nm">Veach</div></div>
+          <div class="apple1-col"><div class="apple1 y">&#10003;</div><div class="a1-nm">Rabel</div></div>
+          <div class="apple1-col"><div class="apple1 n">&#10007;</div><div class="a1-nm">Wall</div></div>
+          <div class="apple1-col"><div class="apple1 w">?</div><div class="a1-nm">Johnston</div></div>
+          <div class="apple1-col"><div class="apple1 w">?</div><div class="a1-nm">Woodill</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bite-card">
+      <div class="bc-topbar carried"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 1</div><div class="bc-tr"><div class="bc-title">Strategic Plan Adoption</div><div class="badge bc2"><div class="bdot"></div><span>CARRIED UNANIMOUSLY</span></div></div></div>
+      <div class="bc-q c">THAT Council adopted the strategic plan.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Wall</div></div></div>
+      <div class="bc-va ct"><div class="vl ci">Vote Result</div>
+        <div class="apple1-row">
+          <div class="apple1-col"><div class="apple1 y">&#10003;</div><div class="a1-nm">Veach</div></div>
+          <div class="apple1-col"><div class="apple1 y">&#10003;</div><div class="a1-nm">Rabel</div></div>
+          <div class="apple1-col"><div class="apple1 y">&#10003;</div><div class="a1-nm">Wall</div></div>
+          <div class="apple1-col"><div class="apple1 y">&#10003;</div><div class="a1-nm">Johnston</div></div>
+          <div class="apple1-col"><div class="apple1 y">&#10003;</div><div class="a1-nm">Woodill</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 7. APPLE GLASS — PILL CAPSULES ===== -->
+<div class="option-wrap" onclick="select(this,'apple-pills')">
+  <div class="option-header"><span class="tag">07</span><h2>Apple Glass — Pill Capsules</h2><p>Rounded pill tags with gloss dots</p></div>
+  <div class="card-stage">
+    <div class="bite-card">
+      <div class="bc-topbar voting"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 7</div><div class="bc-tr"><div class="bc-title">Park Improvement Grant</div><div class="badge bv"><div class="bdot"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="bc-q">THAT Council adopts the park grant.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Woodill</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Rabel</div></div></div>
+      <div class="bc-va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="apple2-row">
+          <div class="apple2 y"><div class="a2-dot"></div>Veach — Yes</div>
+          <div class="apple2 y"><div class="a2-dot"></div>Rabel — Yes</div>
+          <div class="apple2 n"><div class="a2-dot"></div>Wall — No</div>
+          <div class="apple2 w"><div class="a2-dot"></div>Johnston</div>
+          <div class="apple2 w"><div class="a2-dot"></div>Woodill</div>
+        </div>
+      </div>
+    </div>
+    <div class="bite-card">
+      <div class="bc-topbar carried"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 7</div><div class="bc-tr"><div class="bc-title">Park Improvement Grant</div><div class="badge bc2"><div class="bdot"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="bc-q c">THAT Council adopted the park grant.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Woodill</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Rabel</div></div></div>
+      <div class="bc-va ct"><div class="vl ci">Vote Result</div>
+        <div class="apple2-row">
+          <div class="apple2 y"><div class="a2-dot"></div>Veach — Yes</div>
+          <div class="apple2 y"><div class="a2-dot"></div>Rabel — Yes</div>
+          <div class="apple2 n"><div class="a2-dot"></div>Wall — No</div>
+          <div class="apple2 y"><div class="a2-dot"></div>Johnston — Yes</div>
+          <div class="apple2 y"><div class="a2-dot"></div>Woodill — Yes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 8. APPLE GLASS — RING INDICATORS ===== -->
+<div class="option-wrap" onclick="select(this,'apple-rings')">
+  <div class="option-header"><span class="tag">08</span><h2>Apple Glass — Ring Indicators</h2><p>Clean circles with colored ring halos</p></div>
+  <div class="card-stage">
+    <div class="bite-card">
+      <div class="bc-topbar voting"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 8</div><div class="bc-tr"><div class="bc-title">Emergency Services</div><div class="badge bv"><div class="bdot"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="bc-q">THAT Council adopts the emergency services agreement.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Johnston</div></div></div>
+      <div class="bc-va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="apple3-row">
+          <div class="apple3-col"><div class="apple3 y">&#10003;</div><div class="a3-nm">Veach</div></div>
+          <div class="apple3-col"><div class="apple3 y">&#10003;</div><div class="a3-nm">Rabel</div></div>
+          <div class="apple3-col"><div class="apple3 n">&#10007;</div><div class="a3-nm">Wall</div></div>
+          <div class="apple3-col"><div class="apple3 w">?</div><div class="a3-nm">Johnston</div></div>
+          <div class="apple3-col"><div class="apple3 w">?</div><div class="a3-nm">Woodill</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bite-card">
+      <div class="bc-topbar carried"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 8</div><div class="bc-tr"><div class="bc-title">Emergency Services</div><div class="badge bc2"><div class="bdot"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="bc-q c">THAT Council adopted the emergency services agreement.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Johnston</div></div></div>
+      <div class="bc-va ct"><div class="vl ci">Vote Result</div>
+        <div class="apple3-row">
+          <div class="apple3-col"><div class="apple3 y">&#10003;</div><div class="a3-nm">Veach</div></div>
+          <div class="apple3-col"><div class="apple3 y">&#10003;</div><div class="a3-nm">Rabel</div></div>
+          <div class="apple3-col"><div class="apple3 n">&#10007;</div><div class="a3-nm">Wall</div></div>
+          <div class="apple3-col"><div class="apple3 y">&#10003;</div><div class="a3-nm">Johnston</div></div>
+          <div class="apple3-col"><div class="apple3 y">&#10003;</div><div class="a3-nm">Woodill</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 9. ABACUS LITE ===== -->
+<div class="option-wrap" onclick="select(this,'abacus-lite')">
+  <div class="option-header"><span class="tag">09</span><h2>Abacus Lite</h2><p>Compact one-line tracks — bead slides to the side</p></div>
+  <div class="card-stage">
+    <div class="bite-card">
+      <div class="bc-topbar voting"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 9</div><div class="bc-tr"><div class="bc-title">Community Grant Program</div><div class="badge bv"><div class="bdot"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="bc-q">THAT Council adopts the community grant program.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Mayor Veach</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Woodill</div></div></div>
+      <div class="bc-va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="ab-lite">
+          <div class="ab-lite-row"><span class="ab-lite-name">Veach</span><div class="ab-lite-track"><div class="ab-lite-bead y"></div></div></div>
+          <div class="ab-lite-row"><span class="ab-lite-name">Rabel</span><div class="ab-lite-track"><div class="ab-lite-bead y"></div></div></div>
+          <div class="ab-lite-row"><span class="ab-lite-name">Wall</span><div class="ab-lite-track"><div class="ab-lite-bead n"></div></div></div>
+          <div class="ab-lite-row"><span class="ab-lite-name">Johnston</span><div class="ab-lite-track"><div class="ab-lite-bead w"></div></div></div>
+          <div class="ab-lite-row"><span class="ab-lite-name">Woodill</span><div class="ab-lite-track"><div class="ab-lite-bead w"></div></div></div>
+          <div class="ab-lite-ends"><span>NO</span><span>YES</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="bite-card">
+      <div class="bc-topbar carried"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 9</div><div class="bc-tr"><div class="bc-title">Community Grant Program</div><div class="badge bc2"><div class="bdot"></div><span>CARRIED UNANIMOUSLY</span></div></div></div>
+      <div class="bc-q c">THAT Council adopted the community grant program.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Mayor Veach</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Woodill</div></div></div>
+      <div class="bc-va ct"><div class="vl ci">Vote Result</div>
+        <div class="ab-lite">
+          <div class="ab-lite-row"><span class="ab-lite-name">Veach</span><div class="ab-lite-track"><div class="ab-lite-bead y"></div></div></div>
+          <div class="ab-lite-row"><span class="ab-lite-name">Rabel</span><div class="ab-lite-track"><div class="ab-lite-bead y"></div></div></div>
+          <div class="ab-lite-row"><span class="ab-lite-name">Wall</span><div class="ab-lite-track"><div class="ab-lite-bead y"></div></div></div>
+          <div class="ab-lite-row"><span class="ab-lite-name">Johnston</span><div class="ab-lite-track"><div class="ab-lite-bead y"></div></div></div>
+          <div class="ab-lite-row"><span class="ab-lite-name">Woodill</span><div class="ab-lite-track"><div class="ab-lite-bead y"></div></div></div>
+          <div class="ab-lite-ends"><span>NO</span><span>YES</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 10. TEST TUBES ===== -->
+<div class="option-wrap" onclick="select(this,'test-tubes')">
+  <div class="option-header"><span class="tag">10</span><h2>Test Tubes</h2><p>Liquid fills green or red with rising bubbles</p></div>
+  <div class="card-stage">
+    <div class="bite-card">
+      <div class="bc-topbar voting"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 10</div><div class="bc-tr"><div class="bc-title">Transit Service Agreement</div><div class="badge bv"><div class="bdot"></div><span>AWAITING VOTE</span></div></div></div>
+      <div class="bc-q">THAT Council adopts the transit agreement.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Mayor Veach</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Rabel</div></div></div>
+      <div class="bc-va vt"><div class="vl vi">Vote &middot; All in favour?</div>
+        <div class="lab">
+          <div class="tube-c"><div class="tube-rim"></div><div class="tube"><div class="tube-fill y" style="height:80%;"></div><div class="tube-bub"><div class="tube-b"></div><div class="tube-b" style="animation-delay:.3s;"></div></div></div><div class="tube-nm">Veach</div></div>
+          <div class="tube-c"><div class="tube-rim"></div><div class="tube"><div class="tube-fill y" style="height:80%;"></div><div class="tube-bub"><div class="tube-b" style="animation-delay:.5s;"></div></div></div><div class="tube-nm">Rabel</div></div>
+          <div class="tube-c"><div class="tube-rim"></div><div class="tube"><div class="tube-fill n" style="height:80%;"></div></div><div class="tube-nm">Wall</div></div>
+          <div class="tube-c"><div class="tube-rim"></div><div class="tube"><div class="tube-fill w" style="height:15%;"></div></div><div class="tube-nm" style="opacity:.5;">Johnston</div></div>
+          <div class="tube-c"><div class="tube-rim"></div><div class="tube"><div class="tube-fill w" style="height:15%;"></div></div><div class="tube-nm" style="opacity:.5;">Woodill</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bite-card">
+      <div class="bc-topbar carried"></div>
+      <div class="bc-header"><div class="bc-meta">Motion &middot; Item 10</div><div class="bc-tr"><div class="bc-title">Transit Service Agreement</div><div class="badge bc2"><div class="bdot"></div><span>CARRIED 4-1</span></div></div></div>
+      <div class="bc-q c">THAT Council adopted the transit agreement.</div>
+      <div class="bc-tiles"><div class="tile tm"><div class="tile-l">Moved By</div><div class="tile-n">Mayor Veach</div></div><div class="tile ts"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Rabel</div></div></div>
+      <div class="bc-va ct"><div class="vl ci">Vote Result</div>
+        <div class="lab">
+          <div class="tube-c"><div class="tube-rim"></div><div class="tube"><div class="tube-fill y" style="height:90%;"></div></div><div class="tube-nm">Veach</div></div>
+          <div class="tube-c"><div class="tube-rim"></div><div class="tube"><div class="tube-fill y" style="height:90%;"></div></div><div class="tube-nm">Rabel</div></div>
+          <div class="tube-c"><div class="tube-rim"></div><div class="tube"><div class="tube-fill n" style="height:90%;"></div></div><div class="tube-nm">Wall</div></div>
+          <div class="tube-c"><div class="tube-rim"></div><div class="tube"><div class="tube-fill y" style="height:90%;"></div></div><div class="tube-nm">Johnston</div></div>
+          <div class="tube-c"><div class="tube-rim"></div><div class="tube"><div class="tube-fill y" style="height:90%;"></div></div><div class="tube-nm">Woodill</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const names = {
+  'abacus': 'Abacus',
+  'aurora-orbs': 'Aurora Orbs',
+  'scales-gold': 'Scales — Classic Gold',
+  'scales-chrome': 'Scales — Sleek Chrome',
+  'scales-purple': 'Scales — Royal Purple',
+  'apple-orbs': 'Apple Glass — Frosted Orbs',
+  'apple-pills': 'Apple Glass — Pill Capsules',
+  'apple-rings': 'Apple Glass — Ring Indicators',
+  'abacus-lite': 'Abacus Lite',
+  'test-tubes': 'Test Tubes'
+};
+function select(el, id) {
+  document.querySelectorAll('.option-wrap').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('pick-text').textContent = names[id];
+}
+</script>
+</body>
+</html>

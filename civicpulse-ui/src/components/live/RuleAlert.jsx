@@ -165,8 +165,8 @@ export default function RuleAlert({ topics, transcript }) {
 
   return (
     <div style={{
-      borderTop: `1px solid #fde68a`,
-      background: 'linear-gradient(to bottom, #fffbeb, #fefce8)',
+      borderTop: '1px solid #e2e8f0',
+      background: '#f8fafc',
       padding: '6px 8px',
       flexShrink: 0,
       maxHeight: '35%',
@@ -175,17 +175,17 @@ export default function RuleAlert({ topics, transcript }) {
       <div style={{
         display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5,
       }}>
-        <svg width="10" height="10" fill="none" stroke="#ca8a04" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
+        <svg width="10" height="10" fill="none" stroke="#64748b" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 9v4m0 4h.01" />
           <circle cx="12" cy="12" r="10" strokeWidth="2" />
         </svg>
         <span style={{
           fontSize: 8.5, fontWeight: 700, textTransform: 'uppercase',
-          letterSpacing: 1, color: '#92400e',
+          letterSpacing: 1, color: '#475569',
         }}>
           Procedure Alert
         </span>
-        <span style={{ fontSize: 8, color: '#b45309', marginLeft: 'auto' }}>
+        <span style={{ fontSize: 8, color: '#94a3b8', marginLeft: 'auto' }}>
           {activeAlerts.length} rule{activeAlerts.length !== 1 ? 's' : ''}
         </span>
       </div>
@@ -194,8 +194,8 @@ export default function RuleAlert({ topics, transcript }) {
         {activeAlerts.map((alert) => (
           <div key={alert.id} style={{
             background: '#fff',
-            border: '1px solid #fde68a',
-            borderLeft: '3px solid #ca8a04',
+            border: '1px solid #e2e8f0',
+            borderLeft: '3px solid #94a3b8',
             borderRadius: '0 6px 6px 0',
             padding: '5px 8px',
             animation: 'ruleSlideIn .4s cubic-bezier(.22,1,.36,1)',
@@ -205,8 +205,8 @@ export default function RuleAlert({ topics, transcript }) {
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
                 <span style={{
-                  fontSize: 8, fontWeight: 700, color: '#ca8a04',
-                  background: '#fefce8', border: '1px solid #fde68a',
+                  fontSize: 8, fontWeight: 700, color: '#64748b',
+                  background: '#f1f5f9', border: '1px solid #cbd5e1',
                   borderRadius: 3, padding: '0 4px',
                 }}>
                   {alert.section}
@@ -214,7 +214,7 @@ export default function RuleAlert({ topics, transcript }) {
                 <span style={{ fontSize: 9.5, fontWeight: 700, color: COLORS.headingText }}>
                   {alert.title}
                 </span>
-                <span style={{ fontSize: 8, color: '#b45309', marginLeft: 'auto' }}>
+                <span style={{ fontSize: 8, color: '#94a3b8', marginLeft: 'auto' }}>
                   {alert.time}
                 </span>
               </div>
@@ -227,7 +227,7 @@ export default function RuleAlert({ topics, transcript }) {
               aria-label={`Dismiss ${alert.title} alert`}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: '#ca8a04', opacity: 0.5, padding: 0, flexShrink: 0,
+                color: '#94a3b8', opacity: 0.5, padding: 0, flexShrink: 0,
                 alignSelf: 'flex-start',
               }}
             >
