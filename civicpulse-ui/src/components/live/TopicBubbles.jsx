@@ -9,12 +9,12 @@ const BUBBLE_STYLES = {
   topic:        { grad: ['#eef2ff','#c7d2fe','#a5b4fc','#818cf8'], ring: '#a5b4fc', glow: 'rgba(99,102,241,0.12)',  border: 'rgba(165,180,252,0.5)', text: '#4338ca' },
   bylaw:        { grad: ['#fefce8','#fde68a','#fcd34d','#fbbf24'], ring: '#fcd34d', glow: 'rgba(202,138,4,0.1)',    border: 'rgba(253,230,138,0.5)', text: '#92400e' },
   department:   { grad: ['#fff7ed','#fed7aa','#fdba74','#fb923c'], ring: '#fdba74', glow: 'rgba(234,88,12,0.1)',    border: 'rgba(253,186,116,0.5)', text: '#c2410c' },
-  location:     { grad: ['#ecfdf5','#a7f3d0','#6ee7b7','#34d399'], ring: '#6ee7b7', glow: 'rgba(5,150,105,0.1)',    border: 'rgba(110,231,183,0.4)', text: '#065f46' },
+  location:     { grad: ['#f8fafc','#e2e8f0','#cbd5e1','#94a3b8'], ring: '#cbd5e1', glow: 'rgba(100,116,139,0.08)', border: 'rgba(203,213,225,0.5)', text: '#475569' },
   program:      { grad: ['#f5f3ff','#ddd6fe','#c4b5fd','#a78bfa'], ring: '#c4b5fd', glow: 'rgba(124,58,237,0.1)',   border: 'rgba(196,181,253,0.5)', text: '#5b21b6' },
   policy:       { grad: ['#fdf2f8','#fbcfe8','#f9a8d4','#f472b6'], ring: '#f9a8d4', glow: 'rgba(219,39,119,0.1)',   border: 'rgba(251,207,232,0.5)', text: '#9d174d' },
   motion:       { grad: ['#eff6ff','#bfdbfe','#93c5fd','#60a5fa'], ring: '#93c5fd', glow: 'rgba(37,99,235,0.1)',    border: 'rgba(147,197,253,0.4)', text: '#1e40af' },
   organization: { grad: ['#ecfeff','#a5f3fc','#67e8f9','#22d3ee'], ring: '#67e8f9', glow: 'rgba(6,182,212,0.1)',    border: 'rgba(165,243,252,0.4)', text: '#155e75' },
-  budget:       { grad: ['#fffbeb','#fde68a','#fcd34d','#f59e0b'], ring: '#fcd34d', glow: 'rgba(245,158,11,0.1)',   border: 'rgba(253,230,138,0.5)', text: '#92400e' },
+  budget:       { grad: ['#ecfdf5','#a7f3d0','#6ee7b7','#34d399'], ring: '#6ee7b7', glow: 'rgba(5,150,105,0.1)',    border: 'rgba(110,231,183,0.4)', text: '#065f46' },
   person:       { grad: ['#f8fafc','#e2e8f0','#cbd5e1','#94a3b8'], ring: '#cbd5e1', glow: 'rgba(100,116,139,0.08)', border: 'rgba(203,213,225,0.5)', text: '#475569' },
 };
 
@@ -173,9 +173,16 @@ export default function TopicBubbles({ topics, status, compact }) {
     });
   }, []);
 
+  // Group by category so same-colored bubbles cluster together
+  const CATEGORY_ORDER = Object.keys(BUBBLE_STYLES);
   const topicsArray = Array.from(topics.values())
     .filter(t => t.state !== 'EVICTED')
-    .sort((a, b) => (b.decay_score || 0) - (a.decay_score || 0));
+    .sort((a, b) => {
+      const catA = CATEGORY_ORDER.indexOf(a.category ?? 'topic');
+      const catB = CATEGORY_ORDER.indexOf(b.category ?? 'topic');
+      if (catA !== catB) return catA - catB;
+      return (b.decay_score || 0) - (a.decay_score || 0);
+    });
 
   const isConnecting = status === 'ACTIVE' && topicsArray.length === 0;
 
@@ -255,7 +262,7 @@ export default function TopicBubbles({ topics, status, compact }) {
           display: 'flex',
           flexWrap: viewMode === 'bubbles' ? 'wrap' : 'nowrap',
           flexDirection: viewMode === 'timeline' ? 'column' : 'row',
-          gap: viewMode === 'timeline' ? 5 : (compact ? 10 : 14),
+          gap: viewMode === 'timeline' ? 5 : (compact ? 16 : 22),
           padding: viewMode === 'timeline' ? '6px 8px' : (compact ? '8px 14px' : '16px 20px'),
           alignContent: viewMode === 'bubbles' ? 'flex-start' : undefined,
           justifyContent: viewMode === 'bubbles' ? 'center' : undefined,
@@ -284,21 +291,50 @@ export default function TopicBubbles({ topics, status, compact }) {
           </div>
         )}
 
-        {/* Bubble view */}
-        {viewMode === 'bubbles' && topicsArray.map((topic) => {
-          const id = topic.normalized_id || topic.label;
-          return (
-            <TopicBubble
-              key={id}
-              topic={topic}
-              compact={compact}
-              locked={lockedIds.has(id)}
-              isNew={newIds.has(id)}
-              colorOn={colorOn}
-              onToggleLock={toggleLock}
-            />
-          );
-        })}
+        {/* Bubble view — clustered by category */}
+        {viewMode === 'bubbles' && (() => {
+          // Group topics by category
+          const groups = {};
+          topicsArray.forEach(topic => {
+            const cat = topic.category || 'topic';
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(topic);
+          });
+          // Render each category as a tight cluster
+          return Object.entries(groups).map(([cat, catTopics]) => (
+            <div
+              key={cat}
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: compact ? 4 : 6,
+                padding: compact ? 4 : 6,
+                borderRadius: '999px',
+                background: colorOn
+                  ? `${(BUBBLE_STYLES[cat] || BUBBLE_STYLES.topic).glow}`
+                  : 'rgba(0,0,0,0.015)',
+                transition: 'background 0.4s ease, box-shadow 0.4s ease',
+              }}
+            >
+              {catTopics.map(topic => {
+                const id = topic.normalized_id || topic.label;
+                return (
+                  <TopicBubble
+                    key={id}
+                    topic={topic}
+                    compact={compact}
+                    locked={lockedIds.has(id)}
+                    isNew={newIds.has(id)}
+                    colorOn={colorOn}
+                    onToggleLock={toggleLock}
+                  />
+                );
+              })}
+            </div>
+          ));
+        })()}
 
         {/* Timeline view */}
         {viewMode === 'timeline' && topicsArray.length > 0 && (

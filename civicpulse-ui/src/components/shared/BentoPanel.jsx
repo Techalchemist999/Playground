@@ -1,8 +1,25 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { COLORS, SPACING } from '../../styles/tokens';
 
-export default function BentoPanel({ title, icon, badge, collapsed: defaultCollapsed = false, style, children }) {
+export default function BentoPanel({ title, icon, badge, collapsed: defaultCollapsed = false, style, headerProps, children }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const mouseDownPos = useRef(null);
+
+  // Only toggle collapse on clean click (no drag movement)
+  const handleMouseDown = (e) => {
+    mouseDownPos.current = { x: e.clientX, y: e.clientY };
+    if (headerProps?.onMouseDown) headerProps.onMouseDown(e);
+  };
+
+  const handleClick = (e) => {
+    if (mouseDownPos.current) {
+      const dx = Math.abs(e.clientX - mouseDownPos.current.x);
+      const dy = Math.abs(e.clientY - mouseDownPos.current.y);
+      // If mouse moved more than 4px, it was a drag — don't collapse
+      if (dx > 4 || dy > 4) return;
+    }
+    setCollapsed(!collapsed);
+  };
 
   return (
     <div style={{
@@ -16,11 +33,12 @@ export default function BentoPanel({ title, icon, badge, collapsed: defaultColla
       transition: 'all .3s cubic-bezier(.22,1,.36,1)',
       ...style,
     }}>
-      {/* Header — always visible, click to toggle */}
+      {/* Header — drag to move, click to collapse */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={handleClick}
+        onMouseDown={handleMouseDown}
         aria-expanded={!collapsed}
-        aria-label={`${title} panel — click to ${collapsed ? 'expand' : 'collapse'}`}
+        aria-label={`${title} panel — drag to move, click to ${collapsed ? 'expand' : 'collapse'}`}
         style={{
           width: '100%',
           display: 'flex',
@@ -32,6 +50,7 @@ export default function BentoPanel({ title, icon, badge, collapsed: defaultColla
           borderBottom: collapsed ? 'none' : `1px solid ${COLORS.subtleBorder}`,
           transition: 'background .15s',
           flexShrink: 0,
+          ...(headerProps?.style || {}),
         }}
       >
         {icon}
