@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Agenda Box Design Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:24px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1100px;margin:0 auto;}
+.sw{background:#fff;border-radius:14px;border:2px solid #e2e8f0;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,.04);cursor:pointer;transition:all .3s;}
+.sw:hover{border-color:#a5b4fc;box-shadow:0 6px 24px rgba(99,102,241,.12);transform:translateY(-2px);}
+.sw.selected{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+.sh{padding:10px 16px 8px;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid #f1f5f9;}
+.sh h2{font-size:13px;font-weight:700;}
+.sh p{font-size:9px;color:#94a3b8;margin-left:auto;font-style:italic;}
+.preview{padding:10px;background:#f8fafc;height:340px;overflow:hidden;}
+
+/* Shared panel shell */
+.pnl{background:#fff;border-radius:10px;border:1px solid #e2e8f0;height:100%;display:flex;flex-direction:column;overflow:hidden;}
+.ph{padding:6px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.ph .tt{font-size:9px;font-weight:700;color:#0f172a;}
+.ph .bd{font-size:7px;font-weight:700;padding:1px 5px;border-radius:999px;margin-left:auto;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;}
+.pbdy{flex:1;overflow-y:auto;padding:6px 8px;}
+
+/* Shared elements */
+.prog{height:4px;border-radius:2px;background:#f1f5f9;margin-bottom:6px;overflow:hidden;display:flex;}
+.prog-d{background:#cbd5e1;transition:width .5s;}
+.prog-a{background:#94a3b8;transition:width .5s;}
+.tabs{display:flex;background:#f1f5f9;border-radius:4px;padding:1px;margin-bottom:6px;}
+.tab{padding:2px 7px;font-size:7px;font-weight:600;border-radius:3px;color:#94a3b8;}
+.tab.a{background:#fff;color:#475569;box-shadow:0 1px 2px rgba(0,0,0,.06);}
+
+/* Item styles */
+.itm{display:flex;gap:6px;padding:4px 6px;align-items:flex-start;border-radius:4px;transition:all .15s;}
+.num{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0;}
+.num.done{background:#f1f5f9;border:1.5px solid #cbd5e1;color:#64748b;}
+.num.act{background:#f1f5f9;border:1.5px solid #475569;color:#475569;}
+.num.pend{background:#f8fafc;border:1px solid #e2e8f0;color:#94a3b8;}
+.itxt{font-size:7.5px;font-weight:600;color:#334155;line-height:1.3;}
+.itxt.act{color:#475569;font-weight:700;}
+.idsc{font-size:6px;color:#94a3b8;}
+
+/* Current item card */
+.now{background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:7px;padding:8px 10px;margin-bottom:6px;}
+.now-l{font-size:6px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#475569;margin-bottom:3px;}
+.now-t{font-size:9px;font-weight:700;color:#0f172a;line-height:1.3;}
+.now-d{font-size:7px;color:#64748b;margin-top:2px;}
+.now-next{font-size:7px;color:#94a3b8;margin-top:6px;}
+.now-next b{color:#475569;}
+
+/* Accordion button */
+.acc-btn{width:100%;padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:5px;cursor:default;display:flex;align-items:center;gap:4px;font-size:7px;font-weight:600;color:#64748b;margin-bottom:4px;}
+
+#result{display:none;max-width:1100px;margin:20px auto 0;background:#fff;border-radius:14px;border:2px solid #6366f1;padding:16px;text-align:center;}
+#result .label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+#result .pick{font-size:18px;font-weight:800;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div style="max-width:1100px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>Agenda Box — 10 Options</h1>
+  <p class="subtitle">Same data: 13 items, 3 discussed, item 4 active. Monochrome theme. Tabs: Agenda / Rules / Transcript.</p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const ITEMS = [
+  {n:1,t:'Call to Order',s:'done'},
+  {n:2,t:'Adoption of Agenda',s:'done'},
+  {n:3,t:'Adoption of Minutes',d:'Feb 10, 2025',s:'done'},
+  {n:4,t:'Delegation — Pine Ave',d:'Drainage concerns',s:'act'},
+  {n:5,t:'Bylaw 1021 — Third Reading',s:'pend'},
+  {n:6,t:'Water Rate Increase',s:'pend'},
+  {n:7,t:'Road Maintenance Budget',s:'pend'},
+  {n:8,t:'Park Improvement Grant',s:'pend'},
+  {n:9,t:'Zoning Amendment',s:'pend'},
+  {n:10,t:'CAO Report',s:'pend'},
+  {n:11,t:'New Business',s:'pend'},
+  {n:12,t:'In-Camera',s:'pend'},
+  {n:13,t:'Adjournment',s:'pend'},
+];
+
+const check = `<svg width="7" height="7" fill="none" stroke="#64748b" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+const tabs = `<div class="tabs"><span class="tab a">Agenda</span><span class="tab">Rules</span><span class="tab">Transcript</span></div>`;
+const prog = `<div class="prog"><div class="prog-d" style="width:23%;"></div><div class="prog-a" style="width:8%;"></div></div>`;
+const progLabel = `<div style="font-size:7px;color:#94a3b8;margin-bottom:6px;"><b style="color:#475569;">3</b> of 13 discussed</div>`;
+
+function item(i, compact) {
+  const it = ITEMS[i];
+  const numCls = it.s === 'done' ? 'done' : it.s === 'act' ? 'act' : 'pend';
+  const inner = it.s === 'done' ? check : it.n;
+  const bg = it.s === 'act' ? 'background:#f1f5f9;border-left:2px solid #475569;' : '';
+  return `<div class="itm" style="${bg}"><div class="num ${numCls}">${inner}</div><div><div class="itxt ${it.s === 'act' ? 'act' : ''}">${it.t}</div>${(!compact && it.d) ? `<div class="idsc">${it.d}</div>` : ''}</div></div>`;
+}
+
+function allItems(compact) { return ITEMS.map((_,i) => item(i, compact)).join(''); }
+
+function currentCard(showNext) {
+  return `<div class="now"><div class="now-l">Now Discussing</div><div style="display:flex;gap:6px;align-items:flex-start;"><div class="num act">4</div><div><div class="now-t">Delegation — Pine Ave</div><div class="now-d">Drainage concerns</div></div></div>${showNext ? `<div class="now-next"><b>Up Next:</b> 5. Bylaw 1021 — Third Reading</div>` : ''}</div>`;
+}
+
+function accordion(label) {
+  return `<div class="acc-btn"><span style="font-size:8px;">▼</span> ${label || 'Full Agenda (13 items)'}</div>`;
+}
+
+const designs = [
+  {
+    id:'current', num:'01', name:'Current — Accordion',
+    desc:'Current item prominent, accordion expands to full list',
+    html: () => `<div class="pnl"><div class="ph"><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy">${tabs}${prog}${progLabel}${currentCard(true)}${accordion()}${allItems(true)}</div></div>`
+  },
+  {
+    id:'flat', num:'02', name:'Flat List',
+    desc:'All items visible, active highlighted, no accordion',
+    html: () => `<div class="pnl"><div class="ph"><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy">${tabs}${prog}${progLabel}${allItems(false)}</div></div>`
+  },
+  {
+    id:'compact', num:'03', name:'Compact Numbers',
+    desc:'Tight single-line items, no descriptions, just numbers and titles',
+    html: () => {
+      const items = ITEMS.map(it => {
+        const bg = it.s === 'act' ? 'background:#f1f5f9;' : '';
+        const col = it.s === 'done' ? '#94a3b8' : it.s === 'act' ? '#475569' : '#334155';
+        const dec = it.s === 'done' ? 'text-decoration:line-through;' : '';
+        const w = it.s === 'act' ? 'font-weight:700;' : '';
+        return `<div style="padding:2px 6px;font-size:7.5px;color:${col};${bg}${dec}${w}display:flex;gap:4px;border-radius:3px;"><span style="color:#94a3b8;min-width:14px;">${it.n}.</span>${it.t}</div>`;
+      }).join('');
+      return `<div class="pnl"><div class="ph"><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy">${tabs}${prog}${items}</div></div>`;
+    }
+  },
+  {
+    id:'stepper', num:'04', name:'Stepper',
+    desc:'Vertical line connecting items like a progress stepper',
+    html: () => {
+      const items = ITEMS.map((it,i) => {
+        const isAct = it.s === 'act';
+        const isDone = it.s === 'done';
+        const dotBg = isDone ? '#cbd5e1' : isAct ? '#475569' : '#e2e8f0';
+        const dotBrd = isDone ? '#94a3b8' : isAct ? '#475569' : '#cbd5e1';
+        const lineBg = isDone ? '#cbd5e1' : '#e2e8f0';
+        return `<div style="display:flex;gap:8px;position:relative;padding-bottom:${i<12?'4px':'0'};">
+          <div style="display:flex;flex-direction:column;align-items:center;width:12px;flex-shrink:0;">
+            <div style="width:${isAct?'12px':'8px'};height:${isAct?'12px':'8px'};border-radius:50%;background:${dotBg};border:1.5px solid ${dotBrd};flex-shrink:0;${isDone?'display:flex;align-items:center;justify-content:center;':''}"><span style="font-size:5px;color:#fff;">${isDone?'✓':''}</span></div>
+            ${i<12?`<div style="width:1.5px;flex:1;background:${lineBg};margin-top:2px;"></div>`:''}
+          </div>
+          <div style="padding-bottom:4px;"><div style="font-size:7.5px;font-weight:${isAct?'700':'600'};color:${isDone?'#94a3b8':isAct?'#475569':'#334155'};${isDone?'text-decoration:line-through;':''}">${it.t}</div>${it.d&&!isDone?`<div style="font-size:6px;color:#94a3b8;">${it.d}</div>`:''}</div>
+        </div>`;
+      }).join('');
+      return `<div class="pnl"><div class="ph"><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy">${tabs}${prog}${items}</div></div>`;
+    }
+  },
+  {
+    id:'cards', num:'05', name:'Card Per Item',
+    desc:'Each agenda item as its own mini card with border',
+    html: () => {
+      const items = ITEMS.map(it => {
+        const isAct = it.s === 'act';
+        const isDone = it.s === 'done';
+        const brd = isAct ? '#475569' : isDone ? '#cbd5e1' : '#e2e8f0';
+        const bg = isAct ? '#f1f5f9' : '#fff';
+        const op = isDone ? 'opacity:.5;' : '';
+        return `<div style="border:1px solid ${brd};border-radius:6px;padding:5px 8px;margin-bottom:4px;background:${bg};${op}${isAct?'border-left:3px solid #475569;':''}">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:7.5px;font-weight:${isAct?'700':'600'};color:${isDone?'#94a3b8':'#334155'};${isDone?'text-decoration:line-through;':''}">${it.n}. ${it.t}</span>
+            <span style="font-size:5.5px;font-weight:700;padding:1px 4px;border-radius:999px;background:${isDone?'#f1f5f9':isAct?'#f1f5f9':'#f8fafc'};color:${isDone?'#94a3b8':isAct?'#475569':'#cbd5e1'};border:1px solid ${isDone?'#e2e8f0':isAct?'#cbd5e1':'#e2e8f0'};">${isDone?'Done':isAct?'Active':'Pending'}</span>
+          </div>
+          ${it.d&&!isDone?`<div style="font-size:6px;color:#94a3b8;margin-top:1px;">${it.d}</div>`:''}
+        </div>`;
+      }).join('');
+      return `<div class="pnl"><div class="ph"><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy">${tabs}${prog}${items}</div></div>`;
+    }
+  },
+  {
+    id:'focus', num:'06', name:'Focus Mode',
+    desc:'Only the current + next item visible, everything else hidden',
+    html: () => {
+      return `<div class="pnl"><div class="ph"><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy">${tabs}${prog}${progLabel}
+        <div style="text-align:center;color:#94a3b8;font-size:7px;margin-bottom:8px;">Items 1-3 discussed ✓</div>
+        ${currentCard(false)}
+        <div style="margin-top:8px;padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;">
+          <div style="font-size:6px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:3px;">Up Next</div>
+          <div style="display:flex;gap:6px;align-items:center;"><div class="num pend">5</div><div><div style="font-size:8px;font-weight:600;color:#334155;">Bylaw 1021 — Third Reading</div><div style="font-size:6.5px;color:#94a3b8;">Council Procedure Bylaw — final adoption</div></div></div>
+        </div>
+        <div style="margin-top:8px;padding:8px 10px;background:#f8fafc;border:1px dashed #e2e8f0;border-radius:7px;">
+          <div style="font-size:6px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#cbd5e1;margin-bottom:3px;">Then</div>
+          <div style="font-size:7px;color:#94a3b8;">6. Water Rate Increase</div>
+        </div>
+        <div style="text-align:center;margin-top:8px;"><span style="font-size:7px;color:#cbd5e1;">7 more items remaining</span></div>
+      </div></div>`;
+    }
+  },
+  {
+    id:'timeline', num:'07', name:'Horizontal Timeline',
+    desc:'Items as dots on a horizontal rail, current highlighted',
+    html: () => {
+      const dots = ITEMS.map(it => {
+        const isDone = it.s === 'done';
+        const isAct = it.s === 'act';
+        const bg = isDone ? '#cbd5e1' : isAct ? '#475569' : '#e2e8f0';
+        const sz = isAct ? '14px' : '8px';
+        return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;">
+          <div style="width:${sz};height:${sz};border-radius:50%;background:${bg};${isAct?'box-shadow:0 0 0 3px #cbd5e1;':''}display:flex;align-items:center;justify-content:center;font-size:6px;color:#fff;font-weight:700;">${isAct?it.n:''}</div>
+          <span style="font-size:${isAct?'6px':'5px'};color:${isAct?'#475569':'#94a3b8'};white-space:nowrap;max-width:50px;overflow:hidden;text-overflow:ellipsis;font-weight:${isAct?'700':'400'};">${it.t.split(' — ')[0].split(' – ')[0]}</span>
+        </div>`;
+      }).join('');
+      return `<div class="pnl"><div class="ph"><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy">${tabs}
+        <div style="display:flex;align-items:flex-start;gap:6px;overflow-x:auto;padding:8px 0 12px;position:relative;">
+          <div style="position:absolute;top:11px;left:4px;right:4px;height:2px;background:#e2e8f0;border-radius:1px;z-index:0;"></div>
+          <div style="position:absolute;top:11px;left:4px;width:23%;height:2px;background:#cbd5e1;border-radius:1px;z-index:1;"></div>
+          ${dots}
+        </div>
+        <div style="margin-top:4px;">${currentCard(true)}</div>
+        <div style="margin-top:6px;">${allItems(true)}</div>
+      </div></div>`;
+    }
+  },
+  {
+    id:'split', num:'08', name:'Done / Active / Upcoming',
+    desc:'Three sections with clear dividers',
+    html: () => {
+      const done = ITEMS.filter(i=>i.s==='done').map((_,i)=>item(i,true)).join('');
+      const act = item(3,false);
+      const upcoming = ITEMS.filter(i=>i.s==='pend').map((_,i)=>item(i+4,true)).join('');
+      return `<div class="pnl"><div class="ph"><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy">${tabs}${prog}
+        <div style="font-size:6px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;padding:4px 6px;">Discussed</div>
+        <div style="opacity:.5;">${done}</div>
+        <div style="height:1px;background:#e2e8f0;margin:6px 0;"></div>
+        <div style="font-size:6px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#475569;padding:4px 6px;">Currently Active</div>
+        ${act}
+        <div style="height:1px;background:#e2e8f0;margin:6px 0;"></div>
+        <div style="font-size:6px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;padding:4px 6px;">Upcoming</div>
+        ${upcoming}
+      </div></div>`;
+    }
+  },
+  {
+    id:'minimal', num:'09', name:'Minimal Counter',
+    desc:'Just item number + title, huge current number, tiny list below',
+    html: () => {
+      const small = ITEMS.filter(i=>i.s==='pend').map(it => `<span style="font-size:6.5px;color:#94a3b8;padding:1px 5px;border:1px solid #e2e8f0;border-radius:999px;">${it.n}</span>`).join(' ');
+      return `<div class="pnl"><div class="ph"><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+        ${tabs}
+        <div style="font-size:48px;font-weight:800;color:#0f172a;line-height:1;">4</div>
+        <div style="font-size:11px;font-weight:700;color:#475569;margin-top:4px;">Delegation — Pine Ave</div>
+        <div style="font-size:8px;color:#94a3b8;margin-top:2px;">Drainage concerns</div>
+        <div style="margin-top:12px;display:flex;gap:3px;flex-wrap:wrap;justify-content:center;">${small}</div>
+        <div style="font-size:7px;color:#94a3b8;margin-top:8px;">3 done · 1 active · 9 remaining</div>
+        ${prog}
+      </div></div>`;
+    }
+  },
+  {
+    id:'kanban', num:'10', name:'Kanban Columns',
+    desc:'Three columns: Done, Now, Next — like a mini task board',
+    html: () => {
+      const doneItems = ITEMS.filter(i=>i.s==='done').map(it => `<div style="padding:3px 5px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;font-size:6px;color:#94a3b8;margin-bottom:2px;">${it.n}. ${it.t}</div>`).join('');
+      const nowItem = `<div style="padding:5px 6px;background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:4px;font-size:7px;font-weight:700;color:#475569;">4. Delegation — Pine Ave<div style="font-size:5.5px;font-weight:400;color:#94a3b8;margin-top:1px;">Drainage concerns</div></div>`;
+      const nextItems = ITEMS.filter(i=>i.s==='pend').slice(0,4).map(it => `<div style="padding:3px 5px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;font-size:6px;color:#334155;margin-bottom:2px;">${it.n}. ${it.t}</div>`).join('');
+      return `<div class="pnl"><div class="ph"><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy">${tabs}${prog}
+        <div style="display:flex;gap:4px;height:100%;">
+          <div style="flex:1;display:flex;flex-direction:column;">
+            <div style="font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#94a3b8;padding:2px 4px;margin-bottom:3px;">Done (3)</div>
+            ${doneItems}
+          </div>
+          <div style="width:1px;background:#e2e8f0;flex-shrink:0;"></div>
+          <div style="flex:1;display:flex;flex-direction:column;">
+            <div style="font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;padding:2px 4px;margin-bottom:3px;">Now</div>
+            ${nowItem}
+          </div>
+          <div style="width:1px;background:#e2e8f0;flex-shrink:0;"></div>
+          <div style="flex:1.2;display:flex;flex-direction:column;">
+            <div style="font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#94a3b8;padding:2px 4px;margin-bottom:3px;">Next</div>
+            ${nextItems}
+            <div style="font-size:5.5px;color:#cbd5e1;padding:2px 4px;margin-top:2px;">+5 more</div>
+          </div>
+        </div>
+      </div></div>`;
+    }
+  },
+];
+
+document.getElementById('grid').innerHTML = designs.map(d =>
+  `<div class="sw" onclick="select(this,'${d.id}')">
+    <div class="sh"><span class="tag">${d.num}</span><h2>${d.name}</h2><p>${d.desc}</p></div>
+    <div class="preview">${d.html()}</div>
+  </div>`
+).join('');
+
+const nm = {};
+designs.forEach(d => nm[d.id] = `${d.num} — ${d.name}`);
+function select(el, id) {
+  document.querySelectorAll('.sw').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('pick-text').textContent = nm[id];
+}
+</script>
+</body>
+</html>

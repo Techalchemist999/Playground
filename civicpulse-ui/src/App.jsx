@@ -44,12 +44,16 @@ export default function App() {
           status={session.status}
           elapsed={elapsed}
           sessionId={session.sessionId}
-          bgThemes={BG_THEMES}
-          bgTheme={bgTheme}
-          onBgThemeChange={setBgTheme}
         />
         {session.view === 'setup' && <SetupView session={session} />}
-        {session.view === 'live' && <LiveDashboard session={session} bgTheme={bgTheme} />}
+        {session.view === 'live' && (
+          <LiveDashboard
+            session={session}
+            bgTheme={bgTheme}
+            bgThemes={BG_THEMES}
+            onBgThemeChange={setBgTheme}
+          />
+        )}
         {session.view === 'minutes' && <MinutesWorkspace session={session} />}
       </PageShell>
     </ToastProvider>

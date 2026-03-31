@@ -32,22 +32,23 @@ const iconAgenda = (
   </svg>
 );
 
-const SNAP = 24; // ~6mm grid snap
-const SNAP_PCT = 3.5; // ~6mm as percentage of typical container height
+const SNAP_PX = 24; // ~6mm grid snap
 
 function snapPct(val) {
-  return Math.round(val / SNAP_PCT) * SNAP_PCT;
-}
-function snapPx(val) {
-  return Math.round(val / SNAP) * SNAP;
+  return Math.round(val * 10) / 10; // smooth percentage rounding
 }
 
-// Panels: x/w in px, y/h in % of container height
+// Snap a pixel value to the 6mm grid
+function snapPx(val) {
+  return Math.round(val / SNAP_PX) * SNAP_PX;
+}
+
+// Panels: all values in % so they scale with window size
 const DEFAULT_PANELS = [
-  { id: 'agenda',  x: 24,  yPct: 3.5,  w: 312, hPct: 93 },
-  { id: 'bites',   x: 348, yPct: 3.5,  w: 528, hPct: 93 },
-  { id: 'topics',  x: 888, yPct: 3.5,  w: 360, hPct: 44.5 },
-  { id: 'notes',   x: 888, yPct: 51.5, w: 360, hPct: 45 },
+  { id: 'agenda',  xPct: 1.5,  yPct: 2,   wPct: 22,  hPct: 96 },
+  { id: 'bites',   xPct: 24.5, yPct: 2,   wPct: 42,  hPct: 96 },
+  { id: 'topics',  xPct: 67.5, yPct: 2,   wPct: 31,  hPct: 46 },
+  { id: 'notes',   xPct: 67.5, yPct: 50,  wPct: 31,  hPct: 48 },
 ];
 
 // Edge resize zones — no right edge so scrolling isn't blocked
@@ -69,12 +70,44 @@ function EdgeHandles({ onEdgeDrag }) {
   ));
 }
 
-export default function LiveDashboard({ session, bgTheme }) {
+export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeChange }) {
   const containerRef = useRef(null);
   const [panels, setPanels] = useState(DEFAULT_PANELS);
   const dragRef = useRef(null);
   const [draggingId, setDraggingId] = useState(null);
   const [quickMotionOpen, setQuickMotionOpen] = useState(false);
+  const [pbNewestTop, setPbNewestTop] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Panel lock + saved positions — persists to localStorage
+  const LOCK_KEY = 'civicpulse-panels-locked';
+  const PANELS_KEY = 'civicpulse-panel-layout';
+
+  const [panelsLocked, setPanelsLocked] = useState(() => {
+    try { return localStorage.getItem(LOCK_KEY) === 'true'; } catch { return false; }
+  });
+
+  // Load saved layout on mount (only if previously locked/saved)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(PANELS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length === DEFAULT_PANELS.length) {
+          setPanels(parsed);
+        }
+      }
+    } catch {}
+  }, []);
+
+  // Save lock state + layout when locking
+  useEffect(() => {
+    try { localStorage.setItem(LOCK_KEY, panelsLocked ? 'true' : 'false'); } catch {}
+    if (panelsLocked) {
+      try { localStorage.setItem(PANELS_KEY, JSON.stringify(panels)); } catch {}
+    }
+  }, [panelsLocked]);
+
   const fallbackTheme = { dot: '#e2e8f0', accent: '#64748b', bg: '#ffffff' };
   const theme = bgTheme || fallbackTheme;
   const accentColor = theme.accent || theme.dot;
@@ -86,13 +119,15 @@ export default function LiveDashboard({ session, bgTheme }) {
   useEffect(() => {
     if (motionCount > pbCountRef.current && pbScrollRef.current) {
       const el = pbScrollRef.current;
-      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
-      if (nearBottom) {
-        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      if (pbNewestTop) {
+        el.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+        if (nearBottom) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
       }
     }
     pbCountRef.current = motionCount;
-  }, [motionCount]);
+  }, [motionCount, pbNewestTop]);
 
   const activeTopics = Array.from(session.topics.values()).filter(
     t => t.state === 'ACTIVE' || t.state === 'DETECTED' || t.state === 'REAPPEARED'
@@ -101,10 +136,11 @@ export default function LiveDashboard({ session, bgTheme }) {
   const discussed = session.agendaItems.filter(i => i.status === 'discussed').length;
   const agendaBadge = session.agendaItems.length > 0 ? `${discussed}/${session.agendaItems.length}` : null;
 
-  const MIN_W = SNAP * 6;
-  const MIN_H_PCT = SNAP_PCT * 3; // minimum height as %
+  const MIN_W_PCT = 10; // minimum 10% width
+  const MIN_H_PCT = 10; // minimum 10% height
 
   const startDrag = useCallback((panelId, e, mode = 'move') => {
+    if (panelsLocked) return;
     e.preventDefault();
     e.stopPropagation();
     const panel = panels.find(p => p.id === panelId);
@@ -117,45 +153,45 @@ export default function LiveDashboard({ session, bgTheme }) {
     dragRef.current = {
       id: panelId, mode,
       startMouseX: e.clientX, startMouseY: e.clientY,
-      startX: panel.x, startYPct: panel.yPct,
-      startW: panel.w, startHPct: panel.hPct,
+      startXPct: panel.xPct, startYPct: panel.yPct,
+      startWPct: panel.wPct, startHPct: panel.hPct,
       ch, cw,
     };
 
     const onMouseMove = (ev) => {
       if (!dragRef.current) return;
       const ds = dragRef.current;
-      const dx = ev.clientX - ds.startMouseX;
-      const dy = ev.clientY - ds.startMouseY;
+      // Snap mouse delta to 6mm grid in pixels, then convert to %
+      const dx = snapPx(ev.clientX - ds.startMouseX);
+      const dy = snapPx(ev.clientY - ds.startMouseY);
+      const dxPct = (dx / ds.cw) * 100;
       const dyPct = (dy / ds.ch) * 100;
 
       setPanels(prev => prev.map(p => {
         if (p.id !== ds.id) return p;
 
         if (ds.mode === 'move') {
-          const newX = snapPx(Math.max(SNAP, Math.min(ds.cw - p.w - SNAP, ds.startX + dx)));
-          const newYPct = snapPct(Math.max(SNAP_PCT, Math.min(100 - p.hPct - SNAP_PCT, ds.startYPct + dyPct)));
-          return { ...p, x: newX, yPct: newYPct };
+          const newXPct = snapPct(Math.max(0.5, Math.min(100 - p.wPct - 0.5, ds.startXPct + dxPct)));
+          const newYPct = snapPct(Math.max(0.5, Math.min(100 - p.hPct - 0.5, ds.startYPct + dyPct)));
+          return { ...p, xPct: newXPct, yPct: newYPct };
         }
 
-        let newX = ds.startX, newYPct = ds.startYPct, newW = ds.startW, newHPct = ds.startHPct;
+        let newXPct = ds.startXPct, newYPct = ds.startYPct, newWPct = ds.startWPct, newHPct = ds.startHPct;
         const resizesLeft   = ds.mode.includes('left');
         const resizesTop    = ds.mode.includes('top');
         const resizesBottom = ds.mode === 'bottom' || ds.mode.includes('bottom');
 
         if (resizesBottom) newHPct = ds.startHPct + dyPct;
-        if (resizesLeft)  { newW = ds.startW - dx; newX = ds.startX + dx; }
+        if (resizesLeft)  { newWPct = ds.startWPct - dxPct; newXPct = ds.startXPct + dxPct; }
         if (resizesTop)   { newHPct = ds.startHPct - dyPct; newYPct = ds.startYPct + dyPct; }
 
-        // Enforce minimums
-        newW = Math.max(MIN_W, newW);
+        newWPct = Math.max(MIN_W_PCT, newWPct);
         newHPct = Math.max(MIN_H_PCT, newHPct);
-        // Clamp to container
-        newHPct = Math.min(newHPct, 100 - newYPct - SNAP_PCT);
-        if (resizesLeft)  newX = Math.max(SNAP, ds.startX + ds.startW - newW);
-        if (resizesTop)   newYPct = Math.max(SNAP_PCT, ds.startYPct + ds.startHPct - newHPct);
+        newHPct = Math.min(newHPct, 100 - newYPct - 0.5);
+        if (resizesLeft) newXPct = Math.max(0.5, ds.startXPct + ds.startWPct - newWPct);
+        if (resizesTop)  newYPct = Math.max(0.5, ds.startYPct + ds.startHPct - newHPct);
 
-        return { ...p, x: snapPx(newX), yPct: snapPct(newYPct), w: snapPx(newW), hPct: snapPct(newHPct) };
+        return { ...p, xPct: snapPct(newXPct), yPct: snapPct(newYPct), wPct: snapPct(newWPct), hPct: snapPct(newHPct) };
       }));
     };
 
@@ -168,15 +204,15 @@ export default function LiveDashboard({ session, bgTheme }) {
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
-  }, [panels]);
+  }, [panels, panelsLocked]);
 
   const panelStyle = (id) => {
     const p = panels.find(pp => pp.id === id);
     return {
       position: 'absolute',
-      left: p.x,
+      left: `${p.xPct}%`,
       top: `${p.yPct}%`,
-      width: p.w,
+      width: `${p.wPct}%`,
       height: `${p.hPct}%`,
       transition: draggingId === id ? 'none' : 'left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease, opacity 0.3s ease',
       zIndex: draggingId === id ? 100 : 1,
@@ -188,13 +224,15 @@ export default function LiveDashboard({ session, bgTheme }) {
   };
 
   const dragHandleStyle = {
-    cursor: 'grab',
+    cursor: panelsLocked ? 'default' : 'grab',
     userSelect: 'none',
   };
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* Draggable panel area — flex:1 so it shrinks when Quick Motion opens */}
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'row', overflow: 'hidden' }}>
+      {/* Main content area */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Draggable panel area */}
       <div
         ref={containerRef}
         style={{
@@ -248,7 +286,30 @@ export default function LiveDashboard({ session, bgTheme }) {
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-                <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {/* Flow direction toggle */}
+                <div style={{
+                  display: 'flex', justifyContent: 'flex-end',
+                  padding: '4px 10px 0', flexShrink: 0,
+                }}>
+                  <button
+                    onClick={() => setPbNewestTop(!pbNewestTop)}
+                    title={pbNewestTop ? 'Newest at top — click to flip' : 'Newest at bottom — click to flip'}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 3,
+                      padding: '2px 7px', border: 'none', borderRadius: 4,
+                      background: '#f1f5f9', cursor: 'pointer',
+                      fontSize: 8, fontWeight: 600, color: COLORS.mutedText,
+                      transition: 'all .15s',
+                    }}
+                  >
+                    <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"
+                      style={{ transform: pbNewestTop ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s' }}
+                    >
+                      <path d="M12 5v14M5 12l7 7 7-7" />
+                    </svg>
+                  </button>
+                </div>
+                <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px', display: 'flex', flexDirection: pbNewestTop ? 'column-reverse' : 'column', gap: 10 }}>
                   {Array.from(session.topics.values())
                     .filter(t => t.state !== 'EVICTED' && t.category === 'motion')
                     .map((topic, i, arr) => (
@@ -321,6 +382,129 @@ export default function LiveDashboard({ session, bgTheme }) {
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
+      </div>{/* end main content area */}
+
+      {/* Right toolbar */}
+      <div style={{
+        width: 52, flexShrink: 0,
+        background: '#fff',
+        borderLeft: '1px solid #e2e8f0',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', padding: '16px 0',
+        gap: 24, zIndex: 50,
+      }}>
+        {/* Gear — settings */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            title="Settings"
+            style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: showSettings ? '#f1f5f9' : 'transparent',
+              border: showSettings ? '1.5px solid #cbd5e1' : '1.5px solid transparent',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all .15s',
+            }}
+            onMouseEnter={e => { if (!showSettings) e.currentTarget.style.background = '#f8fafc'; }}
+            onMouseLeave={e => { if (!showSettings) e.currentTarget.style.background = showSettings ? '#f1f5f9' : 'transparent'; }}
+          >
+            <svg width="24" height="24" fill="none" stroke="#475569" strokeWidth="1.8" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </button>
+          {showSettings && (
+            <div style={{
+              position: 'absolute', top: 0, right: 52,
+              background: '#fff', borderRadius: 10, padding: '12px 14px',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+              border: '1px solid #e2e8f0',
+              width: 200, zIndex: 300,
+            }}>
+              <span style={{
+                fontSize: 9, fontWeight: 700, color: '#94a3b8',
+                letterSpacing: '1px', textTransform: 'uppercase',
+                display: 'block', marginBottom: 8,
+              }}>
+                Grid Theme
+              </span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {(bgThemes || []).map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => onBgThemeChange?.(t)}
+                    title={t.label}
+                    style={{
+                      width: 28, height: 28, borderRadius: '50%',
+                      background: t.bg?.includes?.('gradient') ? t.bg : t.dot,
+                      border: bgTheme?.id === t.id ? '2.5px solid #0f172a' : '2px solid #e2e8f0',
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s, border 0.15s',
+                      transform: bgTheme?.id === t.id ? 'scale(1.15)' : 'scale(1)',
+                    }}
+                  />
+                ))}
+              </div>
+              {bgTheme && (
+                <span style={{ fontSize: 8.5, color: '#94a3b8', display: 'block', marginTop: 6 }}>
+                  {bgTheme.label}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Edit tool */}
+        <button
+          title="Edit (coming soon)"
+          style={{
+            width: 40, height: 40, borderRadius: 10,
+            background: 'transparent',
+            border: '1.5px solid transparent',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all .15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; }}
+        >
+          <svg width="24" height="24" fill="none" stroke="#475569" strokeWidth="1.8" viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        </button>
+
+        {/* Lock panels */}
+        <button
+          onClick={() => setPanelsLocked(!panelsLocked)}
+          title={panelsLocked ? 'Panels locked — click to unlock' : 'Panels unlocked — click to lock'}
+          style={{
+            width: 40, height: 40, borderRadius: 10,
+            background: panelsLocked ? '#f1f5f9' : 'transparent',
+            border: panelsLocked ? '1.5px solid #cbd5e1' : '1.5px solid transparent',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all .15s',
+          }}
+          onMouseEnter={e => { if (!panelsLocked) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; } }}
+          onMouseLeave={e => { if (!panelsLocked) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
+        >
+          {panelsLocked ? (
+            <svg width="24" height="24" fill="none" stroke="#475569" strokeWidth="1.8" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          ) : (
+            <svg width="24" height="24" fill="none" stroke="#cbd5e1" strokeWidth="1.8" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" />
+              <path d="M7 11V7a5 5 0 0 1 5-5 5 5 0 0 1 5 5" />
+            </svg>
+          )}
+        </button>
+
+        <div style={{ flex: 1 }} />
+      </div>
     </div>
   );
 }

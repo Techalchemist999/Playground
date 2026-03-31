@@ -20,12 +20,23 @@ function shortName(name) {
 export default function BiteCard({ topic, index, isNewest, accentColor }) {
   const cat = CATEGORY_COLORS[topic.category] || CATEGORY_COLORS.topic;
   const stage = getStage(topic);
-  const mover = topic.mover || COUNCILLORS[index % COUNCILLORS.length];
-  const seconder = topic.seconder || COUNCILLORS[(index + 1) % COUNCILLORS.length];
-  const motionText = topic.motionText || `THAT Council ${isCarried ? 'adopted' : 'adopts'} the ${topic.label.toLowerCase()} as presented.`;
-  const amendment = topic.amendment || null;
+
+  // Editable fields
+  const [editing, setEditing] = useState(false);
+  const [editLabel, setEditLabel] = useState(topic.label);
+  const [editMover, setEditMover] = useState(topic.mover || COUNCILLORS[index % COUNCILLORS.length]);
+  const [editSeconder, setEditSeconder] = useState(topic.seconder || COUNCILLORS[(index + 1) % COUNCILLORS.length]);
+  const [editMotionText, setEditMotionText] = useState(topic.motionText || '');
+  const [editAmendText, setEditAmendText] = useState(topic.amendment?.text || '');
+
+  const mover = editMover;
+  const seconder = editSeconder;
 
   const isCarried = stage === 'carried';
+  const defaultMotion = `THAT Council ${isCarried ? 'adopted' : 'adopts'} the ${editLabel.toLowerCase()} as presented.`;
+  const motionText = editMotionText || defaultMotion;
+  const amendment = topic.amendment ? { ...topic.amendment, text: editAmendText || topic.amendment.text } : null;
+
   const hasSeconder = stage === 'awaiting-vote' || stage === 'carried';
   const isVoting = stage === 'awaiting-vote';
   const isMoverDetected = stage === 'mover-detected';
@@ -92,15 +103,48 @@ export default function BiteCard({ topic, index, isNewest, accentColor }) {
       {/* Header */}
       <div style={{ padding: '12px 14px 0' }}>
         <div style={{
-          fontSize: 8, fontWeight: 700, letterSpacing: 1.3,
-          textTransform: 'uppercase', color: COLORS.mutedText, marginBottom: 3,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: 3,
         }}>
-          Motion · Item {index + 1}
+          <div style={{
+            fontSize: 8, fontWeight: 700, letterSpacing: 1.3,
+            textTransform: 'uppercase', color: COLORS.mutedText,
+          }}>
+            Motion · Item {index + 1}
+          </div>
+          <button
+            onClick={() => setEditing(!editing)}
+            title={editing ? 'Done editing' : 'Edit this card'}
+            style={{
+              background: editing ? '#f1f5f9' : 'transparent',
+              border: editing ? '1px solid #cbd5e1' : '1px solid transparent',
+              borderRadius: 4, padding: '2px 4px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all .15s',
+            }}
+          >
+            <svg width="10" height="10" fill="none" stroke={editing ? '#475569' : '#cbd5e1'} strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 10 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.headingText, lineHeight: 1.3 }}>
-            {topic.label}
-          </div>
+          {editing ? (
+            <input
+              value={editLabel}
+              onChange={e => setEditLabel(e.target.value)}
+              style={{
+                fontSize: 13.5, fontWeight: 700, color: COLORS.headingText, lineHeight: 1.3,
+                border: '1px solid #cbd5e1', borderRadius: 4, padding: '2px 6px',
+                flex: 1, fontFamily: 'inherit', background: '#f8fafc',
+              }}
+            />
+          ) : (
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.headingText, lineHeight: 1.3 }}>
+              {editLabel}
+            </div>
+          )}
           <div style={{
             flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4,
             background: badge.bg, border: `1.5px solid ${badge.border}`,
@@ -126,7 +170,18 @@ export default function BiteCard({ topic, index, isNewest, accentColor }) {
         opacity: amendment?.status === 'pending' || amendment?.status === 'voting' ? 0.4 : 1,
         transition: 'opacity .3s',
       }}>
-        {amendment?.status === 'carried'
+        {editing ? (
+          <textarea
+            value={editMotionText || motionText}
+            onChange={e => setEditMotionText(e.target.value)}
+            style={{
+              width: '100%', border: '1px solid #cbd5e1', borderRadius: 4,
+              padding: '4px 6px', fontSize: 12, fontFamily: 'inherit',
+              lineHeight: 1.75, color: COLORS.bodyText, background: '#fff',
+              resize: 'vertical', minHeight: 50,
+            }}
+          />
+        ) : amendment?.status === 'carried'
           ? <>{motionText.replace(/\.$/, '')} <strong>{amendment.text}</strong></>
           : motionText
         }
@@ -165,7 +220,18 @@ export default function BiteCard({ topic, index, isNewest, accentColor }) {
               : '#475569',
             textDecoration: amendment.status === 'defeated' ? 'line-through' : 'none',
           }}>
-            "{amendment.text}"
+            {editing ? (
+              <textarea
+                value={editAmendText || amendment.text}
+                onChange={e => setEditAmendText(e.target.value)}
+                style={{
+                  width: '100%', border: '1px solid #cbd5e1', borderRadius: 4,
+                  padding: '4px 6px', fontSize: 12, fontFamily: 'inherit',
+                  lineHeight: 1.7, background: '#fff', resize: 'vertical', minHeight: 40,
+                  color: amendment.status === 'defeated' ? '#991b1b' : 'inherit',
+                }}
+              />
+            ) : `"${amendment.text}"`}
           </div>
           <div style={{
             fontSize: 10, fontWeight: 600, marginTop: 6,
@@ -203,9 +269,21 @@ export default function BiteCard({ topic, index, isNewest, accentColor }) {
             fontSize: 7, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase',
             color: '#64748b', marginBottom: 2,
           }}>Moved By</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.headingText }}>
-            {mover}
-          </div>
+          {editing ? (
+            <input
+              value={editMover}
+              onChange={e => setEditMover(e.target.value)}
+              style={{
+                fontSize: 12, fontWeight: 700, color: COLORS.headingText,
+                border: '1px solid #cbd5e1', borderRadius: 4, padding: '1px 4px',
+                width: '100%', fontFamily: 'inherit', background: '#fff',
+              }}
+            />
+          ) : (
+            <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.headingText }}>
+              {mover}
+            </div>
+          )}
         </div>
         <div style={{
           flex: 1,
@@ -217,13 +295,25 @@ export default function BiteCard({ topic, index, isNewest, accentColor }) {
             fontSize: 7, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase',
             color: '#64748b', marginBottom: 2,
           }}>Seconded By</div>
-          <div style={{
-            fontSize: 12, fontWeight: 700,
-            color: hasSeconder ? COLORS.headingText : '#94a3b8',
-            fontStyle: hasSeconder ? 'normal' : 'italic',
-          }}>
-            {hasSeconder ? seconder : 'Listening...'}
-          </div>
+          {editing ? (
+            <input
+              value={editSeconder}
+              onChange={e => setEditSeconder(e.target.value)}
+              style={{
+                fontSize: 12, fontWeight: 700, color: COLORS.headingText,
+                border: '1px solid #cbd5e1', borderRadius: 4, padding: '1px 4px',
+                width: '100%', fontFamily: 'inherit', background: '#fff',
+              }}
+            />
+          ) : (
+            <div style={{
+              fontSize: 12, fontWeight: 700,
+              color: hasSeconder ? COLORS.headingText : '#94a3b8',
+              fontStyle: hasSeconder ? 'normal' : 'italic',
+            }}>
+              {hasSeconder ? seconder : 'Listening...'}
+            </div>
+          )}
         </div>
       </div>
 
