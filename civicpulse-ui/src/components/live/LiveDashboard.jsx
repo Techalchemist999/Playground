@@ -5,6 +5,7 @@ import TopicBubbles from './TopicBubbles';
 import AgendaSidebar from './AgendaSidebar';
 import ClerkNotes from './ClerkNotes';
 import BiteCard from './BiteCard';
+import QuickMotion from './QuickMotion';
 import SessionControls from './SessionControls';
 
 // PB History — groups resolved motions by agenda item
@@ -169,8 +170,8 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
   const [panels, setPanels] = useState(DEFAULT_PANELS);
   const dragRef = useRef(null);
   const [draggingId, setDraggingId] = useState(null);
-  const [quickMotionOpen, setQuickMotionOpen] = useState(false);
   const [pbNewestTop, setPbNewestTop] = useState(false);
+  const [quickMotionOpen, setQuickMotionOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   // Panel lock + saved positions — persists to localStorage
@@ -405,35 +406,79 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                 const allMotions = Array.from(session.topics.values())
                   .filter(t => t.state !== 'EVICTED' && t.category === 'motion');
                 const nonExpired = allMotions.filter(t => t.state !== 'EXPIRED');
+                const resolved = allMotions.filter(t => t.state === 'EXPIRED');
                 const onFloorMotion = nonExpired.length > 0 ? nonExpired[nonExpired.length - 1] : null;
 
-                if (!onFloorMotion) {
+                // Quick Motion form open
+                if (quickMotionOpen) {
                   return (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: COLORS.mutedText, fontSize: 11, fontStyle: 'italic' }}>
-                      No motion on the floor
-                    </div>
+                    <QuickMotion
+                      startOpen={true}
+                      onFloorMotion={onFloorMotion}
+                      resolvedMotions={resolved}
+                      onCancel={() => setQuickMotionOpen(false)}
+                      onRecord={(data) => {
+                        if (session.addMotion) session.addMotion(data);
+                        setQuickMotionOpen(false);
+                      }}
+                    />
                   );
                 }
 
+                // No motion on the floor — show empty + Quick Motion
+                if (!onFloorMotion) {
+                  return (
+                    <QuickMotion
+                      onFloorMotion={null}
+                      resolvedMotions={resolved}
+                      onRecord={(data) => {
+                        if (session.addMotion) session.addMotion(data);
+                      }}
+                    />
+                  );
+                }
+
+                // Motion on the floor — show the card
                 const topic = onFloorMotion;
                 const amendment = topic.amendment;
                 const i = allMotions.indexOf(topic);
 
-                if (!amendment) {
-                  return (
-                    <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px' }}>
-                      <BiteCard topic={topic} index={i} isNewest={true} accentColor={accentColor} cardMode="simple" />
-                    </div>
-                  );
-                }
-
-                const amendResolved = amendment.status === 'carried' || amendment.status === 'defeated';
-                return (
-                  <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px' }}>
+                const motionCard = !amendment
+                  ? <BiteCard topic={topic} index={i} isNewest={true} accentColor={accentColor} cardMode="simple" />
+                  : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                       <BiteCard topic={{ ...topic, amendment: { ...amendment }, state: 'ACTIVE' }} index={i} isNewest={false} accentColor={accentColor} cardMode="original" />
                       <BiteCard topic={topic} index={i} isNewest={false} accentColor={accentColor} cardMode="amendment" />
-                      {amendResolved && <BiteCard topic={topic} index={i} isNewest={true} accentColor={accentColor} cardMode="final" />}
+                      {(amendment.status === 'carried' || amendment.status === 'defeated') &&
+                        <BiteCard topic={topic} index={i} isNewest={true} accentColor={accentColor} cardMode="final" />
+                      }
+                    </div>
+                  );
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                    {/* + button top right */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 10px 0', flexShrink: 0 }}>
+                      <button
+                        onClick={() => setQuickMotionOpen(true)}
+                        title="Quick Motion"
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 3,
+                          padding: '3px 8px', border: '1.5px solid #e2e8f0', borderRadius: 6,
+                          background: '#fff', cursor: 'pointer', fontSize: 9, fontWeight: 700,
+                          color: '#64748b', transition: 'all .15s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.color = '#475569'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
+                      >
+                        <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path d="M12 5v14M5 12h14" />
+                        </svg>
+                        Motion
+                      </button>
+                    </div>
+                    <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '4px 10px 8px' }}>
+                      {motionCard}
                     </div>
                   </div>
                 );
@@ -482,7 +527,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
       </div>
 
       {/* Bottom: session controls + Quick Motion */}
-      <SessionControls session={session} quickMotionOpen={quickMotionOpen} onQuickMotionToggle={setQuickMotionOpen} />
+      <SessionControls session={session} />
       <style>{`
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(20px); }

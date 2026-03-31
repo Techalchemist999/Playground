@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Quick Motion Wizard (Full Flow)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:32px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:32px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.flow{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:0;}
+.arrow{text-align:center;color:#cbd5e1;font-size:18px;padding:10px 0;}
+.stage-head{text-align:center;margin-bottom:8px;}
+.stage-label{font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 12px;border-radius:999px;display:inline-block;background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;}
+
+.otf{background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.03);}
+.otf-h{padding:8px 14px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:6px;}
+.otf-h .ic{width:10px;height:10px;border-radius:3px;background:#475569;}
+.otf-h .tt{font-size:10px;font-weight:700;color:#0f172a;}
+
+.inp{background:#fff;border:1.5px solid #cbd5e1;border-radius:8px;padding:9px 12px;font-size:12px;color:#334155;font-family:inherit;width:100%;outline:none;line-height:1.7;}
+.inp:focus{border-color:#94a3b8;}
+.inp::placeholder{color:#94a3b8;}
+.btn{background:#475569;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.btn-ghost{background:transparent;color:#94a3b8;border:none;padding:6px 10px;font-size:10px;font-weight:600;cursor:pointer;}
+
+/* Type selector pills */
+.type-pills{display:flex;gap:4px;margin-bottom:12px;}
+.type-pill{padding:6px 12px;border-radius:8px;font-size:10px;font-weight:600;cursor:pointer;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;transition:all .15s;flex:1;text-align:center;}
+.type-pill:hover{border-color:#94a3b8;}
+.type-pill.active{border-color:#475569;background:#f1f5f9;color:#0f172a;font-weight:700;}
+
+/* Councillor pills */
+.pills{display:flex;flex-wrap:wrap;gap:4px;}
+.pill{padding:5px 10px;border-radius:999px;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;}
+.pill:hover{border-color:#94a3b8;background:#f8fafc;}
+.pill.active{border-color:#475569;background:#f1f5f9;color:#0f172a;}
+.pill.disabled{opacity:.3;pointer-events:none;}
+
+/* Tile selectors */
+.tile-sel{flex:1;background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:7px;padding:5px 8px;position:relative;}
+.tile-sel.filled{border-color:#475569;background:#f8fafc;}
+.tile-sel-l{font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#64748b;margin-bottom:2px;}
+.tile-sel-n{font-size:11px;font-weight:700;color:#0f172a;}
+.tile-sel-ph{font-size:10px;font-style:italic;color:#94a3b8;}
+
+/* Motion card */
+.card{border-radius:10px;overflow:hidden;background:#fff;border:1px solid #e2e8f0;}
+.bar{height:3px;background:linear-gradient(90deg,#cbd5e1,transparent);}
+.hdr{padding:10px 12px 0;}
+.meta{font-size:7px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:#94a3b8;margin-bottom:3px;}
+.ttl{font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;margin-bottom:8px;}
+.qt{background:#f8fafc;border-left:3px solid #cbd5e1;border-radius:0 8px 8px 0;padding:8px 11px;margin:0 12px 8px;font-size:12px;color:#334155;line-height:1.75;}
+.tiles{display:flex;gap:4px;padding:0 12px 8px;}
+.tile{flex:1;background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:6px;padding:5px 8px;}
+.tile-l{font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#64748b;margin-bottom:1px;}
+.tile-n{font-size:11px;font-weight:700;color:#0f172a;}
+.votes{display:flex;gap:6px;justify-content:center;padding:6px 12px 8px;}
+.orb{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:#f1f5f9;border:1.5px dashed #cbd5e1;color:#94a3b8;}
+.on{font-size:5.5px;color:#94a3b8;margin-top:2px;text-align:center;}
+.stripe{padding:7px 12px;font-size:9px;font-weight:600;font-style:italic;text-align:center;color:#94a3b8;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;gap:5px;}
+.stripe .dot{width:4px;height:4px;border-radius:50%;background:#94a3b8;animation:pulse 1.5s infinite;}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+
+<div style="max-width:420px;margin:0 auto;">
+  <div class="tag">ON THE FLOOR SPEC</div>
+  <h1>Quick Motion Wizard — Full Flow</h1>
+  <p class="subtitle">Empty state → click Quick Motion → single form with motion type, text, mover, seconder → card on the floor.</p>
+</div>
+
+<div class="flow">
+
+<!-- ===== STATE 1: Empty ===== -->
+<div class="stage-head"><span class="stage-label">State 1 — Empty</span></div>
+<div class="otf">
+  <div class="otf-h"><div class="ic"></div><span class="tt">On The Floor</span></div>
+  <div style="padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;">
+    <svg width="32" height="32" fill="none" stroke="#e2e8f0" stroke-width="1.5" viewBox="0 0 24 24">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+    </svg>
+    <span style="font-size:12px;color:#94a3b8;font-style:italic;">No motion on the floor</span>
+    <button class="btn" style="padding:10px 20px;font-size:12px;border-radius:10px;margin-top:8px;">
+      <svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Quick Motion
+    </button>
+    <span style="font-size:9px;color:#cbd5e1;">or wait for one to be detected from audio</span>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+
+<!-- ===== STATE 2: Form open — all fields at once ===== -->
+<div class="stage-head"><span class="stage-label">State 2 — Quick Motion Form</span></div>
+<div class="otf">
+  <div class="otf-h"><div class="ic"></div><span class="tt">On The Floor</span><span style="margin-left:auto;"><button class="btn-ghost">Cancel</button></span></div>
+  <div style="padding:14px 16px;">
+
+    <!-- Motion Type -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Motion Type</div>
+      <div class="type-pills">
+        <div class="type-pill active">Main Motion</div>
+        <div class="type-pill">Amending Motion</div>
+        <div class="type-pill">Reconsideration</div>
+      </div>
+    </div>
+
+    <!-- Motion Text -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Motion Text</div>
+      <textarea class="inp" placeholder="THAT Council..." style="resize:none;min-height:70px;">THAT Council directs the CAO to report on drainage costs for Pine Avenue at the next regular meeting.</textarea>
+    </div>
+
+    <!-- Mover + Seconder side by side as tiles with pill pickers -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="flex:1;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Mover</div>
+        <div class="pills">
+          <span class="pill">Veach</span>
+          <span class="pill active">Rabel ✓</span>
+          <span class="pill">Wall</span>
+          <span class="pill">Johnston</span>
+          <span class="pill">Woodill</span>
+        </div>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Seconder</div>
+        <div class="pills">
+          <span class="pill">Veach</span>
+          <span class="pill disabled">Rabel</span>
+          <span class="pill active">Wall ✓</span>
+          <span class="pill">Johnston</span>
+          <span class="pill">Woodill</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn" style="padding:9px 18px;font-size:12px;">
+        <svg width="11" height="11" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Put on the Floor
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+
+<!-- ===== STATE 2B: Amending Motion type selected ===== -->
+<div class="stage-head"><span class="stage-label">Variant — Amending Motion Selected</span></div>
+<div class="otf">
+  <div class="otf-h"><div class="ic"></div><span class="tt">On The Floor</span><span style="margin-left:auto;"><button class="btn-ghost">Cancel</button></span></div>
+  <div style="padding:14px 16px;">
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Motion Type</div>
+      <div class="type-pills">
+        <div class="type-pill">Main Motion</div>
+        <div class="type-pill active">Amending Motion</div>
+        <div class="type-pill">Reconsideration</div>
+      </div>
+    </div>
+
+    <!-- Reference to main motion being amended -->
+    <div style="margin-bottom:14px;padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+      <div style="font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:3px;">Amending Main Motion</div>
+      <div style="font-size:11px;font-weight:600;color:#0f172a;">Bylaw 1021 — Third Reading</div>
+      <div style="font-size:9px;color:#64748b;margin-top:1px;">Currently on the floor</div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Amendment Text</div>
+      <textarea class="inp" placeholder="THAT the main motion be amended by..." style="resize:none;min-height:60px;">THAT the main motion be amended by adding section 14 regarding public consultation requirements.</textarea>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="flex:1;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Mover</div>
+        <div class="pills">
+          <span class="pill">Veach</span>
+          <span class="pill">Rabel</span>
+          <span class="pill active">Wall ✓</span>
+          <span class="pill">Johnston</span>
+          <span class="pill">Woodill</span>
+        </div>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Seconder</div>
+        <div class="pills">
+          <span class="pill">Veach</span>
+          <span class="pill">Rabel</span>
+          <span class="pill disabled">Wall</span>
+          <span class="pill active">Johnston ✓</span>
+          <span class="pill">Woodill</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn" style="padding:9px 18px;font-size:12px;">
+        <svg width="11" height="11" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Put Amendment on the Floor
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+
+<!-- ===== STATE 2C: Reconsideration type selected ===== -->
+<div class="stage-head"><span class="stage-label">Variant — Reconsideration Selected</span></div>
+<div class="otf">
+  <div class="otf-h"><div class="ic"></div><span class="tt">On The Floor</span><span style="margin-left:auto;"><button class="btn-ghost">Cancel</button></span></div>
+  <div style="padding:14px 16px;">
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Motion Type</div>
+      <div class="type-pills">
+        <div class="type-pill">Main Motion</div>
+        <div class="type-pill">Amending Motion</div>
+        <div class="type-pill active">Reconsideration</div>
+      </div>
+    </div>
+
+    <!-- Select which motion to reconsider -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Motion to Reconsider</div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f1f5f9;border:1.5px solid #475569;border-radius:8px;cursor:pointer;">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#22c55e" stroke-width="2"/><polyline points="8 12 11 15 16 9" stroke="#22c55e" stroke-width="2.5" fill="none"/></svg>
+          <div style="flex:1;"><div style="font-size:10px;font-weight:600;color:#0f172a;">Water Rate Increase — 4.5%</div><div style="font-size:8px;color:#64748b;">Carried 4-1 · Item 6</div></div>
+          <span style="font-size:8px;font-weight:700;color:#475569;">Selected</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;opacity:.5;">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#22c55e" stroke-width="2"/><polyline points="8 12 11 15 16 9" stroke="#22c55e" stroke-width="2.5" fill="none"/></svg>
+          <div style="flex:1;"><div style="font-size:10px;font-weight:600;color:#0f172a;">Adopt Agenda</div><div style="font-size:8px;color:#94a3b8;">Carried Unanimously · Item 2</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="flex:1;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Mover</div>
+        <div class="pills">
+          <span class="pill">Veach</span>
+          <span class="pill">Rabel</span>
+          <span class="pill">Wall</span>
+          <span class="pill active">Johnston ✓</span>
+          <span class="pill">Woodill</span>
+        </div>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#475569;margin-bottom:6px;">Seconder</div>
+        <div class="pills">
+          <span class="pill">Veach</span>
+          <span class="pill">Rabel</span>
+          <span class="pill">Wall</span>
+          <span class="pill disabled">Johnston</span>
+          <span class="pill active">Woodill ✓</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn" style="padding:9px 18px;font-size:12px;">
+        <svg width="11" height="11" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Put Reconsideration on the Floor
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+
+<!-- ===== STATE 3: Card on the floor ===== -->
+<div class="stage-head"><span class="stage-label">State 3 — Motion on the Floor</span></div>
+<div class="otf">
+  <div class="otf-h"><div class="ic"></div><span class="tt">On The Floor</span></div>
+  <div style="padding:10px;">
+    <div class="card">
+      <div class="bar"></div>
+      <div class="hdr">
+        <div class="meta">Floor Motion</div>
+        <div class="ttl">Direct CAO to Report on Drainage Costs</div>
+      </div>
+      <div class="qt">THAT Council directs the CAO to report on drainage costs for Pine Avenue at the next regular meeting.</div>
+      <div class="tiles">
+        <div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div>
+        <div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Wall</div></div>
+      </div>
+      <div class="votes">
+        <div style="text-align:center"><div class="orb">?</div><div class="on">Veach</div></div>
+        <div style="text-align:center"><div class="orb">?</div><div class="on">Rabel</div></div>
+        <div style="text-align:center"><div class="orb">?</div><div class="on">Wall</div></div>
+        <div style="text-align:center"><div class="orb">?</div><div class="on">Johnston</div></div>
+        <div style="text-align:center"><div class="orb">?</div><div class="on">Woodill</div></div>
+      </div>
+      <div class="stripe"><span class="dot"></span> All in favour?</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,13 +1,9 @@
 import { useState } from 'react';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../styles/tokens';
 import { gradientButtonStyle, outlineButtonStyle } from '../../styles/shared';
-import QuickMotion from './QuickMotion';
 
-export default function SessionControls({ session, quickMotionOpen, onQuickMotionToggle }) {
+export default function SessionControls({ session }) {
   const [confirmStop, setConfirmStop] = useState(false);
-
-  const showQuickMotion = quickMotionOpen;
-  const setShowQuickMotion = onQuickMotionToggle;
 
   return (
     <div style={{
@@ -16,12 +12,6 @@ export default function SessionControls({ session, quickMotionOpen, onQuickMotio
       flexShrink: 0,
       fontFamily: TYPOGRAPHY.fontFamily,
     }}>
-      {/* Quick Motion expandable area */}
-      {showQuickMotion && (
-        <div style={{ borderBottom: `1px solid ${COLORS.cardBorder}` }}>
-          <QuickMotion onRecord={(data) => { session.addMotion(data); setShowQuickMotion(false); }} />
-        </div>
-      )}
       {/* Control bar */}
       <div style={{
         height: SPACING.controlBarHeight,
@@ -30,23 +20,8 @@ export default function SessionControls({ session, quickMotionOpen, onQuickMotio
         padding: '0 20px',
         gap: 12,
       }}>
-      {/* Left: Quick Motion toggle + session info */}
+      {/* Left: session info */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button
-          onClick={() => setShowQuickMotion(!showQuickMotion)}
-          style={{
-            ...outlineButtonStyle,
-            padding: '7px 14px',
-            color: showQuickMotion ? COLORS.primary : COLORS.secondaryText,
-            borderColor: showQuickMotion ? COLORS.primary : COLORS.primaryBorder,
-          }}
-        >
-          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Motion
-        </button>
-        <span style={{ fontSize: 10, color: COLORS.cardBorder }}>|</span>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 4,
           fontSize: 11, color: COLORS.mutedText,
@@ -72,7 +47,7 @@ export default function SessionControls({ session, quickMotionOpen, onQuickMotio
         </span>
       </div>
 
-      {/* Center: controls */}
+      {/* Right: controls */}
       <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
         {session.status === 'ACTIVE' && (
           <button
