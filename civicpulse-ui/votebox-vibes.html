@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Vote Box Concept (10 Options)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:28px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1200px;margin:0 auto;}
+
+.sw{background:#fff;border-radius:14px;border:2px solid #e2e8f0;overflow:hidden;cursor:pointer;transition:all .3s;box-shadow:0 2px 10px rgba(0,0,0,.03);}
+.sw:hover{border-color:#a5b4fc;box-shadow:0 6px 24px rgba(99,102,241,.12);transform:translateY(-2px);}
+.sw.selected{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+.sh{padding:10px 16px 8px;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid #f1f5f9;}
+.sh h2{font-size:13px;font-weight:700;color:#0f172a;}
+.sh p{font-size:9px;color:#94a3b8;margin-left:auto;font-style:italic;}
+.preview{padding:8px;background:#f8fafc;height:320px;overflow:hidden;}
+
+/* Bento panels */
+.pnl{background:#fff;border-radius:8px;border:1px solid #e2e8f0;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 4px rgba(0,0,0,.02);}
+.ph{padding:5px 8px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.ph .ic{width:8px;height:8px;border-radius:2px;}
+.ph .tt{font-size:8px;font-weight:700;color:#334155;}
+.ph .bd{font-size:6px;font-weight:700;padding:1px 4px;border-radius:999px;margin-left:auto;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;}
+.pbdy{flex:1;overflow:hidden;padding:4px 6px;}
+
+/* Vote box */
+.vbox{background:#fff;border-radius:8px;border:1px solid #e2e8f0;overflow:hidden;display:flex;flex-direction:column;}
+.vbox-h{padding:5px 8px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.vbox-h .ic{width:8px;height:8px;border-radius:2px;background:#475569;}
+.vbox-h .tt{font-size:8px;font-weight:700;color:#0f172a;}
+.vbox-h .live{font-size:5px;font-weight:700;color:#94a3b8;margin-left:auto;display:flex;align-items:center;gap:2px;letter-spacing:.8px;text-transform:uppercase;}
+.vbox-h .live .dot{width:4px;height:4px;border-radius:50%;background:#94a3b8;animation:pulse 1.5s infinite;}
+.vbox-b{flex:1;padding:6px 8px;display:flex;flex-direction:column;justify-content:center;}
+.vbox-meta{font-size:5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:2px;}
+.vbox-title{font-size:10px;font-weight:700;color:#0f172a;line-height:1.3;margin-bottom:4px;}
+.vbox-qt{font-size:7.5px;color:#334155;line-height:1.6;border-left:2px solid #cbd5e1;padding-left:6px;margin-bottom:6px;}
+.vbox-tiles{display:flex;gap:3px;margin-bottom:6px;}
+.vbox-tile{flex:1;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 4px;}
+.vbox-tile-l{font-size:4px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#64748b;}
+.vbox-tile-n{font-size:7px;font-weight:700;color:#0f172a;}
+.vbox-votes{display:flex;gap:4px;justify-content:center;margin-bottom:4px;}
+.vo{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;position:relative;}
+.vo::before{content:'';position:absolute;top:1px;left:4px;width:6px;height:3px;border-radius:50%;background:rgba(255,255,255,.4);}
+.vo.y{background:linear-gradient(135deg,#dcfce7,#bbf7d0aa);border:1px solid #86efac;color:#16a34a;}
+.vo.n{background:linear-gradient(135deg,#fee2e2,#fecacaaa);border:1px solid #fca5a5;color:#dc2626;}
+.vo.w{background:#f1f5f9;border:1px dashed #cbd5e1;color:#94a3b8;font-size:6px;}
+.vo-n{font-size:4px;color:#94a3b8;text-align:center;margin-top:1px;}
+.vbox-stripe{padding:4px 8px;font-size:7px;font-weight:700;letter-spacing:.5px;text-align:center;}
+.vbox-stripe.wait{background:#f8fafc;color:#94a3b8;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;gap:3px;}
+.vbox-stripe.wait .dot{width:3px;height:3px;border-radius:50%;background:#94a3b8;animation:pulse 1.5s infinite;}
+
+/* Mini PB card */
+.mc{border-radius:5px;overflow:hidden;background:#fff;border:1px solid #e2e8f0;margin-bottom:3px;}
+.mc-bar{height:2px;background:linear-gradient(90deg,#cbd5e1,transparent);}
+.mc-b{padding:4px 6px;}
+.mc-t{font-size:7px;font-weight:700;color:#0f172a;line-height:1.3;}
+.mc-s{font-size:5px;font-weight:700;padding:4px 6px;text-align:center;}
+.mc-s.g{background:#f0fdf4;color:#22c55e;border-top:1px solid #dcfce7;}
+
+/* Mini agenda/topics/notes */
+.mini-item{padding:2px 4px;font-size:6px;color:#334155;}
+.mini-bubble{width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 0 0 1.5px #cbd5e1;display:inline-flex;align-items:center;justify-content:center;font-size:4px;color:#475569;font-weight:600;}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#result{display:none;max-width:1200px;margin:20px auto 0;background:#fff;border-radius:14px;border:2px solid #6366f1;padding:16px;text-align:center;}
+#result .label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+#result .pick{font-size:18px;font-weight:800;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div style="max-width:1200px;margin:0 auto;">
+  <div class="tag">CONCEPT PICKER</div>
+  <h1>Vote Box — 10 Layout Ideas</h1>
+  <p class="subtitle">A dedicated "Vote Box" panel that makes it unmistakably clear what's being voted on right now. PB becomes the history/archive. How do they relate?</p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const voteBox = `<div class="vbox" style="flex:1;">
+  <div class="vbox-h"><div class="ic"></div><span class="tt">On The Floor</span><span class="live"><span class="dot"></span> LIVE</span></div>
+  <div class="vbox-b">
+    <div class="vbox-meta">Motion · Item 5</div>
+    <div class="vbox-title">Bylaw 1021 — Third Reading</div>
+    <div class="vbox-qt">THAT Council gives Bylaw 1021 third and final reading.</div>
+    <div class="vbox-tiles"><div class="vbox-tile"><div class="vbox-tile-l">Moved By</div><div class="vbox-tile-n">Cllr Rabel</div></div><div class="vbox-tile"><div class="vbox-tile-l">Seconded By</div><div class="vbox-tile-n">Cllr Wall</div></div></div>
+    <div class="vbox-votes"><div style="text-align:center"><div class="vo y">✓</div><div class="vo-n">Veach</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vo-n">Rabel</div></div><div style="text-align:center"><div class="vo y">✓</div><div class="vo-n">Wall</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vo-n">Johnston</div></div><div style="text-align:center"><div class="vo w">?</div><div class="vo-n">Woodill</div></div></div>
+  </div>
+  <div class="vbox-stripe wait"><span class="dot"></span> All in favour?</div>
+</div>`;
+
+const voteBoxLg = voteBox.replace('flex:1;','');
+
+const pbHistory = `<div class="pnl" style="flex:1;"><div class="ph"><div class="ic" style="background:#475569;"></div><span class="tt">History</span><span class="bd">3</span></div><div class="pbdy" style="overflow-y:auto;">
+  <div class="mc"><div class="mc-bar"></div><div class="mc-b"><div class="mc-t">Adopt Agenda</div></div><div class="mc-s g">CARRIED UNANIMOUSLY</div></div>
+  <div class="mc"><div class="mc-bar"></div><div class="mc-b"><div class="mc-t">Adopt Minutes</div></div><div class="mc-s g">CARRIED UNANIMOUSLY</div></div>
+  <div class="mc"><div class="mc-bar"></div><div class="mc-b"><div class="mc-t">Water Rate 4.5%</div></div><div class="mc-s g">CARRIED 4-1</div></div>
+</div></div>`;
+
+const pbFull = `<div class="pnl" style="flex:1;"><div class="ph"><div class="ic" style="background:#475569;"></div><span class="tt">Procedural Bites</span><span class="bd">4</span></div><div class="pbdy" style="overflow-y:auto;">
+  <div class="mc"><div class="mc-bar"></div><div class="mc-b"><div class="mc-t">Adopt Agenda</div></div><div class="mc-s g">CARRIED UNANIMOUSLY</div></div>
+  <div class="mc"><div class="mc-bar"></div><div class="mc-b"><div class="mc-t">Adopt Minutes</div></div><div class="mc-s g">CARRIED UNANIMOUSLY</div></div>
+  <div class="mc"><div class="mc-bar"></div><div class="mc-b"><div class="mc-t">Water Rate 4.5%</div></div><div class="mc-s g">CARRIED 4-1</div></div>
+  <div class="mc" style="border-color:#475569;"><div class="mc-bar" style="background:linear-gradient(90deg,#475569,transparent);"></div><div class="mc-b"><div class="mc-t" style="color:#475569;">Bylaw 1021 ← On The Floor</div></div></div>
+</div></div>`;
+
+const agenda = `<div class="pnl"><div class="ph"><div class="ic" style="background:#475569;"></div><span class="tt">Agenda</span><span class="bd">3/13</span></div><div class="pbdy"><div class="mini-item" style="text-decoration:line-through;color:#94a3b8;">1. Call to Order</div><div class="mini-item" style="text-decoration:line-through;color:#94a3b8;">2. Adopt Agenda</div><div class="mini-item" style="text-decoration:line-through;color:#94a3b8;">3. Minutes</div><div class="mini-item" style="font-weight:700;">4. Delegation</div><div class="mini-item" style="font-weight:700;color:#475569;">→ 5. Bylaw 1021</div><div class="mini-item">6. Water Rates</div></div></div>`;
+
+const topics = `<div class="pnl"><div class="ph"><div class="ic" style="background:#475569;"></div><span class="tt">Topics</span><span class="bd">5</span></div><div class="pbdy" style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center;padding:6px;"><span class="mini-bubble">Bylaw</span><span class="mini-bubble">Pine</span><span class="mini-bubble">Rates</span><span class="mini-bubble">Roads</span><span class="mini-bubble">Zone</span></div></div>`;
+
+const notes = `<div class="pnl"><div class="ph"><div class="ic" style="background:#475569;"></div><span class="tt">Notes</span></div><div class="pbdy"><div class="mini-item" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;padding:2px 4px;margin-bottom:2px;font-size:5px;">7:02 — Quorum present</div><div class="mini-item" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;padding:2px 4px;font-size:5px;">7:05 — Pine Ave drainage $18K</div></div></div>`;
+
+const designs = [
+  {
+    id:'center-stage', num:'01', name:'Center Stage',
+    desc:'Vote Box is the largest panel in the center. PB history on the left, Agenda+Topics+Notes on the right.',
+    grid:'grid-template-columns:.3fr 1fr .35fr;grid-template-rows:1fr 1fr;',
+    cells:`<div style="grid-row:1/3;display:flex;">${pbHistory}</div>
+           <div style="grid-row:1/3;display:flex;">${voteBox}</div>
+           <div style="display:flex;flex-direction:column;gap:4px;">${agenda}${topics}</div>
+           <div style="display:flex;">${notes}</div>`
+  },
+  {
+    id:'top-banner', num:'02', name:'Top Banner',
+    desc:'Vote Box spans the full width at the top. PB + Agenda + Topics + Notes below in a row.',
+    grid:'grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:1.2fr .8fr;',
+    cells:`<div style="grid-column:1/5;display:flex;">${voteBox}</div>
+           <div style="display:flex;">${pbHistory}</div>
+           <div style="display:flex;">${agenda}</div>
+           <div style="display:flex;">${topics}</div>
+           <div style="display:flex;">${notes}</div>`
+  },
+  {
+    id:'split-pb', num:'03', name:'Split PB — Active vs Done',
+    desc:'Vote Box replaces PB for the active motion. PB only shows completed motions below/beside.',
+    grid:'grid-template-columns:1fr .35fr;grid-template-rows:1.3fr .7fr;',
+    cells:`<div style="display:flex;">${voteBox}</div>
+           <div style="grid-row:1/3;display:flex;flex-direction:column;gap:4px;">${agenda}${topics}${notes}</div>
+           <div style="display:flex;">${pbHistory}</div>`
+  },
+  {
+    id:'overlay', num:'04', name:'Overlay / Modal',
+    desc:'Vote Box floats as a prominent overlay on top of the normal PB layout when a vote is called.',
+    grid:'grid-template-columns:.3fr 1fr .35fr;grid-template-rows:1fr 1fr;position:relative;',
+    cells:`<div style="grid-row:1/3;display:flex;">${agenda}</div>
+           <div style="grid-row:1/3;display:flex;opacity:.3;">${pbFull}</div>
+           <div style="display:flex;">${topics}</div>
+           <div style="display:flex;">${notes}</div>
+           <div style="position:absolute;top:15%;left:20%;right:15%;bottom:20%;z-index:10;box-shadow:0 8px 40px rgba(0,0,0,.15);border-radius:10px;overflow:hidden;">${voteBoxLg}</div>`
+  },
+  {
+    id:'right-dock', num:'05', name:'Right Dock',
+    desc:'Vote Box docks on the right side as a fixed panel. PB center, Agenda left.',
+    grid:'grid-template-columns:.3fr 1fr .4fr;grid-template-rows:1fr 1fr;',
+    cells:`<div style="grid-row:1/3;display:flex;">${agenda}</div>
+           <div style="grid-row:1/3;display:flex;">${pbHistory}</div>
+           <div style="display:flex;">${voteBox}</div>
+           <div style="display:flex;flex-direction:column;gap:4px;">${topics}${notes}</div>`
+  },
+  {
+    id:'card-promotes', num:'06', name:'Card Promotes Up',
+    desc:'Active card sits at the top of PB enlarged. Completed cards shrink below it. Same panel, just hierarchy.',
+    grid:'grid-template-columns:.3fr 1fr .35fr;grid-template-rows:1fr 1fr;',
+    cells:`<div style="grid-row:1/3;display:flex;">${agenda}</div>
+           <div style="grid-row:1/3;display:flex;flex-direction:column;gap:4px;">
+             <div style="flex:1.5;">${voteBox}</div>
+             <div style="flex:1;display:flex;flex-direction:column;">${pbHistory}</div>
+           </div>
+           <div style="display:flex;">${topics}</div>
+           <div style="display:flex;">${notes}</div>`
+  },
+  {
+    id:'twin-col', num:'07', name:'Twin Columns',
+    desc:'Vote Box and PB History side by side as equal columns. Active vote always visible alongside past decisions.',
+    grid:'grid-template-columns:.25fr .5fr .5fr .3fr;grid-template-rows:1fr 1fr;',
+    cells:`<div style="grid-row:1/3;display:flex;">${agenda}</div>
+           <div style="grid-row:1/3;display:flex;">${voteBox}</div>
+           <div style="grid-row:1/3;display:flex;">${pbHistory}</div>
+           <div style="display:flex;">${topics}</div>
+           <div style="display:flex;">${notes}</div>`
+  },
+  {
+    id:'bottom-dock', num:'08', name:'Bottom Dock',
+    desc:'Vote Box docks at the bottom spanning full width. Like a control panel. PB + everything else above.',
+    grid:'grid-template-columns:.3fr 1fr .35fr;grid-template-rows:1fr .8fr;',
+    cells:`<div style="display:flex;">${agenda}</div>
+           <div style="display:flex;">${pbHistory}</div>
+           <div style="display:flex;flex-direction:column;gap:4px;">${topics}${notes}</div>
+           <div style="grid-column:1/4;display:flex;">${voteBox}</div>`
+  },
+  {
+    id:'focus-mode', num:'09', name:'Focus Mode',
+    desc:'When a vote is called, everything else fades except the Vote Box. Full attention. Other panels at 30% opacity.',
+    grid:'grid-template-columns:.3fr 1fr .35fr;grid-template-rows:1fr 1fr;',
+    cells:`<div style="grid-row:1/3;display:flex;opacity:.25;">${agenda}</div>
+           <div style="grid-row:1/3;display:flex;">${voteBox}</div>
+           <div style="display:flex;opacity:.25;">${topics}</div>
+           <div style="display:flex;opacity:.25;">${notes}</div>`
+  },
+  {
+    id:'tabbed', num:'10', name:'Tabbed — Vote / History',
+    desc:'Single panel with tabs: "On The Floor" (vote box) and "History" (completed PB cards). Switch between them.',
+    grid:'grid-template-columns:.3fr 1fr .35fr;grid-template-rows:1fr 1fr;',
+    cells:`<div style="grid-row:1/3;display:flex;">${agenda}</div>
+           <div style="grid-row:1/3;display:flex;flex-direction:column;">
+             <div style="display:flex;background:#f1f5f9;border-radius:6px 6px 0 0;padding:2px;gap:1px;">
+               <span style="padding:3px 8px;font-size:7px;font-weight:700;border-radius:4px;background:#fff;color:#475569;box-shadow:0 1px 2px rgba(0,0,0,.06);">On The Floor</span>
+               <span style="padding:3px 8px;font-size:7px;font-weight:600;border-radius:4px;color:#94a3b8;">History (3)</span>
+             </div>
+             ${voteBox}
+           </div>
+           <div style="display:flex;">${topics}</div>
+           <div style="display:flex;">${notes}</div>`
+  },
+];
+
+document.getElementById('grid').innerHTML = designs.map(d =>
+  `<div class="sw" onclick="select(this,'${d.id}')">
+    <div class="sh"><span class="tag">${d.num}</span><h2>${d.name}</h2><p>${d.desc}</p></div>
+    <div class="preview"><div style="display:grid;gap:4px;height:100%;${d.grid}">${d.cells}</div></div>
+  </div>`
+).join('');
+
+const nm={};designs.forEach(d=>nm[d.id]=`${d.num} — ${d.name}`);
+function select(el,id){document.querySelectorAll('.sw').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');document.getElementById('result').style.display='block';document.getElementById('pick-text').textContent=nm[id];}
+</script>
+</body>
+</html>

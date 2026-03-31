@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — PB Compact (10 Options)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:28px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1100px;margin:0 auto;}
+.sw{background:#fff;border-radius:14px;border:2px solid #e2e8f0;overflow:hidden;cursor:pointer;transition:all .3s;box-shadow:0 2px 10px rgba(0,0,0,.03);}
+.sw:hover{border-color:#a5b4fc;box-shadow:0 6px 24px rgba(99,102,241,.12);transform:translateY(-2px);}
+.sw.selected{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+.sh{padding:10px 16px 8px;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid #f1f5f9;}
+.sh h2{font-size:13px;font-weight:700;color:#0f172a;}
+.sh p{font-size:9px;color:#94a3b8;margin-left:auto;font-style:italic;}
+.preview{padding:10px 14px;background:#f8fafc;display:flex;flex-direction:column;gap:4px;}
+
+#result{display:none;max-width:1100px;margin:20px auto 0;background:#fff;border-radius:14px;border:2px solid #6366f1;padding:16px;text-align:center;}
+#result .label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+#result .pick{font-size:18px;font-weight:800;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div style="max-width:1100px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>PB Compact — Grouped by Agenda Item</h1>
+  <p class="subtitle">Top level: agenda item # + title (collapsed). Accordion down: the motions that resulted from it. Floor motions grouped separately. Each shows collapsed + one expanded.</p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const g='#22c55e',gB='#f0fdf4',gD='#bbf7d0',r='#dc2626',rB='#fef2f2',rD='#fecaca';
+
+// Motion rows for the expanded view
+const m1 = {t:'Adopt Agenda',res:'Carried Unanimously',isG:true};
+const m2 = {t:'Adopt Minutes — Feb 10',res:'Carried Unanimously',isG:true};
+const m5 = {t:'Give Bylaw 1021 third reading',res:'Carried 4-1 (As Amended)',isG:true,amended:true};
+const m11 = {t:'Extend meeting past 9 PM',res:'Defeated 2-3',isG:false};
+const mF = {t:'Direct CAO to report on drainage costs',res:'Carried Unanimously',isG:true};
+
+function motionRow(m, style) {
+  const col = m.isG ? g : r;
+  const bg = m.isG ? gB : rB;
+  const bd = m.isG ? gD : rD;
+  if (style === 'dot') return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
+    <div style="width:7px;height:7px;border-radius:50%;background:${col};flex-shrink:0;"></div>
+    <span style="font-size:10px;color:#334155;flex:1;">${m.t}${m.amended?' <span style="font-size:7px;color:#94a3b8;">· amended</span>':''}</span>
+    <span style="font-size:8px;font-weight:700;color:${col};">${m.res}</span>
+  </div>`;
+  if (style === 'pill') return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
+    <span style="font-size:10px;color:#334155;flex:1;">${m.t}${m.amended?' <span style="font-size:7px;color:#94a3b8;">amended</span>':''}</span>
+    <span style="font-size:7px;font-weight:700;color:${col};padding:2px 6px;border-radius:999px;background:${bg};border:1px solid ${bd};white-space:nowrap;">${m.res}</span>
+  </div>`;
+  if (style === 'bar') return `<div style="border-left:3px solid ${col};padding:4px 10px;margin:2px 0;border-radius:0 4px 4px 0;background:${bg};">
+    <div style="font-size:10px;font-weight:600;color:#0f172a;">${m.t}</div>
+    <div style="font-size:8px;font-weight:700;color:${col};margin-top:1px;">${m.res}${m.amended?' · amended':''}</div>
+  </div>`;
+  if (style === 'check') return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;">
+    <svg width="11" height="11" fill="none" stroke="${col}" stroke-width="2.5" viewBox="0 0 24 24">${m.isG?'<polyline points="20 6 9 17 4 12"/>':'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'}</svg>
+    <span style="font-size:10px;color:#334155;flex:1;">${m.t}${m.amended?' <span style="font-size:7px;color:#94a3b8;">· amended</span>':''}</span>
+    <span style="font-size:8px;font-weight:600;color:${col};">${m.res}</span>
+  </div>`;
+  if (style === 'stripe') return `<div style="display:flex;overflow:hidden;border-radius:5px;border:1px solid #e2e8f0;margin:2px 0;">
+    <div style="flex:1;padding:5px 8px;font-size:10px;font-weight:600;color:#0f172a;background:#fff;">${m.t}${m.amended?' <span style="font-size:7px;color:#94a3b8;">amended</span>':''}</div>
+    <div style="padding:5px 8px;font-size:7px;font-weight:700;color:${col};background:${bg};border-left:1px solid ${bd};white-space:nowrap;display:flex;align-items:center;">${m.res}</div>
+  </div>`;
+  // default: minimal
+  return `<div style="display:flex;align-items:baseline;gap:6px;padding:3px 0;border-bottom:1px solid #f8fafc;">
+    <span style="font-size:10px;color:#334155;flex:1;">${m.t}</span>
+    <span style="font-size:8px;font-weight:700;color:${col};">${m.res}</span>
+  </div>`;
+}
+
+const designs = [
+  // 1
+  { id:'outlined-sq', num:'01', name:'Outlined Square + Dot Motions',
+    desc:'Agenda # in outlined square. Chevron expands to show motions with status dots.',
+    header: (num,title,count,open) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:${open?'10px 10px 0 0':'10px'};border:1px solid #e2e8f0;${open?'border-bottom:none;':''}">
+      <svg width="9" height="9" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?'180':'0'}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+      <div style="width:22px;height:22px;border-radius:5px;border:1.5px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#64748b;flex-shrink:0;">${num}</div>
+      <span style="font-size:11px;font-weight:600;color:#0f172a;flex:1;">${title}</span>
+      <span style="font-size:8px;color:#94a3b8;">${count} motion${count>1?'s':''}</span>
+    </div>`,
+    body: (motions) => `<div style="padding:6px 14px 10px;background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;">${motions.map(m=>motionRow(m,'dot')).join('')}</div>`,
+    mStyle: 'dot'
+  },
+  // 2
+  { id:'tonal', num:'02', name:'Tonal Header + Pill Motions',
+    desc:'Light grey header with number chip. Motions show as pill badges.',
+    header: (num,title,count,open) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;background:${open?'#f1f5f9':'#f8fafc'};border-radius:${open?'10px 10px 0 0':'10px'};border:1px solid #e2e8f0;${open?'border-bottom:1px solid #e2e8f0;':''}">
+      <svg width="9" height="9" fill="none" stroke="#64748b" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?'180':'0'}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+      <div style="width:20px;height:20px;border-radius:6px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#475569;flex-shrink:0;">${num}</div>
+      <span style="font-size:11px;font-weight:600;color:#0f172a;flex:1;">${title}</span>
+      <span style="font-size:8px;color:#94a3b8;">${count}</span>
+    </div>`,
+    body: (motions) => `<div style="padding:8px 14px 10px;background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;">${motions.map(m=>motionRow(m,'pill')).join('')}</div>`,
+    mStyle: 'pill'
+  },
+  // 3
+  { id:'left-bar', num:'03', name:'Left Bar + Card Motions',
+    desc:'Agenda item as a clean row. Motions expand as mini colored-bar cards.',
+    header: (num,title,count,open) => `<div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:#fff;border-radius:${open?'8px 8px 0 0':'8px'};border:1px solid #e2e8f0;${open?'border-bottom:none;':''}">
+      <svg width="9" height="9" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?'180':'0'}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+      <span style="font-size:10px;font-weight:700;color:#94a3b8;min-width:14px;">${num}.</span>
+      <span style="font-size:11px;font-weight:600;color:#0f172a;flex:1;">${title}</span>
+    </div>`,
+    body: (motions) => `<div style="padding:4px 12px 8px;background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;">${motions.map(m=>motionRow(m,'bar')).join('')}</div>`,
+    mStyle: 'bar'
+  },
+  // 4
+  { id:'check-list', num:'04', name:'Checklist + Inline Results',
+    desc:'Agenda item row. Motions as a checklist with ✓/✗ icons and result text.',
+    header: (num,title,count,open) => `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;${open?'border-bottom:1px solid #f1f5f9;':''}">
+      <svg width="9" height="9" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?'180':'0'}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+      <span style="font-size:9px;font-weight:700;color:#cbd5e1;">${num}</span>
+      <span style="font-size:11px;font-weight:600;color:#0f172a;flex:1;">${title}</span>
+      <span style="font-size:8px;color:#94a3b8;">${count}</span>
+    </div>`,
+    body: (motions) => `<div style="padding:4px 10px 8px 32px;">${motions.map(m=>motionRow(m,'check')).join('')}</div>`,
+    mStyle: 'check'
+  },
+  // 5
+  { id:'stripe-split', num:'05', name:'Split Row Motions',
+    desc:'Clean header. Motions as split rows: title left, colored result right.',
+    header: (num,title,count,open) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:${open?'10px 10px 0 0':'10px'};border:1px solid #e2e8f0;${open?'border-bottom:none;':''}">
+      <svg width="9" height="9" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?'180':'0'}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+      <div style="width:22px;height:22px;border-radius:5px;border:1.5px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#64748b;flex-shrink:0;">${num}</div>
+      <span style="font-size:11px;font-weight:600;color:#0f172a;flex:1;">${title}</span>
+    </div>`,
+    body: (motions) => `<div style="padding:6px 12px 8px;background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;">${motions.map(m=>motionRow(m,'stripe')).join('')}</div>`,
+    mStyle: 'stripe'
+  },
+  // 6
+  { id:'notion-db', num:'06', name:'Database Row (Notion)',
+    desc:'Borderless rows, bottom dividers. Motions as indented sub-rows.',
+    header: (num,title,count,open) => `<div style="display:flex;align-items:baseline;gap:8px;padding:7px 4px;border-bottom:1px solid ${open?'#e2e8f0':'#f1f5f9'};">
+      <svg width="8" height="8" fill="none" stroke="#cbd5e1" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?'180':'0'}deg);flex-shrink:0;margin-top:2px;"><polyline points="6 9 12 15 18 9"/></svg>
+      <span style="font-size:9px;font-weight:600;color:#cbd5e1;min-width:14px;text-align:right;">${num}</span>
+      <span style="font-size:11px;font-weight:500;color:#334155;flex:1;">${title}</span>
+      <span style="font-size:8px;color:#cbd5e1;">${count}</span>
+    </div>`,
+    body: (motions) => `<div style="padding:4px 4px 8px 30px;">${motions.map(m=>motionRow(m,'default')).join('')}</div>`,
+    mStyle: 'default'
+  },
+  // 7
+  { id:'github-issue', num:'07', name:'Issue Group (GitHub)',
+    desc:'Agenda item as a milestone. Motions as closed/open issues underneath.',
+    header: (num,title,count,open) => `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border-radius:${open?'10px 10px 0 0':'10px'};border:1px solid #e2e8f0;${open?'border-bottom:1px dashed #e2e8f0;':''}">
+      <svg width="9" height="9" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?'180':'0'}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+      <svg width="12" height="12" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:600;color:#0f172a;">Item ${num} — ${title}</div>
+      </div>
+      <span style="font-size:8px;color:#94a3b8;font-weight:600;">${count} motion${count>1?'s':''}</span>
+    </div>`,
+    body: (motions) => `<div style="padding:6px 12px 10px;background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;">${motions.map(m=>motionRow(m,'check')).join('')}</div>`,
+    mStyle: 'check'
+  },
+  // 8
+  { id:'compact-count', num:'08', name:'Number + Count Chips',
+    desc:'Minimal: item #, title, and colored count chips showing carried/defeated totals.',
+    header: (num,title,count,open,motions) => {
+      const carried = motions.filter(m=>m.isG).length;
+      const defeated = motions.filter(m=>!m.isG).length;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:#fff;border-radius:${open?'8px 8px 0 0':'8px'};border:1px solid #e2e8f0;${open?'border-bottom:none;':''}">
+        <svg width="9" height="9" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?'180':'0'}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+        <div style="width:20px;height:20px;border-radius:5px;border:1.5px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#64748b;flex-shrink:0;">${num}</div>
+        <span style="font-size:11px;font-weight:600;color:#0f172a;flex:1;">${title}</span>
+        ${carried>0?`<span style="font-size:7px;font-weight:700;padding:2px 5px;border-radius:999px;background:${gB};color:${g};border:1px solid ${gD};">${carried} carried</span>`:''}
+        ${defeated>0?`<span style="font-size:7px;font-weight:700;padding:2px 5px;border-radius:999px;background:${rB};color:${r};border:1px solid ${rD};">${defeated} defeated</span>`:''}
+      </div>`;
+    },
+    body: (motions) => `<div style="padding:6px 14px 10px;background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;">${motions.map(m=>motionRow(m,'dot')).join('')}</div>`,
+    mStyle: 'dot',
+    hasMotionsInHeader: true
+  },
+  // 9
+  { id:'indent-minimal', num:'09', name:'Indent + Minimal Text',
+    desc:'Bare minimum. Item row, motions indented as plain text lines.',
+    header: (num,title,count,open) => `<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:4px;transition:background .1s;" onmouseenter="this.style.background='#f8fafc'" onmouseleave="this.style.background='transparent'">
+      <svg width="8" height="8" fill="none" stroke="#cbd5e1" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?'180':'0'}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+      <span style="font-size:9px;font-weight:700;color:#94a3b8;">${num}.</span>
+      <span style="font-size:10.5px;font-weight:600;color:#0f172a;flex:1;">${title}</span>
+    </div>`,
+    body: (motions) => `<div style="padding:2px 8px 6px 28px;">${motions.map(m=>`<div style="display:flex;align-items:baseline;gap:6px;padding:2px 0;">
+      <span style="font-size:9px;color:#334155;flex:1;">${m.t}</span>
+      <span style="font-size:8px;font-weight:600;color:${m.isG?g:r};">${m.res}</span>
+    </div>`).join('')}</div>`,
+    mStyle: 'default'
+  },
+  // 10
+  { id:'card-group', num:'10', name:'Card Group',
+    desc:'Each agenda item is a card. Motions inside as stacked mini-rows with colored left borders.',
+    header: (num,title,count,open) => `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;${open?'':''}">
+      <svg width="9" height="9" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?'180':'0'}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+      <div style="width:24px;height:24px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#475569;flex-shrink:0;">${num}</div>
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:700;color:#0f172a;">${title}</div>
+        <div style="font-size:8px;color:#94a3b8;margin-top:1px;">${count} motion${count>1?'s':''}</div>
+      </div>
+    </div>`,
+    body: (motions) => `<div style="padding:0 14px 10px;">${motions.map(m=>motionRow(m,'bar')).join('')}</div>`,
+    mStyle: 'bar',
+    isCard: true
+  },
+];
+
+// Agenda item groups
+const groups = [
+  { num: '2', title: 'Adoption of Agenda & Minutes', motions: [m1, m2] },
+  { num: '5', title: 'Bylaw 1021 — Third Reading', motions: [m5] },
+  { num: '11', title: 'New Business', motions: [m11] },
+  { num: '—', title: 'Floor Motions', motions: [mF] },
+];
+
+document.getElementById('grid').innerHTML = designs.map(d => {
+  // Show first group expanded, rest collapsed
+  const rows = groups.map((grp, gi) => {
+    const open = gi === 1; // expand item 5
+    const hFn = d.hasMotionsInHeader
+      ? d.header(grp.num, grp.title, grp.motions.length, open, grp.motions)
+      : d.header(grp.num, grp.title, grp.motions.length, open);
+    if (d.isCard) {
+      return `<div style="background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;">
+        ${hFn}${open ? d.body(grp.motions) : ''}
+      </div>`;
+    }
+    return hFn + (open ? d.body(grp.motions) : '');
+  }).join('');
+  return `<div class="sw" onclick="select(this,'${d.id}')">
+    <div class="sh"><span class="tag">${d.num}</span><h2>${d.name}</h2><p>${d.desc}</p></div>
+    <div class="preview">${rows}</div>
+  </div>`;
+}).join('');
+
+const nm={};designs.forEach(d=>nm[d.id]=`${d.num} — ${d.name}`);
+function select(el,id){document.querySelectorAll('.sw').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');document.getElementById('result').style.display='block';document.getElementById('pick-text').textContent=nm[id];}
+</script>
+</body>
+</html>

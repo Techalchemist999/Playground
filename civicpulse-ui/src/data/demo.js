@@ -39,6 +39,7 @@ export const DEMO_TOPICS = [
     state: 'EXPIRED',
     mention_count: 1,
     decay_score: 0.05,
+    agendaItemNumber: 2,
     mover: 'Cllr Rabel',
     seconder: 'Cllr Johnston',
     motionText: 'THAT Council adopts the agenda as presented.',
@@ -54,6 +55,7 @@ export const DEMO_TOPICS = [
     state: 'EXPIRED',
     mention_count: 1,
     decay_score: 0.08,
+    agendaItemNumber: 3,
     mover: 'Cllr Wall',
     seconder: 'Cllr Woodill',
     motionText: 'THAT Council adopts the minutes of the February 10, 2025 regular meeting as presented.',
@@ -62,7 +64,6 @@ export const DEMO_TOPICS = [
   },
 
   // Motion 3: Bylaw 1021 — AMENDMENT CARRIED
-  // Amendment adds section 14 re: public consultation
   {
     normalized_id: 'motion-bylaw-1021',
     label: 'Bylaw 1021 — Third Reading',
@@ -70,13 +71,14 @@ export const DEMO_TOPICS = [
     state: 'ACTIVE',
     mention_count: 3,
     decay_score: 0.9,
+    agendaItemNumber: 5,
     mover: 'Cllr Rabel',
     seconder: 'Cllr Wall',
     motionText: 'THAT Council gives Bylaw 1021 third and final reading.',
     votes: ['yes','yes','yes', null, null],
     amendment: {
       status: 'carried', // 'pending' | 'voting' | 'carried' | 'defeated'
-      text: '...with the addition of section 14 regarding public consultation requirements.',
+      text: 'adding section 14 regarding public consultation requirements.',
       mover: 'Cllr Wall',
       seconder: 'Cllr Johnston',
       votes: ['yes','yes','no','yes','yes'],
@@ -93,13 +95,14 @@ export const DEMO_TOPICS = [
     state: 'DETECTED',
     mention_count: 1,
     decay_score: 0.6,
+    agendaItemNumber: 6,
     mover: 'Mayor Veach',
     seconder: 'Cllr Rabel',
     motionText: 'THAT Council approves a 4.5% water rate increase effective July 1, 2025.',
     votes: [null, null, null, null, null],
     amendment: {
       status: 'defeated',
-      text: '...reducing the increase from 4.5% to 3.0%.',
+      text: 'reducing the increase from 4.5% to 3.0%.',
       mover: 'Cllr Johnston',
       seconder: 'Cllr Woodill',
       votes: ['no','no','yes','yes','no'],
@@ -111,6 +114,7 @@ export const DEMO_TOPICS = [
   {
     normalized_id: 'motion-road-budget',
     label: 'Road Maintenance Budget',
+    agendaItemNumber: 7,
     category: 'motion',
     state: 'DETECTED',
     mention_count: 1,

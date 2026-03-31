@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Disposition Placement (6 Options)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:24px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.options{display:flex;flex-direction:column;gap:24px;max-width:960px;margin:0 auto;}
+.sw{background:#fff;border-radius:14px;border:2px solid #e2e8f0;overflow:hidden;cursor:pointer;transition:all .3s;box-shadow:0 2px 10px rgba(0,0,0,.03);}
+.sw:hover{border-color:#a5b4fc;box-shadow:0 6px 24px rgba(99,102,241,.12);transform:translateY(-2px);}
+.sw.selected{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+.sh{padding:10px 16px 8px;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid #f1f5f9;}
+.sh h2{font-size:14px;font-weight:700;color:#0f172a;}
+.sh p{font-size:10px;color:#94a3b8;margin-left:auto;font-style:italic;}
+.preview{padding:16px;background:#f8fafc;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+
+/* Card */
+.card{border-radius:12px;overflow:hidden;width:100%;max-width:380px;background:#fff;border:1px solid #e2e8f0;box-shadow:0 2px 10px rgba(0,0,0,.03);flex-shrink:0;}
+.bar{height:3px;background:linear-gradient(90deg,#cbd5e1,transparent);}
+.hdr{padding:10px 12px 0;}
+.meta{font-size:7px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:#94a3b8;margin-bottom:2px;}
+.tr{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:8px;}
+.ttl{font-size:12px;font-weight:700;color:#0f172a;line-height:1.3;}
+.qt{background:#f8fafc;border-left:3px solid #cbd5e1;border-radius:0 6px 6px 0;padding:7px 10px;margin:0 12px 8px;font-size:11px;color:#334155;line-height:1.7;}
+.tiles{display:flex;gap:4px;padding:0 12px 8px;}
+.tile{flex:1;background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:6px;padding:4px 6px;}
+.tile-l{font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#64748b;margin-bottom:1px;}
+.tile-n{font-size:10px;font-weight:700;color:#0f172a;}
+.votes{display:flex;gap:6px;justify-content:center;padding:6px 12px 10px;}
+.vc{text-align:center;}
+.orb{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;position:relative;}
+.orb::before{content:'';position:absolute;top:3px;left:6px;width:10px;height:5px;border-radius:50%;background:rgba(255,255,255,.5);}
+.orb.y{background:linear-gradient(135deg,#dcfce7,#bbf7d0aa);border:1.5px solid #86efac;color:#16a34a;}
+.orb.n{background:linear-gradient(135deg,#fee2e2,#fecacaaa);border:1.5px solid #fca5a5;color:#dc2626;}
+.on{font-size:6px;color:#94a3b8;margin-top:2px;}
+
+/* Disposition elements */
+.d-stripe{padding:7px 12px;font-size:9px;font-weight:700;letter-spacing:.5px;text-align:center;}
+.d-stripe.g{background:#f0fdf4;color:#22c55e;border-top:1px solid #dcfce7;}
+.d-stripe.r{background:#fef2f2;color:#dc2626;border-top:1px solid #fee2e2;}
+.d-overlay{position:absolute;top:0;right:0;padding:5px 10px;border-radius:0 0 0 10px;font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.d-overlay.g{background:#22c55e;color:#fff;}
+.d-overlay.r{background:#dc2626;color:#fff;}
+
+#result{display:none;max-width:960px;margin:20px auto 0;background:#fff;border-radius:14px;border:2px solid #6366f1;padding:16px;text-align:center;}
+#result .label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+#result .pick{font-size:18px;font-weight:800;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div style="max-width:960px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>Disposition Placement — 6 Options</h1>
+  <p class="subtitle">Each shows carried + defeated side by side. Disposition appears once per card.</p>
+</div>
+
+<div class="options">
+
+<script>
+const votesCarried = `<div class="votes"><div class="vc"><div class="orb y">✓</div><div class="on">Veach</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Rabel</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Wall</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Johnston</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Woodill</div></div></div>`;
+const votesDefeated = `<div class="votes"><div class="vc"><div class="orb n">✗</div><div class="on">Veach</div></div><div class="vc"><div class="orb n">✗</div><div class="on">Rabel</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Wall</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Johnston</div></div><div class="vc"><div class="orb n">✗</div><div class="on">Woodill</div></div></div>`;
+const tiles = `<div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Wall</div></div></div>`;
+const quoteC = `<div class="qt">THAT Council adopted Bylaw 1021 as presented.</div>`;
+const quoteD = `<div class="qt">THAT Council adopts the water rate increase as presented.</div>`;
+const hdrC = `<div class="hdr"><div class="meta">Motion · Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div></div></div>`;
+const hdrD = `<div class="hdr"><div class="meta">Motion · Item 6</div><div class="tr"><div class="ttl">Water Rate Increase</div></div></div>`;
+
+const designs = [
+  // 2: Bottom Stripe
+  {
+    id:'bottom-stripe', num:'A', name:'Bottom Stripe',
+    desc:'Full-width colored bar across the very bottom of the card',
+    carried: `<div class="card"><div class="bar"></div>${hdrC}${quoteC}${tiles}${votesCarried}<div class="d-stripe g">CARRIED UNANIMOUSLY</div></div>`,
+    defeated: `<div class="card"><div class="bar"></div>${hdrD}${quoteD}${tiles}${votesDefeated}<div class="d-stripe r">DEFEATED 2-3</div></div>`,
+  },
+  // 6: Corner Ribbon
+  {
+    id:'corner-ribbon', num:'B', name:'Corner Ribbon',
+    desc:'Solid colored badge in the top-right corner overlaying the card',
+    carried: `<div class="card" style="position:relative;"><div class="bar"></div><div class="d-overlay g">CARRIED</div>${hdrC}${quoteC}${tiles}${votesCarried}</div>`,
+    defeated: `<div class="card" style="position:relative;"><div class="bar"></div><div class="d-overlay r">DEFEATED 2-3</div>${hdrD}${quoteD}${tiles}${votesDefeated}</div>`,
+  },
+  // NEW: Bottom-right minimal text
+  {
+    id:'bottom-right', num:'C', name:'Bottom-Right Text',
+    desc:'Small right-aligned text at the very bottom. Quiet, out of the way.',
+    carried: `<div class="card"><div class="bar"></div>${hdrC}${quoteC}${tiles}${votesCarried}<div style="text-align:right;padding:0 12px 8px;"><span style="font-size:8px;font-weight:700;color:#22c55e;letter-spacing:.5px;">CARRIED UNANIMOUSLY</span></div></div>`,
+    defeated: `<div class="card"><div class="bar"></div>${hdrD}${quoteD}${tiles}${votesDefeated}<div style="text-align:right;padding:0 12px 8px;"><span style="font-size:8px;font-weight:700;color:#dc2626;letter-spacing:.5px;">DEFEATED 2-3</span></div></div>`,
+  },
+  // NEW: Top bar becomes the color + text replaces meta
+  {
+    id:'top-replace', num:'D', name:'Top Bar + Meta Replace',
+    desc:'Top accent bar turns green/red and the meta line becomes the disposition',
+    carried: `<div class="card"><div style="height:3px;background:linear-gradient(90deg,#22c55e,#22c55e55,transparent);"></div><div class="hdr"><div style="font-size:7px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:#22c55e;margin-bottom:2px;">Carried Unanimously · Item 5</div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div></div></div>${quoteC}${tiles}${votesCarried}</div>`,
+    defeated: `<div class="card"><div style="height:3px;background:linear-gradient(90deg,#dc2626,#dc262655,transparent);"></div><div class="hdr"><div style="font-size:7px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:#dc2626;margin-bottom:2px;">Defeated 2-3 · Item 6</div><div class="tr"><div class="ttl">Water Rate Increase</div></div></div>${quoteD}${tiles}${votesDefeated}</div>`,
+  },
+  // NEW: Stamp overlay — angled watermark across the card
+  {
+    id:'stamp', num:'E', name:'Stamp',
+    desc:'Angled watermark stamped diagonally across the card — bold, unmissable',
+    carried: `<div class="card" style="position:relative;overflow:hidden;"><div class="bar"></div>${hdrC}${quoteC}${tiles}${votesCarried}
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);font-size:28px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:rgba(34,197,94,.08);pointer-events:none;white-space:nowrap;">CARRIED</div></div>`,
+    defeated: `<div class="card" style="position:relative;overflow:hidden;"><div class="bar"></div>${hdrD}${quoteD}${tiles}${votesDefeated}
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);font-size:28px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:rgba(220,38,38,.08);pointer-events:none;white-space:nowrap;">DEFEATED</div></div>`,
+  },
+  // NEW: Border turns the color — entire card border
+  {
+    id:'border-glow', num:'F', name:'Card Border',
+    desc:'The entire card border turns green/red — subtle but the whole card communicates status',
+    carried: `<div class="card" style="border:1.5px solid #bbf7d0;box-shadow:0 0 0 1px #dcfce7,0 2px 10px rgba(34,197,94,.06);"><div style="height:3px;background:linear-gradient(90deg,#22c55e,transparent);"></div>${hdrC}${quoteC}${tiles}${votesCarried}
+      <div style="text-align:center;padding:0 12px 8px;"><span style="font-size:8px;font-weight:700;color:#22c55e;letter-spacing:.5px;">CARRIED UNANIMOUSLY</span></div></div>`,
+    defeated: `<div class="card" style="border:1.5px solid #fecaca;box-shadow:0 0 0 1px #fee2e2,0 2px 10px rgba(220,38,38,.06);"><div style="height:3px;background:linear-gradient(90deg,#dc2626,transparent);"></div>${hdrD}${quoteD}${tiles}${votesDefeated}
+      <div style="text-align:center;padding:0 12px 8px;"><span style="font-size:8px;font-weight:700;color:#dc2626;letter-spacing:.5px;">DEFEATED 2-3</span></div></div>`,
+  },
+];
+
+document.querySelector('.options').innerHTML = designs.map(d =>
+  `<div class="sw" onclick="select(this,'${d.id}')">
+    <div class="sh"><span class="tag">${d.num}</span><h2>${d.name}</h2><p>${d.desc}</p></div>
+    <div class="preview">${d.carried}${d.defeated}</div>
+  </div>`
+).join('');
+
+const nm={};designs.forEach(d=>nm[d.id]=`${d.num} — ${d.name}`);
+function select(el,id){document.querySelectorAll('.sw').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');document.getElementById('result').style.display='block';document.getElementById('pick-text').textContent=nm[id];}
+</script>
+
+</div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+</body>
+</html>

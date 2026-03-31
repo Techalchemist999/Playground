@@ -140,8 +140,9 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, 
                       </div>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                         <div style={{
-                          width: 22, height: 22, borderRadius: '50%',
-                          background: COLORS.primaryLight, border: `2px solid ${COLORS.primary}`,
+                          width: 22, height: 22, borderRadius: 5,
+                          border: `2px solid ${COLORS.primary}`,
+                          boxShadow: '0 0 0 3px #e2e8f0',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           flexShrink: 0, fontSize: 10, fontWeight: 700, color: COLORS.primary,
                         }}>
@@ -211,24 +212,20 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, 
                           }}
                         >
                           <div style={{
-                            width: 18, height: 18, borderRadius: '50%',
-                            background: st.bg, border: `1.5px solid ${st.border}`,
+                            width: 18, height: 18, borderRadius: 4,
+                            border: `${isActive ? '2' : '1.5'}px solid ${isActive ? COLORS.primary : st.border}`,
+                            boxShadow: isActive ? '0 0 0 3px #e2e8f0' : 'none',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             flexShrink: 0, fontSize: 8, fontWeight: 700, color: st.color,
                           }}>
-                            {item.status === 'discussed' ? (
-                              <svg width="8" height="8" fill="none" stroke="#22c55e" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
-                            ) : (
-                              item.number || (i + 1)
-                            )}
+                            {item.number || (i + 1)}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{
                               fontSize: 10, fontWeight: 600,
-                              color: isActive ? COLORS.primary : COLORS.headingText,
+                              color: isActive ? COLORS.primary : item.status === 'discussed' ? COLORS.mutedText : COLORS.headingText,
                               lineHeight: 1.3,
+                              textDecoration: item.status === 'discussed' ? 'line-through' : 'none',
                             }}>
                               {item.title}
                             </div>

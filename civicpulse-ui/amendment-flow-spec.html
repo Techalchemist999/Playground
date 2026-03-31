@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Amendment Nesting (6 Options)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:28px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.options{display:flex;flex-direction:column;gap:24px;max-width:520px;margin:0 auto;}
+.sw{background:#fff;border-radius:14px;border:2px solid #e2e8f0;overflow:hidden;cursor:pointer;transition:all .3s;box-shadow:0 2px 10px rgba(0,0,0,.03);}
+.sw:hover{border-color:#a5b4fc;box-shadow:0 6px 24px rgba(99,102,241,.12);transform:translateY(-2px);}
+.sw.selected{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+.sh{padding:10px 16px 8px;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid #f1f5f9;}
+.sh h2{font-size:14px;font-weight:700;color:#0f172a;}
+.sh p{font-size:10px;color:#94a3b8;margin-left:auto;font-style:italic;}
+.preview{padding:14px;background:#f8fafc;}
+
+/* Shared card */
+.card{border-radius:12px;overflow:hidden;background:#fff;border:1px solid #e2e8f0;box-shadow:0 2px 10px rgba(0,0,0,.03);}
+.bar{height:3px;background:linear-gradient(90deg,#cbd5e1,transparent);}
+.hdr{padding:10px 12px 0;}
+.meta{font-size:7px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:#94a3b8;margin-bottom:3px;}
+.tr{margin-bottom:8px;}
+.ttl{font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;}
+.qt{background:#f8fafc;border-left:3px solid #cbd5e1;border-radius:0 8px 8px 0;padding:8px 11px;margin:0 12px 8px;font-size:11.5px;color:#334155;line-height:1.75;}
+.tiles{display:flex;gap:4px;padding:0 12px 8px;}
+.tile{flex:1;background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:6px;padding:4px 7px;}
+.tile-l{font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#64748b;margin-bottom:1px;}
+.tile-n{font-size:10.5px;font-weight:700;color:#0f172a;}
+.votes{display:flex;gap:5px;justify-content:center;padding:6px 12px 8px;}
+.vc{text-align:center;}
+.orb{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;position:relative;}
+.orb::before{content:'';position:absolute;top:2px;left:5px;width:10px;height:4px;border-radius:50%;background:rgba(255,255,255,.5);}
+.orb.y{background:linear-gradient(135deg,#dcfce7,#bbf7d0aa);border:1.5px solid #86efac;color:#16a34a;}
+.orb.n{background:linear-gradient(135deg,#fee2e2,#fecacaaa);border:1.5px solid #fca5a5;color:#dc2626;}
+.on{font-size:5px;color:#94a3b8;margin-top:1px;}
+.stripe{padding:7px 12px;font-size:9px;font-weight:700;letter-spacing:.5px;text-align:center;}
+.stripe.g{background:#f0fdf4;color:#22c55e;border-top:1px solid #dcfce7;}
+
+/* Small amendment card */
+.sm .hdr{padding:7px 10px 0;}.sm .meta{font-size:6px;}.sm .ttl{font-size:10.5px;}.sm .qt{padding:5px 9px;margin:0 10px 6px;font-size:10px;}.sm .tiles{padding:0 10px 6px;}.sm .tile{padding:3px 5px;}.sm .tile-l{font-size:5px;}.sm .tile-n{font-size:9px;}.sm .votes{padding:4px 10px 6px;gap:4px;}.sm .orb{width:20px;height:20px;font-size:8px;}.sm .orb::before{top:1px;left:4px;width:7px;height:3px;}.sm .on{font-size:4px;}.sm .stripe{padding:5px 10px;font-size:7.5px;}.sm .bar{height:2px;}
+
+.proc-badge{font-size:7px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 6px;border-radius:999px;color:#64748b;background:#f1f5f9;border:1px solid #cbd5e1;margin-left:4px;}
+
+#result{display:none;max-width:520px;margin:20px auto 0;background:#fff;border-radius:14px;border:2px solid #6366f1;padding:16px;text-align:center;}
+#result .label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+#result .pick{font-size:18px;font-weight:800;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div style="max-width:520px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>Amendment Nesting — 6 Options</h1>
+  <p class="subtitle">How does the amendment child card relate to its parent motion? Each shows the final state: main carried as amended, amendment carried 4-1.</p>
+</div>
+
+<div class="options">
+
+<script>
+const mainTop = `<div class="bar"></div><div class="hdr"><div class="meta">Motion · Item 5 <span class="proc-badge">as amended</span></div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div></div></div><div class="qt">THAT Council gives Bylaw 1021 third and final reading <strong>with the addition of section 14 regarding public consultation requirements.</strong></div><div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Wall</div></div></div>`;
+const mainVotes = `<div class="votes"><div class="vc"><div class="orb y">✓</div><div class="on">Veach</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Rabel</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Wall</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Johnston</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Woodill</div></div></div>`;
+const mainStripe = `<div class="stripe g">CARRIED UNANIMOUSLY (AS AMENDED)</div>`;
+const amendCard = `<div class="bar" style="background:linear-gradient(90deg,#22c55e,transparent);"></div><div class="hdr"><div class="meta">Amendment to Motion · Item 5</div><div class="tr"><div class="ttl">Add section 14 — Public Consultation</div></div></div><div class="qt">"...with the addition of section 14 regarding public consultation requirements."</div><div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Wall</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Johnston</div></div></div><div class="votes"><div class="vc"><div class="orb y">✓</div><div class="on">Veach</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Rabel</div></div><div class="vc"><div class="orb n">✗</div><div class="on">Wall</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Johnston</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Woodill</div></div></div><div class="stripe g">AMENDMENT CARRIED 4-1</div>`;
+
+const designs = [
+  // 1: Indented below with left border connector
+  {
+    id:'indent-border', num:'A', name:'Indent + Left Border',
+    desc:'Amendment indented below, connected by a continuous left border on the parent',
+    html: `<div style="border-left:3px solid #e2e8f0;border-radius:12px 12px 0 0;padding-left:0;">
+      <div class="card" style="border-radius:12px 12px 0 0;border-bottom:none;">${mainTop}${mainVotes}${mainStripe}</div>
+      <div style="margin-left:28px;padding:8px 0 0;">
+        <div class="card sm">${amendCard}</div>
+      </div>
+    </div>`
+  },
+  // 2: Tabbed below — tab sticks out connecting them
+  {
+    id:'tabbed', num:'B', name:'Tabbed Connection',
+    desc:'Amendment card with a small tab/notch connecting it to the parent above',
+    html: `<div>
+      <div class="card">${mainTop}${mainVotes}${mainStripe}</div>
+      <div style="margin-left:32px;position:relative;margin-top:-1px;">
+        <div style="position:absolute;left:16px;top:-8px;width:2px;height:8px;background:#cbd5e1;"></div>
+        <div style="position:absolute;left:16px;top:-8px;width:12px;height:2px;background:#cbd5e1;"></div>
+        <div style="position:absolute;left:6px;top:-14px;width:2px;height:14px;background:#cbd5e1;border-radius:0 0 0 4px;"></div>
+        <div style="position:absolute;left:6px;top:-14px;width:12px;height:2px;background:#cbd5e1;"></div>
+        <div class="card sm" style="margin-top:6px;">${amendCard}</div>
+      </div>
+    </div>`
+  },
+  // 3: Inside the parent card — nested section
+  {
+    id:'nested-inside', num:'C', name:'Nested Inside Parent',
+    desc:'Amendment lives inside the parent card as an indented sub-section — no separate card',
+    html: `<div class="card">${mainTop}${mainVotes}
+      <div style="margin:0 12px 10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+        <div style="font-size:6px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#22c55e;margin-bottom:4px;">✓ Amendment Carried 4-1</div>
+        <div style="font-size:10px;color:#166534;line-height:1.6;margin-bottom:4px;">"...with the addition of section 14 regarding public consultation requirements."</div>
+        <div style="display:flex;gap:3px;">
+          <div style="flex:1;background:#fff;border:1px solid #e2e8f0;border-radius:4px;padding:2px 5px;"><div style="font-size:5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#64748b;">Moved</div><div style="font-size:8px;font-weight:700;color:#0f172a;">Cllr Wall</div></div>
+          <div style="flex:1;background:#fff;border:1px solid #e2e8f0;border-radius:4px;padding:2px 5px;"><div style="font-size:5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#64748b;">Sec'd</div><div style="font-size:8px;font-weight:700;color:#0f172a;">Cllr Johnston</div></div>
+        </div>
+        <div style="display:flex;gap:3px;justify-content:center;margin-top:6px;">
+          <div style="width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#dcfce7,#bbf7d0aa);border:1px solid #86efac;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#16a34a;">✓</div>
+          <div style="width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#dcfce7,#bbf7d0aa);border:1px solid #86efac;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#16a34a;">✓</div>
+          <div style="width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#fee2e2,#fecacaaa);border:1px solid #fca5a5;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#dc2626;">✗</div>
+          <div style="width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#dcfce7,#bbf7d0aa);border:1px solid #86efac;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#16a34a;">✓</div>
+          <div style="width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#dcfce7,#bbf7d0aa);border:1px solid #86efac;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#16a34a;">✓</div>
+        </div>
+      </div>
+      ${mainStripe}</div>`
+  },
+  // 4: Side by side — amendment card to the right
+  {
+    id:'side-by-side', num:'D', name:'Side by Side',
+    desc:'Amendment card sits to the right of the parent, same height, connected by a horizontal line',
+    html: `<div style="display:flex;gap:0;align-items:stretch;">
+      <div class="card" style="flex:1.2;border-radius:12px 0 0 12px;border-right:none;">${mainTop}${mainVotes}${mainStripe}</div>
+      <div style="width:2px;background:#e2e8f0;flex-shrink:0;position:relative;">
+        <div style="position:absolute;top:50%;left:-3px;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid #22c55e;transform:translateY(-50%);"></div>
+      </div>
+      <div class="card sm" style="flex:1;border-radius:0 12px 12px 0;border-left:none;">${amendCard}</div>
+    </div>`
+  },
+  // 5: Stacked with shadow depth — amendment slightly behind
+  {
+    id:'shadow-stack', num:'E', name:'Shadow Stack',
+    desc:'Amendment card peeks out from behind the parent — stacked with offset shadow creating depth',
+    html: `<div style="position:relative;padding-bottom:8px;padding-right:8px;">
+      <div class="card sm" style="position:absolute;bottom:0;right:0;width:calc(100% - 16px);opacity:.7;border-color:#cbd5e1;">${amendCard}</div>
+      <div class="card" style="position:relative;z-index:2;">${mainTop}${mainVotes}${mainStripe}</div>
+      <div style="position:absolute;bottom:4px;right:4px;z-index:3;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:999px;padding:2px 8px;font-size:7px;font-weight:700;color:#22c55e;">+1 amendment (carried 4-1)</div>
+    </div>`
+  },
+  // 6: Accordion child — collapses into a single line, expandable
+  {
+    id:'accordion', num:'F', name:'Accordion Child',
+    desc:'Amendment collapsed into a slim bar below the parent. Click to expand full details.',
+    html: `<div>
+      <div class="card" style="border-radius:12px 12px 0 0;">${mainTop}${mainVotes}${mainStripe}</div>
+      <div style="background:#f0fdf4;border:1px solid #dcfce7;border-top:none;border-radius:0 0 12px 12px;overflow:hidden;">
+        <div style="padding:6px 12px;display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <svg width="10" height="10" fill="none" stroke="#22c55e" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          <span style="font-size:9px;font-weight:700;color:#22c55e;">Amendment Carried 4-1</span>
+          <span style="font-size:8px;color:#64748b;margin-left:auto;">Cllr Wall · Add section 14</span>
+        </div>
+        <div style="padding:0 12px 10px;border-top:1px solid #dcfce7;">
+          <div class="card sm" style="margin-top:8px;border-color:#dcfce7;">${amendCard}</div>
+        </div>
+      </div>
+    </div>`
+  },
+];
+
+document.querySelector('.options').innerHTML = designs.map(d =>
+  `<div class="sw" onclick="select(this,'${d.id}')">
+    <div class="sh"><span class="tag">${d.num}</span><h2>${d.name}</h2><p>${d.desc}</p></div>
+    <div class="preview">${d.html}</div>
+  </div>`
+).join('');
+
+const nm={};designs.forEach(d=>nm[d.id]=`${d.num} — ${d.name}`);
+function select(el,id){document.querySelectorAll('.sw').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');document.getElementById('result').style.display='block';document.getElementById('pick-text').textContent=nm[id];}
+</script>
+
+</div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+</body>
+</html>

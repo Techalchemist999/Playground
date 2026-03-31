@@ -6,6 +6,99 @@ import AgendaSidebar from './AgendaSidebar';
 import ClerkNotes from './ClerkNotes';
 import BiteCard from './BiteCard';
 import SessionControls from './SessionControls';
+
+// PB History — groups resolved motions by agenda item
+function PBHistory({ topics, agendaItems, accentColor }) {
+  const [openGroups, setOpenGroups] = useState(new Set());
+  const resolved = Array.from(topics.values())
+    .filter(t => t.state === 'EXPIRED' && t.category === 'motion');
+
+  if (resolved.length === 0) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: COLORS.mutedText, fontSize: 11, fontStyle: 'italic' }}>
+        Completed motions appear here...
+      </div>
+    );
+  }
+
+  // Group by agenda item number — motions without one go to "Floor Motions"
+  const groups = {};
+  resolved.forEach(topic => {
+    const itemNum = topic.agendaItemNumber;
+    const agendaMatch = itemNum ? agendaItems.find(a => a.number === itemNum) : null;
+    const key = agendaMatch ? String(agendaMatch.number) : '—';
+    const title = agendaMatch ? agendaMatch.title : 'Floor Motions';
+    if (!groups[key]) groups[key] = { num: key, title, motions: [] };
+    groups[key].motions.push(topic);
+  });
+
+  const toggleGroup = (key) => {
+    setOpenGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', padding: '6px 10px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {Object.values(groups).map(grp => {
+        const isOpen = openGroups.has(grp.num);
+        const count = grp.motions.length;
+        return (
+          <div key={grp.num}>
+            {/* Agenda item header — GitHub issue milestone style */}
+            <div
+              onClick={() => toggleGroup(grp.num)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 12px',
+                background: '#fff',
+                borderRadius: isOpen ? '10px 10px 0 0' : 10,
+                border: '1px solid #e2e8f0',
+                borderBottom: isOpen ? '1px dashed #e2e8f0' : '1px solid #e2e8f0',
+                cursor: 'pointer', transition: 'all .15s',
+              }}
+            >
+              <svg width="9" height="9" fill="none" stroke="#94a3b8" strokeWidth="2.5" viewBox="0 0 24 24"
+                style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s', flexShrink: 0 }}>
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+              <svg width="12" height="12" fill="none" stroke="#94a3b8" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                <line x1="4" y1="22" x2="4" y2="15" />
+              </svg>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#0f172a' }}>
+                  {grp.num !== '—' ? `Item ${grp.num} — ` : ''}{grp.title}
+                </div>
+              </div>
+              <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 600 }}>
+                {count} motion{count > 1 ? 's' : ''}
+              </span>
+            </div>
+            {/* Expanded — motions as check/X rows */}
+            {isOpen && (
+              <div style={{
+                padding: '6px 12px 10px',
+                background: '#fff',
+                border: '1px solid #e2e8f0',
+                borderTop: 'none',
+                borderRadius: '0 0 10px 10px',
+                display: 'flex', flexDirection: 'column', gap: 2,
+              }}>
+                {grp.motions.map((topic, i) => (
+                  <BiteCard key={topic.normalized_id || topic.label} topic={topic} index={i} isNewest={false} accentColor={accentColor} cardMode="simple" />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 const iconBites = (
   <svg width="13" height="13" fill="none" stroke={COLORS.primary} strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
     <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -45,10 +138,11 @@ function snapPx(val) {
 
 // Panels: all values in % so they scale with window size
 const DEFAULT_PANELS = [
-  { id: 'agenda',  xPct: 1.5,  yPct: 2,   wPct: 22,  hPct: 96 },
-  { id: 'bites',   xPct: 24.5, yPct: 2,   wPct: 42,  hPct: 96 },
-  { id: 'topics',  xPct: 67.5, yPct: 2,   wPct: 31,  hPct: 46 },
-  { id: 'notes',   xPct: 67.5, yPct: 50,  wPct: 31,  hPct: 48 },
+  { id: 'agenda',   xPct: 1.5,  yPct: 2,   wPct: 22,  hPct: 96 },
+  { id: 'history',  xPct: 24.5, yPct: 2,   wPct: 42,  hPct: 46 },
+  { id: 'floor',    xPct: 24.5, yPct: 50,  wPct: 42,  hPct: 48 },
+  { id: 'topics',   xPct: 67.5, yPct: 2,   wPct: 31,  hPct: 46 },
+  { id: 'notes',    xPct: 67.5, yPct: 50,  wPct: 31,  hPct: 48 },
 ];
 
 // Edge resize zones — no right edge so scrolling isn't blocked
@@ -272,67 +366,80 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
           </div>
         </div>
 
-        {/* Procedural Bites */}
-        <div style={panelStyle('bites')}>
+        {/* Procedural Bites — History */}
+        <div style={panelStyle('history')}>
           <div style={{ position: 'relative', display: 'flex', flex: 1, minHeight: 0 }}>
             <BentoPanel
               title="Procedural Bites"
               icon={iconBites}
-              badge={`${Array.from(session.topics.values()).filter(t => t.category === 'motion').length} motions`}
+              badge={`${Array.from(session.topics.values()).filter(t => t.state === 'EXPIRED' && t.category === 'motion').length}`}
               style={{ flex: 1, minHeight: 0 }}
               headerProps={{
-                onMouseDown: (e) => startDrag('bites', e, 'move'),
+                onMouseDown: (e) => startDrag('history', e, 'move'),
                 style: dragHandleStyle,
               }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-                {/* Flow direction toggle */}
-                <div style={{
-                  display: 'flex', justifyContent: 'flex-end',
-                  padding: '4px 10px 0', flexShrink: 0,
-                }}>
-                  <button
-                    onClick={() => setPbNewestTop(!pbNewestTop)}
-                    title={pbNewestTop ? 'Newest at top — click to flip' : 'Newest at bottom — click to flip'}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 3,
-                      padding: '2px 7px', border: 'none', borderRadius: 4,
-                      background: '#f1f5f9', cursor: 'pointer',
-                      fontSize: 8, fontWeight: 600, color: COLORS.mutedText,
-                      transition: 'all .15s',
-                    }}
-                  >
-                    <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"
-                      style={{ transform: pbNewestTop ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s' }}
-                    >
-                      <path d="M12 5v14M5 12l7 7 7-7" />
-                    </svg>
-                  </button>
-                </div>
-                <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px', display: 'flex', flexDirection: pbNewestTop ? 'column-reverse' : 'column', gap: 10 }}>
-                  {Array.from(session.topics.values())
-                    .filter(t => t.state !== 'EVICTED' && t.category === 'motion')
-                    .map((topic, i, arr) => (
-                      <BiteCard
-                        key={topic.normalized_id || topic.label}
-                        topic={topic}
-                        index={i}
-                        isNewest={i === arr.length - 1}
-                        accentColor={accentColor}
-                      />
-                    ))}
-                  {Array.from(session.topics.values()).filter(t => t.category === 'motion').length === 0 && (
-                    <div style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      flex: 1, color: COLORS.mutedText, fontSize: 12, fontStyle: 'italic',
-                    }}>
-                      Motions and procedural items will appear here...
-                    </div>
-                  )}
-                </div>
-              </div>
+              <PBHistory topics={session.topics} agendaItems={session.agendaItems} accentColor={accentColor} />
             </BentoPanel>
-            <EdgeHandles onEdgeDrag={(edge, e) => startDrag('bites', e, edge)} />
+            <EdgeHandles onEdgeDrag={(edge, e) => startDrag('history', e, edge)} />
+          </div>
+        </div>
+
+        {/* On The Floor */}
+        <div style={panelStyle('floor')}>
+          <div style={{ position: 'relative', display: 'flex', flex: 1, minHeight: 0 }}>
+            <BentoPanel
+              title="On The Floor"
+              icon={<svg width="13" height="13" fill="none" stroke={COLORS.primary} strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+              </svg>}
+              style={{ flex: 1, minHeight: 0 }}
+              headerProps={{
+                onMouseDown: (e) => startDrag('floor', e, 'move'),
+                style: dragHandleStyle,
+              }}
+            >
+              {(() => {
+                const allMotions = Array.from(session.topics.values())
+                  .filter(t => t.state !== 'EVICTED' && t.category === 'motion');
+                const nonExpired = allMotions.filter(t => t.state !== 'EXPIRED');
+                const onFloorMotion = nonExpired.length > 0 ? nonExpired[nonExpired.length - 1] : null;
+
+                if (!onFloorMotion) {
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: COLORS.mutedText, fontSize: 11, fontStyle: 'italic' }}>
+                      No motion on the floor
+                    </div>
+                  );
+                }
+
+                const topic = onFloorMotion;
+                const amendment = topic.amendment;
+                const i = allMotions.indexOf(topic);
+
+                if (!amendment) {
+                  return (
+                    <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px' }}>
+                      <BiteCard topic={topic} index={i} isNewest={true} accentColor={accentColor} cardMode="simple" />
+                    </div>
+                  );
+                }
+
+                const amendResolved = amendment.status === 'carried' || amendment.status === 'defeated';
+                return (
+                  <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                      <BiteCard topic={{ ...topic, amendment: { ...amendment }, state: 'ACTIVE' }} index={i} isNewest={false} accentColor={accentColor} cardMode="original" />
+                      <BiteCard topic={topic} index={i} isNewest={false} accentColor={accentColor} cardMode="amendment" />
+                      {amendResolved && <BiteCard topic={topic} index={i} isNewest={true} accentColor={accentColor} cardMode="final" />}
+                    </div>
+                  </div>
+                );
+              })()}
+            </BentoPanel>
+            <EdgeHandles onEdgeDrag={(edge, e) => startDrag('floor', e, edge)} />
           </div>
         </div>
 

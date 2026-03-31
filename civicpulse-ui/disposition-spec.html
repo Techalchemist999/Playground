@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Bottom Stripe Disposition (Full Spec)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:28px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.scenarios{display:flex;flex-direction:column;gap:28px;max-width:440px;margin:0 auto;}
+.scenario-label{text-align:center;margin-bottom:8px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:999px;display:inline-block;}
+.scenario-head{text-align:center;margin-bottom:8px;}
+.sl-g{background:#f0fdf4;color:#22c55e;border:1.5px solid #bbf7d0;}
+.sl-r{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;}
+.sl-grey{background:#f1f5f9;color:#64748b;border:1.5px solid #cbd5e1;}
+
+/* Card */
+.card{border-radius:12px;overflow:hidden;background:#fff;border:1px solid #e2e8f0;box-shadow:0 2px 10px rgba(0,0,0,.03);}
+.bar{height:3px;background:linear-gradient(90deg,#cbd5e1,transparent);}
+.hdr{padding:10px 12px 0;}
+.meta{font-size:7px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:#94a3b8;margin-bottom:2px;display:flex;align-items:center;gap:4px;}
+.tr{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:8px;}
+.ttl{font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;}
+.qt{background:#f8fafc;border-left:3px solid #cbd5e1;border-radius:0 6px 6px 0;padding:8px 10px;margin:0 12px 8px;font-size:11.5px;color:#334155;line-height:1.75;}
+.tiles{display:flex;gap:4px;padding:0 12px 8px;}
+.tile{flex:1;background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:6px;padding:5px 7px;}
+.tile-l{font-size:6px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#64748b;margin-bottom:1px;}
+.tile-n{font-size:11px;font-weight:700;color:#0f172a;}
+.votes{display:flex;gap:6px;justify-content:center;padding:6px 12px 10px;}
+.vc{text-align:center;}
+.orb{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;position:relative;}
+.orb::before{content:'';position:absolute;top:3px;left:6px;width:11px;height:5px;border-radius:50%;background:rgba(255,255,255,.5);filter:blur(1px);}
+.orb.y{background:linear-gradient(135deg,#dcfce7,#bbf7d0aa);border:1.5px solid #86efac;color:#16a34a;}
+.orb.n{background:linear-gradient(135deg,#fee2e2,#fecacaaa);border:1.5px solid #fca5a5;color:#dc2626;}
+.orb.w{background:#f1f5f9;border:1.5px dashed #cbd5e1;color:#94a3b8;font-size:10px;}
+.on{font-size:6px;color:#94a3b8;margin-top:2px;}
+
+/* Amendment block */
+.amend{margin:0 12px 8px;padding:8px 10px;border-radius:0 7px 7px 0;}
+.amend.pending{background:#f8fafc;border-left:3px solid #cbd5e1;}
+.amend.carried{background:#f0fdf4;border-left:3px solid #22c55e;}
+.amend.defeated{background:#fef2f2;border-left:3px solid #dc2626;}
+.amend-l{font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.amend-l.pending{color:#475569;}
+.amend-l.carried{color:#22c55e;}
+.amend-l.defeated{color:#dc2626;}
+.amend-t{font-size:11px;line-height:1.7;}
+.amend-t.pending{color:#475569;}
+.amend-t.carried{color:#166534;}
+.amend-t.defeated{color:#991b1b;text-decoration:line-through;}
+.amend-m{font-size:9px;font-weight:600;margin-top:4px;}
+.amend-m.pending{color:#64748b;}
+.amend-m.carried{color:#16a34a;}
+.amend-m.defeated{color:#dc2626;}
+
+/* Bottom stripe */
+.stripe{padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.5px;text-align:center;border-radius:0 0 12px 12px;}
+.stripe.carried{background:#f0fdf4;color:#22c55e;border-top:1px solid #dcfce7;}
+.stripe.defeated{background:#fef2f2;color:#dc2626;border-top:1px solid #fee2e2;}
+.stripe.tabled{background:#f1f5f9;color:#64748b;border-top:1px solid #e2e8f0;}
+.stripe.postponed{background:#f1f5f9;color:#64748b;border-top:1px solid #e2e8f0;}
+.stripe.referred{background:#f1f5f9;color:#64748b;border-top:1px solid #e2e8f0;}
+.stripe.withdrawn{background:#f8fafc;color:#94a3b8;border-top:1px solid #e2e8f0;}
+
+/* Procedural status badge */
+.proc-badge{display:inline-flex;align-items:center;gap:3px;font-size:7px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 6px;border-radius:999px;color:#64748b;background:#f1f5f9;border:1px solid #cbd5e1;}
+
+/* Section divider */
+.section{margin-top:32px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:8px;}
+.section-num{font-size:12px;font-weight:800;color:#cbd5e1;}
+.section-title{font-size:14px;font-weight:700;color:#0f172a;}
+.section-desc{font-size:10px;color:#94a3b8;margin-left:auto;}
+</style>
+</head>
+<body>
+
+<div style="max-width:440px;margin:0 auto;">
+  <div class="tag">DISPOSITION SPEC</div>
+  <h1>Bottom Stripe — Full Scenarios</h1>
+  <p class="subtitle">Every procedural outcome a motion can have. Bottom stripe is the single place disposition appears.</p>
+</div>
+
+<div class="scenarios">
+
+<!-- ===== SECTION 1: SIMPLE MOTIONS ===== -->
+<div class="section"><span class="section-num">1</span><span class="section-title">Simple Motions</span><span class="section-desc">No amendments</span></div>
+
+<!-- Carried Unanimously -->
+<div>
+  <div class="scenario-head"><span class="scenario-label sl-g">Carried Unanimously</span></div>
+  <div class="card">
+    <div class="bar"></div>
+    <div class="hdr"><div class="meta">Motion · Item 2</div><div class="tr"><div class="ttl">Adopt Agenda</div></div></div>
+    <div class="qt">THAT Council adopts the agenda as presented.</div>
+    <div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Johnston</div></div></div>
+    <div class="votes"><div class="vc"><div class="orb y">✓</div><div class="on">Veach</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Rabel</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Wall</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Johnston</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Woodill</div></div></div>
+    <div class="stripe carried">CARRIED UNANIMOUSLY</div>
+  </div>
+</div>
+
+<!-- Carried with opposition -->
+<div>
+  <div class="scenario-head"><span class="scenario-label sl-g">Carried 4-1</span></div>
+  <div class="card">
+    <div class="bar"></div>
+    <div class="hdr"><div class="meta">Motion · Item 6</div><div class="tr"><div class="ttl">Water Rate Increase — 4.5%</div></div></div>
+    <div class="qt">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+    <div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Mayor Veach</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Rabel</div></div></div>
+    <div class="votes"><div class="vc"><div class="orb y">✓</div><div class="on">Veach</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Rabel</div></div><div class="vc"><div class="orb n">✗</div><div class="on">Wall</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Johnston</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Woodill</div></div></div>
+    <div class="stripe carried">CARRIED 4-1</div>
+  </div>
+</div>
+
+<!-- Defeated -->
+<div>
+  <div class="scenario-head"><span class="scenario-label sl-r">Defeated 2-3</span></div>
+  <div class="card">
+    <div class="bar"></div>
+    <div class="hdr"><div class="meta">Motion · Item 11</div><div class="tr"><div class="ttl">Extend Meeting Past 9 PM</div></div></div>
+    <div class="qt">THAT Council extends the meeting past 9:00 PM to complete the agenda.</div>
+    <div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Wall</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Johnston</div></div></div>
+    <div class="votes"><div class="vc"><div class="orb n">✗</div><div class="on">Veach</div></div><div class="vc"><div class="orb n">✗</div><div class="on">Rabel</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Wall</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Johnston</div></div><div class="vc"><div class="orb n">✗</div><div class="on">Woodill</div></div></div>
+    <div class="stripe defeated">DEFEATED 2-3</div>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: WITH AMENDMENTS ===== -->
+<div class="section"><span class="section-num">2</span><span class="section-title">With Amendments</span><span class="section-desc">Amendment resolved, then main motion</span></div>
+
+<!-- Amendment Carried → Main Carried -->
+<div>
+  <div class="scenario-head"><span class="scenario-label sl-g">Amendment Carried → Motion Carried</span></div>
+  <div class="card">
+    <div class="bar"></div>
+    <div class="hdr"><div class="meta">Motion · Item 5 <span class="proc-badge">as amended</span></div><div class="tr"><div class="ttl">Bylaw 1021 — Third Reading</div></div></div>
+    <div class="qt">THAT Council gives Bylaw 1021 third reading <strong>with the addition of section 14 regarding public consultation requirements.</strong></div>
+    <div class="amend carried">
+      <div class="amend-l carried">✓ Amendment Carried</div>
+      <div class="amend-t carried">"...with the addition of section 14 regarding public consultation requirements."</div>
+      <div class="amend-m carried">✓ Carried 4-1 · Cllr Wall</div>
+    </div>
+    <div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Rabel</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Wall</div></div></div>
+    <div class="votes"><div class="vc"><div class="orb y">✓</div><div class="on">Veach</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Rabel</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Wall</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Johnston</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Woodill</div></div></div>
+    <div class="stripe carried">CARRIED UNANIMOUSLY (AS AMENDED)</div>
+  </div>
+</div>
+
+<!-- Amendment Defeated → Main Carried on original -->
+<div>
+  <div class="scenario-head"><span class="scenario-label sl-g">Amendment Defeated → Original Carried</span></div>
+  <div class="card">
+    <div class="bar"></div>
+    <div class="hdr"><div class="meta">Motion · Item 6</div><div class="tr"><div class="ttl">Water Rate Increase — 4.5%</div></div></div>
+    <div class="qt">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+    <div class="amend defeated">
+      <div class="amend-l defeated">✗ Amendment Defeated</div>
+      <div class="amend-t defeated">"...reducing the increase from 4.5% to 3.0%."</div>
+      <div class="amend-m defeated">✗ Defeated 2-3 · Cllr Johnston</div>
+    </div>
+    <div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Mayor Veach</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Rabel</div></div></div>
+    <div class="votes"><div class="vc"><div class="orb y">✓</div><div class="on">Veach</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Rabel</div></div><div class="vc"><div class="orb n">✗</div><div class="on">Wall</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Johnston</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Woodill</div></div></div>
+    <div class="stripe carried">CARRIED 4-1</div>
+  </div>
+</div>
+
+<!-- Amendment Carried → Main Defeated -->
+<div>
+  <div class="scenario-head"><span class="scenario-label sl-r">Amendment Carried → Main Defeated</span></div>
+  <div class="card">
+    <div class="bar"></div>
+    <div class="hdr"><div class="meta">Motion · Item 9 <span class="proc-badge">as amended</span></div><div class="tr"><div class="ttl">Zoning Amendment — Pine Ave</div></div></div>
+    <div class="qt">THAT Council approves the rezoning of 4820 Pine Ave <strong>subject to a public consultation period of 60 days.</strong></div>
+    <div class="amend carried">
+      <div class="amend-l carried">✓ Amendment Carried</div>
+      <div class="amend-t carried">"...subject to a public consultation period of 60 days."</div>
+      <div class="amend-m carried">✓ Carried 3-2 · Cllr Wall</div>
+    </div>
+    <div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Johnston</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Woodill</div></div></div>
+    <div class="votes"><div class="vc"><div class="orb n">✗</div><div class="on">Veach</div></div><div class="vc"><div class="orb n">✗</div><div class="on">Rabel</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Wall</div></div><div class="vc"><div class="orb n">✗</div><div class="on">Johnston</div></div><div class="vc"><div class="orb y">✓</div><div class="on">Woodill</div></div></div>
+    <div class="stripe defeated">DEFEATED 2-3 (AS AMENDED)</div>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: PROCEDURAL DISPOSITIONS ===== -->
+<div class="section"><span class="section-num">3</span><span class="section-title">Procedural</span><span class="section-desc">Tabled, postponed, referred, withdrawn</span></div>
+
+<!-- Tabled -->
+<div>
+  <div class="scenario-head"><span class="scenario-label sl-grey">Tabled</span></div>
+  <div class="card">
+    <div class="bar"></div>
+    <div class="hdr"><div class="meta">Motion · Item 8</div><div class="tr"><div class="ttl">Park Improvement Grant</div></div></div>
+    <div class="qt">THAT Council approves the NDIT grant application for playground equipment replacement.</div>
+    <div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Woodill</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Rabel</div></div></div>
+    <div class="stripe tabled">TABLED — To be taken from the table at a future meeting</div>
+  </div>
+</div>
+
+<!-- Postponed to specific date -->
+<div>
+  <div class="scenario-head"><span class="scenario-label sl-grey">Postponed</span></div>
+  <div class="card">
+    <div class="bar"></div>
+    <div class="hdr"><div class="meta">Motion · Item 7</div><div class="tr"><div class="ttl">Road Maintenance Budget</div></div></div>
+    <div class="qt">THAT Council approves the 2025 road maintenance budget of $142,000 as presented.</div>
+    <div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Johnston</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Mayor Veach</div></div></div>
+    <div class="stripe postponed">POSTPONED — To April 2, 2025 regular meeting</div>
+  </div>
+</div>
+
+<!-- Referred to committee -->
+<div>
+  <div class="scenario-head"><span class="scenario-label sl-grey">Referred</span></div>
+  <div class="card">
+    <div class="bar"></div>
+    <div class="hdr"><div class="meta">Motion · Item 9</div><div class="tr"><div class="ttl">Zoning Amendment — Pine Ave</div></div></div>
+    <div class="qt">THAT Council approves the rezoning of 4820 Pine Ave from R1 to R2.</div>
+    <div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Johnston</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Woodill</div></div></div>
+    <div class="stripe referred">REFERRED — To Planning Committee for review</div>
+  </div>
+</div>
+
+<!-- Withdrawn -->
+<div>
+  <div class="scenario-head"><span class="scenario-label sl-grey">Withdrawn</span></div>
+  <div class="card">
+    <div class="bar"></div>
+    <div class="hdr"><div class="meta">Motion · Item 11</div><div class="tr"><div class="ttl">Extend Meeting Past 9 PM</div></div></div>
+    <div class="qt" style="opacity:.5;text-decoration:line-through;">THAT Council extends the meeting past 9:00 PM to complete the agenda.</div>
+    <div class="tiles"><div class="tile"><div class="tile-l">Moved By</div><div class="tile-n">Cllr Wall</div></div><div class="tile"><div class="tile-l">Seconded By</div><div class="tile-n">Cllr Johnston</div></div></div>
+    <div class="stripe withdrawn">WITHDRAWN — By mover with consent of seconder</div>
+  </div>
+</div>
+
+</div>
+
+</body>
+</html>
