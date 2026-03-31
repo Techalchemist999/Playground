@@ -243,6 +243,31 @@ export function useSession() {
     });
   }, []);
 
+  // Add a motion manually via Quick Motion
+  const addMotion = useCallback(({ text, mover, seconder }) => {
+    const id = `motion-${Date.now()}`;
+    const newMotion = {
+      normalized_id: id,
+      label: text,
+      category: 'motion',
+      state: 'ACTIVE',
+      mention_count: 1,
+      decay_score: 1,
+      confidence: 1,
+      timestamp_start: Date.now(),
+      motion_text: text,
+      mover: mover || null,
+      seconder: seconder || null,
+      amendment: null,
+      votes: {},
+    };
+    setTopics(prev => {
+      const next = new Map(prev);
+      next.set(id, newMotion);
+      return next;
+    });
+  }, []);
+
   const reset = useCallback(() => {
     if (sseClose.current) sseClose.current();
     demoTimers.current.forEach(t => clearTimeout(t));
@@ -262,6 +287,6 @@ export function useSession() {
   return {
     view, setView, sessionId, status, source, startTime, error,
     topics, transcript, agendaItems, currentAgendaItem, setAgendaItems,
-    ingest, start, startDemo, startDemoPlayback, pause, resume, stop, reset,
+    ingest, start, startDemo, startDemoPlayback, pause, resume, stop, reset, addMotion,
   };
 }

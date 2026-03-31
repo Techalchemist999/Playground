@@ -4,7 +4,6 @@ import BentoPanel from '../shared/BentoPanel';
 import TopicBubbles from './TopicBubbles';
 import AgendaSidebar from './AgendaSidebar';
 import ClerkNotes from './ClerkNotes';
-import QuickMotion from './QuickMotion';
 import BiteCard from './BiteCard';
 import SessionControls from './SessionControls';
 const iconBites = (
@@ -34,34 +33,32 @@ const iconAgenda = (
 );
 
 const SNAP = 24; // ~6mm grid snap
+const SNAP_PCT = 3.5; // ~6mm as percentage of typical container height
 
-
-function snapToGrid(val) {
+function snapPct(val) {
+  return Math.round(val / SNAP_PCT) * SNAP_PCT;
+}
+function snapPx(val) {
   return Math.round(val / SNAP) * SNAP;
 }
 
-// Default panel layout (x, y, w, h in px — will snap to grid)
+// Panels: x/w in px, y/h in % of container height
 const DEFAULT_PANELS = [
-  { id: 'agenda',    x: 24,  y: 24,  w: 312, h: 648 },
-  { id: 'bites',     x: 348, y: 24,  w: 528, h: 648 },
-  { id: 'topics',    x: 888, y: 24,  w: 360, h: 312 },
-  { id: 'notes',     x: 888, y: 348, w: 360, h: 326 },
+  { id: 'agenda',  x: 24,  yPct: 3.5,  w: 312, hPct: 93 },
+  { id: 'bites',   x: 348, yPct: 3.5,  w: 528, hPct: 93 },
+  { id: 'topics',  x: 888, yPct: 3.5,  w: 360, hPct: 44.5 },
+  { id: 'notes',   x: 888, yPct: 51.5, w: 360, hPct: 45 },
 ];
 
-// Edge resize zones — all 4 sides + 4 corners
+// Edge resize zones — no right edge so scrolling isn't blocked
 const EDGE_SIZE = 8;
 function EdgeHandles({ onEdgeDrag }) {
   const edges = [
-    // sides
     { key: 'top',    style: { top: 0, left: EDGE_SIZE, right: EDGE_SIZE, height: EDGE_SIZE, cursor: 'ns-resize' } },
     { key: 'bottom', style: { bottom: 0, left: EDGE_SIZE, right: EDGE_SIZE, height: EDGE_SIZE, cursor: 'ns-resize' } },
     { key: 'left',   style: { left: 0, top: EDGE_SIZE, bottom: EDGE_SIZE, width: EDGE_SIZE, cursor: 'ew-resize' } },
-    { key: 'right',  style: { right: 0, top: EDGE_SIZE, bottom: EDGE_SIZE, width: EDGE_SIZE, cursor: 'ew-resize' } },
-    // corners
     { key: 'top-left',     style: { top: 0, left: 0, width: EDGE_SIZE, height: EDGE_SIZE, cursor: 'nwse-resize' } },
-    { key: 'top-right',    style: { top: 0, right: 0, width: EDGE_SIZE, height: EDGE_SIZE, cursor: 'nesw-resize' } },
     { key: 'bottom-left',  style: { bottom: 0, left: 0, width: EDGE_SIZE, height: EDGE_SIZE, cursor: 'nesw-resize' } },
-    { key: 'bottom-right', style: { bottom: 0, right: 0, width: EDGE_SIZE, height: EDGE_SIZE, cursor: 'nwse-resize' } },
   ];
   return edges.map(({ key, style }) => (
     <div
@@ -74,19 +71,13 @@ function EdgeHandles({ onEdgeDrag }) {
 
 export default function LiveDashboard({ session, bgTheme }) {
   const containerRef = useRef(null);
-  const [panels, setPanels] = useState(() =>
-    DEFAULT_PANELS.map(p => ({
-      ...p,
-      x: snapToGrid(p.x),
-      y: snapToGrid(p.y),
-      w: snapToGrid(p.w),
-      h: snapToGrid(p.h),
-    }))
-  );
+  const [panels, setPanels] = useState(DEFAULT_PANELS);
   const dragRef = useRef(null);
   const [draggingId, setDraggingId] = useState(null);
-  const fallbackTheme = { dot: '#e2e8f0', bg: '#ffffff' };
+  const [quickMotionOpen, setQuickMotionOpen] = useState(false);
+  const fallbackTheme = { dot: '#e2e8f0', accent: '#64748b', bg: '#ffffff' };
   const theme = bgTheme || fallbackTheme;
+  const accentColor = theme.accent || theme.dot;
 
   // Smart scroll for procedural bites
   const pbScrollRef = useRef(null);
@@ -110,8 +101,8 @@ export default function LiveDashboard({ session, bgTheme }) {
   const discussed = session.agendaItems.filter(i => i.status === 'discussed').length;
   const agendaBadge = session.agendaItems.length > 0 ? `${discussed}/${session.agendaItems.length}` : null;
 
-  const MIN_W = SNAP * 6; // 144px min width
-  const MIN_H = SNAP * 4; // 96px min height
+  const MIN_W = SNAP * 6;
+  const MIN_H_PCT = SNAP_PCT * 3; // minimum height as %
 
   const startDrag = useCallback((panelId, e, mode = 'move') => {
     e.preventDefault();
@@ -119,16 +110,16 @@ export default function LiveDashboard({ session, bgTheme }) {
     const panel = panels.find(p => p.id === panelId);
     if (!panel) return;
 
+    const ch = containerRef.current?.clientHeight || 700;
+    const cw = containerRef.current?.clientWidth || 1200;
+
     setDraggingId(panelId);
     dragRef.current = {
-      id: panelId,
-      mode, // 'move' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
-      startMouseX: e.clientX,
-      startMouseY: e.clientY,
-      startX: panel.x,
-      startY: panel.y,
-      startW: panel.w,
-      startH: panel.h,
+      id: panelId, mode,
+      startMouseX: e.clientX, startMouseY: e.clientY,
+      startX: panel.x, startYPct: panel.yPct,
+      startW: panel.w, startHPct: panel.hPct,
+      ch, cw,
     };
 
     const onMouseMove = (ev) => {
@@ -136,33 +127,35 @@ export default function LiveDashboard({ session, bgTheme }) {
       const ds = dragRef.current;
       const dx = ev.clientX - ds.startMouseX;
       const dy = ev.clientY - ds.startMouseY;
+      const dyPct = (dy / ds.ch) * 100;
 
       setPanels(prev => prev.map(p => {
         if (p.id !== ds.id) return p;
 
         if (ds.mode === 'move') {
-          return { ...p, x: snapToGrid(Math.max(SNAP, ds.startX + dx)), y: snapToGrid(Math.max(SNAP, ds.startY + dy)) };
+          const newX = snapPx(Math.max(SNAP, Math.min(ds.cw - p.w - SNAP, ds.startX + dx)));
+          const newYPct = snapPct(Math.max(SNAP_PCT, Math.min(100 - p.hPct - SNAP_PCT, ds.startYPct + dyPct)));
+          return { ...p, x: newX, yPct: newYPct };
         }
 
-        let newX = ds.startX, newY = ds.startY, newW = ds.startW, newH = ds.startH;
+        let newX = ds.startX, newYPct = ds.startYPct, newW = ds.startW, newHPct = ds.startHPct;
         const resizesLeft   = ds.mode.includes('left');
-        const resizesRight  = ds.mode === 'right' || ds.mode.includes('right');
         const resizesTop    = ds.mode.includes('top');
         const resizesBottom = ds.mode === 'bottom' || ds.mode.includes('bottom');
 
-        if (resizesRight)  newW = ds.startW + dx;
-        if (resizesBottom) newH = ds.startH + dy;
+        if (resizesBottom) newHPct = ds.startHPct + dyPct;
         if (resizesLeft)  { newW = ds.startW - dx; newX = ds.startX + dx; }
-        if (resizesTop)   { newH = ds.startH - dy; newY = ds.startY + dy; }
+        if (resizesTop)   { newHPct = ds.startHPct - dyPct; newYPct = ds.startYPct + dyPct; }
 
         // Enforce minimums
         newW = Math.max(MIN_W, newW);
-        newH = Math.max(MIN_H, newH);
-        // If dragging left/top edge, clamp position so it doesn't overshoot
+        newHPct = Math.max(MIN_H_PCT, newHPct);
+        // Clamp to container
+        newHPct = Math.min(newHPct, 100 - newYPct - SNAP_PCT);
         if (resizesLeft)  newX = Math.max(SNAP, ds.startX + ds.startW - newW);
-        if (resizesTop)   newY = Math.max(SNAP, ds.startY + ds.startH - newH);
+        if (resizesTop)   newYPct = Math.max(SNAP_PCT, ds.startYPct + ds.startHPct - newHPct);
 
-        return { ...p, x: snapToGrid(newX), y: snapToGrid(newY), w: snapToGrid(newW), h: snapToGrid(newH) };
+        return { ...p, x: snapPx(newX), yPct: snapPct(newYPct), w: snapPx(newW), hPct: snapPct(newHPct) };
       }));
     };
 
@@ -177,21 +170,20 @@ export default function LiveDashboard({ session, bgTheme }) {
     window.addEventListener('mouseup', onMouseUp);
   }, [panels]);
 
-  const getPanel = (id) => panels.find(p => p.id === id);
-
   const panelStyle = (id) => {
-    const p = getPanel(id);
+    const p = panels.find(pp => pp.id === id);
     return {
       position: 'absolute',
       left: p.x,
-      top: p.y,
+      top: `${p.yPct}%`,
       width: p.w,
-      height: p.h,
-      transition: draggingId === id ? 'none' : 'left 0.2s ease, top 0.2s ease, width 0.2s ease, height 0.2s ease',
+      height: `${p.hPct}%`,
+      transition: draggingId === id ? 'none' : 'left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease, opacity 0.3s ease',
       zIndex: draggingId === id ? 100 : 1,
       opacity: draggingId === id ? 0.92 : 1,
       display: 'flex',
       minHeight: 0,
+      overflow: 'hidden',
     };
   };
 
@@ -202,18 +194,16 @@ export default function LiveDashboard({ session, bgTheme }) {
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* Draggable panel area */}
+      {/* Draggable panel area — flex:1 so it shrinks when Quick Motion opens */}
       <div
         ref={containerRef}
         style={{
           flex: 1,
           position: 'relative',
-          padding: 20,
-          overflow: 'auto',
-          background: theme.bg,
-          backgroundImage: `radial-gradient(circle, ${theme.dot}40 1px, transparent 1px)`,
-          backgroundSize: `${SNAP}px ${SNAP}px`,
-          backgroundPosition: '0 0',
+          overflow: 'hidden',
+          ...(theme.bg.includes('gradient')
+            ? { backgroundImage: theme.bg }
+            : { background: theme.bg }),
           transition: 'background 0.3s ease',
         }}
       >
@@ -237,6 +227,7 @@ export default function LiveDashboard({ session, bgTheme }) {
                 transcript={session.transcript}
                 status={session.status}
                 embedded
+                accentColor={accentColor}
               />
             </BentoPanel>
             <EdgeHandles onEdgeDrag={(edge, e) => startDrag('agenda', e, edge)} />
@@ -266,6 +257,7 @@ export default function LiveDashboard({ session, bgTheme }) {
                         topic={topic}
                         index={i}
                         isNewest={i === arr.length - 1}
+                        accentColor={accentColor}
                       />
                     ))}
                   {Array.from(session.topics.values()).filter(t => t.category === 'motion').length === 0 && (
@@ -277,7 +269,6 @@ export default function LiveDashboard({ session, bgTheme }) {
                     </div>
                   )}
                 </div>
-                <QuickMotion />
               </div>
             </BentoPanel>
             <EdgeHandles onEdgeDrag={(edge, e) => startDrag('bites', e, edge)} />
@@ -322,8 +313,8 @@ export default function LiveDashboard({ session, bgTheme }) {
         </div>
       </div>
 
-      {/* Bottom: Slim session controls */}
-      <SessionControls session={session} />
+      {/* Bottom: session controls + Quick Motion */}
+      <SessionControls session={session} quickMotionOpen={quickMotionOpen} onQuickMotionToggle={setQuickMotionOpen} />
       <style>{`
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(20px); }

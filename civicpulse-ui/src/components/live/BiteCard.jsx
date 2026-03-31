@@ -17,7 +17,7 @@ function shortName(name) {
   return name.replace('Cllr ', '').replace('Mayor ', '');
 }
 
-export default function BiteCard({ topic, index, isNewest }) {
+export default function BiteCard({ topic, index, isNewest, accentColor }) {
   const cat = CATEGORY_COLORS[topic.category] || CATEGORY_COLORS.topic;
   const stage = getStage(topic);
   const mover = topic.mover || COUNCILLORS[index % COUNCILLORS.length];
@@ -30,8 +30,8 @@ export default function BiteCard({ topic, index, isNewest }) {
   const isVoting = stage === 'awaiting-vote';
   const isMoverDetected = stage === 'mover-detected';
 
-  // Monochrome top bar — no color
-  const barColor = '#cbd5e1';
+  // Top bar — matches grid theme color
+  const barColor = accentColor || '#cbd5e1';
 
   // Determine final result for badge color
   const finalVotes = topic.votes || [];

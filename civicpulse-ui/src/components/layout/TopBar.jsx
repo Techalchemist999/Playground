@@ -119,7 +119,7 @@ export default function TopBar({ status = 'IDLE', elapsed = 0, sessionId, bgThem
                     title={theme.label}
                     style={{
                       width: 28, height: 28, borderRadius: '50%',
-                      background: theme.dot,
+                      background: theme.bg.includes?.('gradient') ? theme.bg : theme.dot,
                       border: bgTheme?.id === theme.id ? '2.5px solid #0f172a' : '2px solid #e2e8f0',
                       cursor: 'pointer',
                       transition: 'transform 0.15s, border 0.15s',

@@ -10,7 +10,7 @@ const STATUS_STYLES = {
   discussed: { bg: '#f1f5f9', color: '#64748b', border: '#cbd5e1', label: 'Discussed' },
 };
 
-export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, transcript = [], status, embedded }) {
+export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, transcript = [], status, embedded, accentColor }) {
   const [viewMode, setViewMode] = useState('agenda'); // 'agenda' | 'rules' | 'transcript'
   const [agendaExpanded, setAgendaExpanded] = useState(false);
   const total = agendaItems.length;
@@ -113,8 +113,8 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, 
                   marginBottom: 4,
                 }}>
                   <div style={{ display: 'flex', height: '100%' }}>
-                    <div style={{ width: `${pctDiscussed}%`, background: '#22c55e', transition: 'width .5s' }} />
-                    <div style={{ width: `${pctActive}%`, background: '#6366f1', transition: 'width .5s' }} />
+                    <div style={{ width: `${pctDiscussed}%`, background: accentColor || '#cbd5e1', transition: 'width .5s, background .3s' }} />
+                    <div style={{ width: `${pctActive}%`, background: `${accentColor || '#cbd5e1'}66`, transition: 'width .5s, background .3s' }} />
                   </div>
                 </div>
                 <span style={{ fontSize: 10, color: COLORS.mutedText }}>
