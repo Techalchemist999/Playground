@@ -35,16 +35,17 @@ const iconAgenda = (
 
 const SNAP = 24; // ~6mm grid snap
 
+
 function snapToGrid(val) {
   return Math.round(val / SNAP) * SNAP;
 }
 
 // Default panel layout (x, y, w, h in px — will snap to grid)
 const DEFAULT_PANELS = [
-  { id: 'agenda',    x: 0,   y: 0,   w: 312, h: 648 },
-  { id: 'bites',     x: 322, y: 0,   w: 528, h: 648 },
-  { id: 'topics',    x: 860, y: 0,   w: 360, h: 312 },
-  { id: 'notes',     x: 860, y: 322, w: 360, h: 326 },
+  { id: 'agenda',    x: 24,  y: 24,  w: 312, h: 648 },
+  { id: 'bites',     x: 348, y: 24,  w: 528, h: 648 },
+  { id: 'topics',    x: 888, y: 24,  w: 360, h: 312 },
+  { id: 'notes',     x: 888, y: 348, w: 360, h: 326 },
 ];
 
 // Edge resize zones — all 4 sides + 4 corners
@@ -71,7 +72,7 @@ function EdgeHandles({ onEdgeDrag }) {
   ));
 }
 
-export default function LiveDashboard({ session }) {
+export default function LiveDashboard({ session, bgTheme }) {
   const containerRef = useRef(null);
   const [panels, setPanels] = useState(() =>
     DEFAULT_PANELS.map(p => ({
@@ -84,6 +85,8 @@ export default function LiveDashboard({ session }) {
   );
   const dragRef = useRef(null);
   const [draggingId, setDraggingId] = useState(null);
+  const fallbackTheme = { dot: '#e2e8f0', bg: '#ffffff' };
+  const theme = bgTheme || fallbackTheme;
 
   // Smart scroll for procedural bites
   const pbScrollRef = useRef(null);
@@ -138,7 +141,7 @@ export default function LiveDashboard({ session }) {
         if (p.id !== ds.id) return p;
 
         if (ds.mode === 'move') {
-          return { ...p, x: snapToGrid(Math.max(0, ds.startX + dx)), y: snapToGrid(Math.max(0, ds.startY + dy)) };
+          return { ...p, x: snapToGrid(Math.max(SNAP, ds.startX + dx)), y: snapToGrid(Math.max(SNAP, ds.startY + dy)) };
         }
 
         let newX = ds.startX, newY = ds.startY, newW = ds.startW, newH = ds.startH;
@@ -156,8 +159,8 @@ export default function LiveDashboard({ session }) {
         newW = Math.max(MIN_W, newW);
         newH = Math.max(MIN_H, newH);
         // If dragging left/top edge, clamp position so it doesn't overshoot
-        if (resizesLeft)  newX = Math.max(0, ds.startX + ds.startW - newW);
-        if (resizesTop)   newY = Math.max(0, ds.startY + ds.startH - newH);
+        if (resizesLeft)  newX = Math.max(SNAP, ds.startX + ds.startW - newW);
+        if (resizesTop)   newY = Math.max(SNAP, ds.startY + ds.startH - newH);
 
         return { ...p, x: snapToGrid(newX), y: snapToGrid(newY), w: snapToGrid(newW), h: snapToGrid(newH) };
       }));
@@ -205,12 +208,13 @@ export default function LiveDashboard({ session }) {
         style={{
           flex: 1,
           position: 'relative',
-          padding: 10,
+          padding: 20,
           overflow: 'auto',
-          // Grid dots background for visual snap reference
-          backgroundImage: `radial-gradient(circle, ${COLORS.cardBorder} 1px, transparent 1px)`,
+          background: theme.bg,
+          backgroundImage: `radial-gradient(circle, ${theme.dot}40 1px, transparent 1px)`,
           backgroundSize: `${SNAP}px ${SNAP}px`,
           backgroundPosition: '0 0',
+          transition: 'background 0.3s ease',
         }}
       >
         {/* Agenda */}

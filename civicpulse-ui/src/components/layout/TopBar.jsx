@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../styles/tokens';
 
 const STATUS_STYLES = {
@@ -18,8 +19,9 @@ function formatTime(ms) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export default function TopBar({ status = 'IDLE', elapsed = 0, sessionId }) {
+export default function TopBar({ status = 'IDLE', elapsed = 0, sessionId, bgThemes = [], bgTheme, onBgThemeChange }) {
   const st = STATUS_STYLES[status] || STATUS_STYLES.IDLE;
+  const [showSettings, setShowSettings] = useState(false);
 
   return (
     <div style={{
@@ -73,6 +75,67 @@ export default function TopBar({ status = 'IDLE', elapsed = 0, sessionId }) {
             {sessionId.substring(0, 8)}...
           </span>
         )}
+        {/* Settings gear */}
+        <div style={{ position: 'relative', marginLeft: 4 }}>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            title="Settings"
+            style={{
+              width: 28, height: 28, borderRadius: 6,
+              background: showSettings ? '#f1f5f9' : 'transparent',
+              border: '1px solid transparent',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => { if (!showSettings) e.currentTarget.style.background = '#f8fafc'; }}
+            onMouseLeave={e => { if (!showSettings) e.currentTarget.style.background = 'transparent'; }}
+          >
+            <svg width="14" height="14" fill="none" stroke="#64748b" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </button>
+          {showSettings && (
+            <div style={{
+              position: 'absolute', top: 36, right: 0,
+              background: '#fff', borderRadius: 10, padding: '12px 14px',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+              border: '1px solid #e2e8f0',
+              width: 200, zIndex: 300,
+            }}>
+              <span style={{
+                fontSize: 9, fontWeight: 700, color: '#94a3b8',
+                letterSpacing: '1px', textTransform: 'uppercase',
+                display: 'block', marginBottom: 8,
+              }}>
+                Grid Theme
+              </span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {bgThemes.map(theme => (
+                  <button
+                    key={theme.id}
+                    onClick={() => onBgThemeChange(theme)}
+                    title={theme.label}
+                    style={{
+                      width: 28, height: 28, borderRadius: '50%',
+                      background: theme.dot,
+                      border: bgTheme?.id === theme.id ? '2.5px solid #0f172a' : '2px solid #e2e8f0',
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s, border 0.15s',
+                      transform: bgTheme?.id === theme.id ? 'scale(1.15)' : 'scale(1)',
+                    }}
+                  />
+                ))}
+              </div>
+              {bgTheme && (
+                <span style={{ fontSize: 8.5, color: '#94a3b8', display: 'block', marginTop: 6 }}>
+                  {bgTheme.label}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <style>{`
