@@ -103,38 +103,36 @@ export default function BiteCard({ topic, index, isNewest, accentColor, cardMode
     const stripeLabel = wasAmended ? `${baseLabel} (AS AMENDED)` : baseLabel;
 
     if (!historyOpen) {
-      // Collapsed — GitHub closed-issue style row
+      // Collapsed — title left, disposition + icon right
       return (
         <div
           onClick={() => setHistoryOpen(true)}
           style={{
-            display: 'flex', alignItems: 'flex-start', gap: 8,
+            display: 'flex', alignItems: 'center', gap: 8,
             padding: '6px 0', cursor: 'pointer',
             flexShrink: 0,
           }}
         >
-          {/* Check circle / X circle icon */}
-          <div style={{ flexShrink: 0, marginTop: 1 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: '#0f172a', flex: 1 }}>
+            {editLabel}
+            {wasAmended && <span style={{ fontSize: 8, color: '#94a3b8', marginLeft: 4 }}>· amended</span>}
+          </span>
+          <span style={{ fontSize: 8, fontWeight: 700, color: stripeColor, whiteSpace: 'nowrap' }}>
+            {stripeLabel}
+          </span>
+          <div style={{ flexShrink: 0 }}>
             {isDefeated ? (
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" stroke="#dc2626" strokeWidth="2" />
                 <line x1="15" y1="9" x2="9" y2="15" stroke="#dc2626" strokeWidth="2.5" />
                 <line x1="9" y1="9" x2="15" y2="15" stroke="#dc2626" strokeWidth="2.5" />
               </svg>
             ) : (
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" stroke="#22c55e" strokeWidth="2" />
                 <polyline points="8 12 11 15 16 9" stroke="#22c55e" strokeWidth="2.5" fill="none" />
               </svg>
             )}
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#0f172a' }}>
-              {editLabel}
-            </div>
-            <div style={{ fontSize: 8, color: '#94a3b8', marginTop: 1 }}>
-              {wasAmended ? 'amended · ' : ''}{stripeLabel.toLowerCase()}
-            </div>
           </div>
         </div>
       );
