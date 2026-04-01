@@ -1,14 +1,33 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { COLORS, SPACING } from '../../styles/tokens';
-import { gradientButtonStyle, cardStyle } from '../../styles/shared';
+import { gradientButtonStyle, outlineButtonStyle, cardStyle } from '../../styles/shared';
 import Spinner from '../shared/Spinner';
 import SourcePicker from './SourcePicker';
 import AgendaPicker from './AgendaPicker';
+import { parseTranscriptToMinutes } from '../../data/mockTranscriptParser';
+import { SAMPLE_TRANSCRIPT } from '../../data/sampleTranscript';
 
 export default function SetupView({ session }) {
   const [agendaId, setAgendaId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  async function handleTranscriptUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setTranscriptLoading(true);
+    try {
+      const text = await file.text();
+      const parsed = parseTranscriptToMinutes(text);
+      session.startTranscriptMinutes(parsed);
+    } catch (err) {
+      console.error('Failed to parse transcript:', err);
+    } finally {
+      setTranscriptLoading(false);
+    }
+  }
 
   async function handleStart() {
     setLoading(true);
@@ -140,6 +159,72 @@ export default function SetupView({ session }) {
               Demo — All Data
             </button>
           </div>
+
+          {/* Upload Transcript — skip to minutes */}
+          <div style={{ borderTop: `1px solid ${COLORS.subtleBorder}`, margin: '16px 0' }} />
+          <div style={{
+            fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
+            color: '#94a3b8', marginBottom: 8, textAlign: 'center',
+          }}>
+            Or generate minutes from a transcript
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".txt,.text"
+            onChange={handleTranscriptUpload}
+            style={{ display: 'none' }}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={transcriptLoading}
+            style={{
+              width: '100%', padding: '12px',
+              background: '#fff',
+              border: `1.5px solid ${COLORS.cardBorder}`,
+              borderRadius: 10, cursor: 'pointer',
+              fontSize: 13, fontWeight: 700, color: COLORS.secondaryText,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              transition: 'all .15s',
+            }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.primary; e.currentTarget.style.color = COLORS.primary; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.cardBorder; e.currentTarget.style.color = COLORS.secondaryText; }}
+          >
+            {transcriptLoading ? (
+              <Spinner size={14} label="Parsing transcript" />
+            ) : (
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="12" y1="18" x2="12" y2="12" />
+                <polyline points="9 15 12 12 15 15" />
+              </svg>
+            )}
+            {transcriptLoading ? 'Generating Minutes...' : 'Upload Transcript'}
+          </button>
+          <button
+            onClick={() => {
+              const parsed = parseTranscriptToMinutes(SAMPLE_TRANSCRIPT);
+              session.startTranscriptMinutes(parsed);
+            }}
+            style={{
+              width: '100%', padding: '12px', marginTop: 8,
+              background: COLORS.primaryGradient, border: 'none',
+              borderRadius: 10, cursor: 'pointer',
+              fontSize: 13, fontWeight: 700, color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              transition: 'all .15s',
+              boxShadow: `0 4px 14px ${COLORS.primaryShadow}`,
+            }}
+          >
+            <svg width="14" height="14" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+            Demo — Generate Minutes
+          </button>
 
           {session.error && (
             <div style={{

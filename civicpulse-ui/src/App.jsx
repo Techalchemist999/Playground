@@ -6,6 +6,7 @@ import TopBar from './components/layout/TopBar';
 import SetupView from './components/setup/SetupView';
 import LiveDashboard from './components/live/LiveDashboard';
 import MinutesWorkspace from './components/minutes/MinutesWorkspace';
+import TranscriptMinutesWorkspace from './components/transcript-minutes/TranscriptMinutesWorkspace';
 
 // Background color themes — dot = grid dots, accent = darker shade for bars/accents
 const BG_THEMES = [
@@ -55,6 +56,7 @@ export default function App() {
           />
         )}
         {session.view === 'minutes' && <MinutesWorkspace session={session} />}
+        {session.view === 'transcript-minutes' && <TranscriptMinutesWorkspace session={session} />}
       </PageShell>
     </ToastProvider>
   );

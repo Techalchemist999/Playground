@@ -4,7 +4,7 @@ import { connectSSE } from '../api/sse';
 import { DEMO_AGENDA_ITEMS, DEMO_TOPICS, DEMO_TRANSCRIPT, DEMO_PLAYBACK, buildDemoTopicsMap } from '../data/demo';
 
 export function useSession() {
-  const [view, setView] = useState('setup'); // setup | live | minutes
+  const [view, setView] = useState('setup'); // setup | live | minutes | transcript-minutes
   const [sessionId, setSessionId] = useState(null);
   const [status, setStatus] = useState('IDLE');
   const [source, setSource] = useState(null);
@@ -14,6 +14,7 @@ export function useSession() {
   const [agendaItems, setAgendaItems] = useState([]);
   const [currentAgendaItem, setCurrentAgendaItem] = useState(null);
   const [error, setError] = useState(null);
+  const [transcriptMinutesData, setTranscriptMinutesData] = useState(null);
 
   const sseClose = useRef(null);
 
@@ -268,6 +269,16 @@ export function useSession() {
     });
   }, []);
 
+  // Upload transcript → generate minutes (skip live view)
+  const startTranscriptMinutes = useCallback((parsedData) => {
+    setSessionId('transcript-' + Date.now());
+    setSource('transcript-upload');
+    setStatus('STOPPED');
+    setTranscriptMinutesData(parsedData);
+    setError(null);
+    setView('transcript-minutes');
+  }, []);
+
   const reset = useCallback(() => {
     if (sseClose.current) sseClose.current();
     demoTimers.current.forEach(t => clearTimeout(t));
@@ -282,11 +293,14 @@ export function useSession() {
     setAgendaItems([]);
     setCurrentAgendaItem(null);
     setError(null);
+    setTranscriptMinutesData(null);
   }, []);
 
   return {
     view, setView, sessionId, status, source, startTime, error,
     topics, transcript, agendaItems, currentAgendaItem, setAgendaItems,
+    transcriptMinutesData,
     ingest, start, startDemo, startDemoPlayback, pause, resume, stop, reset, addMotion,
+    startTranscriptMinutes,
   };
 }
