@@ -188,6 +188,11 @@ export function parseTranscriptToMinutes(text) {
     metadata: {
       date: new Date().toISOString().split('T')[0],
       time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      meetingType: /in camera/i.test(text) ? 'In Camera Meeting'
+        : /committee/i.test(text) ? 'Committee Meeting'
+        : /special/i.test(text) ? 'Special Meeting'
+        : /public hearing/i.test(text) ? 'Public Hearing'
+        : 'Regular Meeting',
       location: 'Council Chambers',
       chair,
       clerk,

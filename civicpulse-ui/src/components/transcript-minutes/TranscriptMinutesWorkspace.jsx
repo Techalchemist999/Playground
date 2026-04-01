@@ -12,13 +12,14 @@ function stripHtml(html) {
 
 // ─── Metadata Header ─────────────────────────────
 function MetadataHeader({ metadata, isEditing, onUpdate }) {
+  const meetingTypes = ['Regular Meeting', 'In Camera Meeting', 'Committee Meeting', 'Special Meeting', 'Public Hearing'];
   const fields = [
     { key: 'municipality', label: 'Municipality' },
+    { key: 'meetingType', label: 'Meeting Type', options: meetingTypes },
     { key: 'date', label: 'Date', type: 'date' },
     { key: 'time', label: 'Time' },
     { key: 'location', label: 'Location' },
     { key: 'chair', label: 'Chair' },
-    { key: 'clerk', label: 'Clerk' },
   ];
 
   return (
@@ -39,23 +40,38 @@ function MetadataHeader({ metadata, isEditing, onUpdate }) {
         </div>
       </div>
       <div style={{ padding: '16px 24px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-        {fields.map(({ key, label, type }) => (
+        {fields.map(({ key, label, type, options }) => (
           <div key={key}>
             <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>
               {label}
             </div>
             {isEditing ? (
-              <input
-                type={type || 'text'}
-                value={metadata[key] || ''}
-                onChange={e => onUpdate(key, e.target.value)}
-                style={{
-                  width: '100%', padding: '6px 10px', fontSize: 13, fontWeight: 600,
-                  color: COLORS.headingText, background: '#f8fafc',
-                  border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
-                  fontFamily: 'inherit',
-                }}
-              />
+              options ? (
+                <select
+                  value={metadata[key] || options[0]}
+                  onChange={e => onUpdate(key, e.target.value)}
+                  style={{
+                    width: '100%', padding: '6px 10px', fontSize: 13, fontWeight: 600,
+                    color: COLORS.headingText, background: '#f8fafc',
+                    border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+                    fontFamily: 'inherit', cursor: 'pointer',
+                  }}
+                >
+                  {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+              ) : (
+                <input
+                  type={type || 'text'}
+                  value={metadata[key] || ''}
+                  onChange={e => onUpdate(key, e.target.value)}
+                  style={{
+                    width: '100%', padding: '6px 10px', fontSize: 13, fontWeight: 600,
+                    color: COLORS.headingText, background: '#f8fafc',
+                    border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+                    fontFamily: 'inherit',
+                  }}
+                />
+              )
             ) : (
               <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.headingText }}>
                 {metadata[key] || '—'}
@@ -335,8 +351,87 @@ function MinutesSection({ section, isEditing, onUpdateContent, onUpdateMotion })
   );
 }
 
+// ─── Sign-Off Block (name + title only) ─────────────────────────────
+function ApprovalSignOff({ approval, isEditing, onUpdate }) {
+  const isApproved = !!approval.approvedAt;
+
+  return (
+    <div style={{
+      ...cardStyle, padding: 0, overflow: 'hidden',
+      border: isApproved ? '1.5px solid #dcfce7' : `1px solid ${COLORS.cardBorder}`,
+    }}>
+      <div style={{
+        padding: '14px 20px 10px',
+        background: isApproved ? '#f0fdf4' : '#fafbfc',
+        borderBottom: `1px solid ${isApproved ? '#dcfce7' : COLORS.subtleBorder}`,
+        display: 'flex', alignItems: 'center', gap: 10,
+        borderLeft: `4px solid ${isApproved ? '#22c55e' : COLORS.primary}`,
+      }}>
+        <span style={{ fontWeight: 700, fontSize: 13, color: isApproved ? '#16a34a' : COLORS.headingText }}>
+          {isApproved ? 'Approved By' : 'Sign-Off'}
+        </span>
+        {isApproved && (
+          <span style={{
+            fontSize: 9, fontWeight: 700, color: '#22c55e',
+            background: '#dcfce7', borderRadius: 999, padding: '2px 8px', marginLeft: 'auto',
+          }}>
+            {new Date(approval.approvedAt).toLocaleDateString()}
+          </span>
+        )}
+      </div>
+
+      <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div>
+          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>
+            Name
+          </div>
+          {isEditing && !isApproved ? (
+            <input
+              value={approval.name || ''}
+              onChange={e => onUpdate('name', e.target.value)}
+              placeholder="e.g. Jane Smith"
+              style={{
+                width: '100%', padding: '6px 10px', fontSize: 13, fontWeight: 600,
+                color: COLORS.headingText, background: '#f8fafc',
+                border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+                fontFamily: 'inherit',
+              }}
+            />
+          ) : (
+            <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.headingText }}>
+              {approval.name || '—'}
+            </div>
+          )}
+        </div>
+        <div>
+          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>
+            Title
+          </div>
+          {isEditing && !isApproved ? (
+            <input
+              value={approval.title || ''}
+              onChange={e => onUpdate('title', e.target.value)}
+              placeholder="e.g. Corporate Officer"
+              style={{
+                width: '100%', padding: '6px 10px', fontSize: 13, fontWeight: 600,
+                color: COLORS.headingText, background: '#f8fafc',
+                border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+                fontFamily: 'inherit',
+              }}
+            />
+          ) : (
+            <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.headingText }}>
+              {approval.title || '—'}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── DOCX Export ─────────────────────────────
-function exportToDocx(data) {
+function exportToDocx(data, approval) {
   const children = [];
 
   // Title
@@ -399,11 +494,28 @@ function exportToDocx(data) {
     });
   });
 
-  // Approval
-  if (data.approvedAt) {
-    children.push(new Paragraph({ text: '', spacing: { after: 400 } }));
+  // Sign-off
+  children.push(new Paragraph({ text: '', spacing: { after: 400 } }));
+  children.push(new Paragraph({ text: 'Approved By:', heading: HeadingLevel.HEADING_1 }));
+  if (approval?.name) {
     children.push(new Paragraph({
-      children: [new TextRun({ text: `Minutes approved on ${new Date(data.approvedAt).toLocaleString()}`, bold: true, italics: true })],
+      children: [new TextRun({ text: 'Name: ', bold: true }), new TextRun(approval.name)],
+    }));
+  }
+  if (approval?.title) {
+    children.push(new Paragraph({
+      children: [new TextRun({ text: 'Title: ', bold: true }), new TextRun(approval.title)],
+    }));
+  }
+  if (approval?.email) {
+    children.push(new Paragraph({
+      children: [new TextRun({ text: 'Email: ', bold: true }), new TextRun(approval.email)],
+    }));
+  }
+  if (approval?.approvedAt) {
+    children.push(new Paragraph({
+      children: [new TextRun({ text: `Approved on ${new Date(approval.approvedAt).toLocaleString()}`, bold: true, italics: true })],
+      spacing: { before: 200 },
     }));
   }
 
@@ -471,13 +583,28 @@ export default function TranscriptMinutesWorkspace({ session }) {
     setIsDirty(true);
   }, []);
 
+  const [approval, setApproval] = useState({
+    name: data?.metadata?.clerk || '',
+    title: 'Corporate Officer',
+    email: '',
+    approvedAt: data?.approvedAt || null,
+  });
+
+  const updateApproval = useCallback((field, value) => {
+    setApproval(prev => ({ ...prev, [field]: value }));
+    setIsDirty(true);
+  }, []);
+
   const approveMinutes = useCallback(() => {
-    setData(prev => ({ ...prev, approvedAt: new Date().toISOString() }));
+    const now = new Date().toISOString();
+    setApproval(prev => ({ ...prev, approvedAt: now }));
+    setData(prev => ({ ...prev, approvedAt: now }));
     setIsEditing(false);
     setIsDirty(true);
   }, []);
 
   const unapprove = useCallback(() => {
+    setApproval(prev => ({ ...prev, approvedAt: null }));
     setData(prev => ({ ...prev, approvedAt: null }));
     setIsDirty(true);
   }, []);
@@ -490,136 +617,265 @@ export default function TranscriptMinutesWorkspace({ session }) {
     );
   }
 
+  const [showApprovalPanel, setShowApprovalPanel] = useState(false);
+
+  const copyApprovalLink = useCallback(() => {
+    const url = `${window.location.origin}${window.location.pathname}?approve=${data.metadata.date || 'draft'}`;
+    navigator.clipboard.writeText(url).catch(() => {});
+    setShowApprovalPanel(false);
+  }, [data]);
+
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* Export / action bar */}
-      <div style={{
-        height: 52, background: '#fff', borderBottom: `1px solid ${COLORS.cardBorder}`,
-        display: 'flex', alignItems: 'center', padding: '0 20px', gap: 10, flexShrink: 0,
-      }}>
-        <svg width="16" height="16" fill="none" stroke={COLORS.primary} strokeWidth="2" viewBox="0 0 24 24">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
-        </svg>
-        <span style={{ fontWeight: 800, fontSize: 15, color: COLORS.headingText }}>Transcript Minutes</span>
-
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'row', overflow: 'hidden' }}>
+      {/* Main content area */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Approved banner */}
         {data.approvedAt && (
-          <span style={{
-            fontSize: 10, fontWeight: 700, color: '#22c55e',
-            background: '#f0fdf4', border: '1px solid #dcfce7',
-            borderRadius: 4, padding: '2px 8px',
+          <div style={{
+            padding: '8px 20px', background: '#f0fdf4', borderBottom: '1px solid #dcfce7',
+            display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
           }}>
-            Approved {new Date(data.approvedAt).toLocaleDateString()}
-          </span>
-        )}
-        {isDirty && !data.approvedAt && (
-          <span style={{
-            fontSize: 10, fontWeight: 600, color: COLORS.warningAmber,
-            background: COLORS.warningLight, border: `1px solid ${COLORS.warningBorder}`,
-            borderRadius: 4, padding: '2px 7px',
-          }}>
-            Unsaved changes
-          </span>
-        )}
-
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
-          <button onClick={session.reset} style={{ ...outlineButtonStyle, padding: '6px 14px', fontSize: 12 }}>
-            New Session
-          </button>
-
-          {/* Edit / View toggle */}
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            style={{
-              ...outlineButtonStyle, padding: '6px 14px', fontSize: 12,
-              background: isEditing ? '#f1f5f9' : 'transparent',
-              borderColor: isEditing ? COLORS.primary : undefined,
-              color: isEditing ? COLORS.primary : undefined,
-            }}
-          >
-            <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              {isEditing ? (
-                <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>
-              ) : (
-                <><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></>
-              )}
+            <svg width="14" height="14" fill="none" stroke="#22c55e" strokeWidth="2.5" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12" />
             </svg>
-            {isEditing ? 'View' : 'Edit'}
-          </button>
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#16a34a' }}>
+              These minutes were approved on {new Date(data.approvedAt).toLocaleString()}
+            </span>
+          </div>
+        )}
 
-          {/* Approve */}
-          {!data.approvedAt ? (
-            <button
-              onClick={approveMinutes}
-              style={{
-                ...outlineButtonStyle, padding: '6px 14px', fontSize: 12,
-                color: '#22c55e', borderColor: '#dcfce7',
-              }}
-            >
-              <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              Approve
-            </button>
-          ) : (
-            <button onClick={unapprove} style={{ ...outlineButtonStyle, padding: '6px 14px', fontSize: 12, color: '#94a3b8' }}>
-              Unapprove
-            </button>
+        {/* Scrollable content */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 60px' }}>
+          <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <MetadataHeader metadata={data.metadata} isEditing={isEditing} onUpdate={updateMetadata} />
+            <RollCallSection
+              rollCall={data.rollCall}
+              isEditing={isEditing}
+              onUpdate={updateRollCall}
+              onAdd={addAttendee}
+              onRemove={removeAttendee}
+            />
+            {data.sections.map(section => (
+              <MinutesSection
+                key={section.id}
+                section={section}
+                isEditing={isEditing}
+                onUpdateContent={html => updateSectionContent(section.id, html)}
+                onUpdateMotion={(mi, field, value) => updateMotion(section.id, mi, field, value)}
+              />
+            ))}
+
+            {/* Sign-off block — name and title only */}
+            <ApprovalSignOff
+              approval={approval}
+              isEditing={isEditing}
+              onUpdate={updateApproval}
+              onApprove={approveMinutes}
+              onUnapprove={unapprove}
+            />
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div style={{
+          height: 44, background: '#fff', borderTop: `1px solid ${COLORS.cardBorder}`,
+          display: 'flex', alignItems: 'center', padding: '0 20px', gap: 10, flexShrink: 0,
+        }}>
+          <svg width="14" height="14" fill="none" stroke={COLORS.primary} strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.headingText }}>Transcript Minutes</span>
+          {data.approvedAt && (
+            <span style={{
+              fontSize: 9, fontWeight: 700, color: '#22c55e',
+              background: '#f0fdf4', border: '1px solid #dcfce7',
+              borderRadius: 999, padding: '2px 8px',
+            }}>
+              Approved
+            </span>
           )}
-
-          {/* Export Word */}
-          <button
-            onClick={() => exportToDocx(data)}
-            style={{ ...gradientButtonStyle, padding: '6px 16px', fontSize: 12 }}
-          >
-            <svg width="11" height="11" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Export Word
+          <div style={{ flex: 1 }} />
+          <button onClick={session.reset} style={{ ...outlineButtonStyle, padding: '5px 12px', fontSize: 11 }}>
+            New Session
           </button>
         </div>
       </div>
 
-      {/* Approved banner */}
-      {data.approvedAt && (
-        <div style={{
-          padding: '8px 20px', background: '#f0fdf4', borderBottom: '1px solid #dcfce7',
-          display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
-        }}>
-          <svg width="14" height="14" fill="none" stroke="#22c55e" strokeWidth="2.5" viewBox="0 0 24 24">
-            <polyline points="20 6 9 17 4 12" />
+      {/* Right toolbar — matches page 2 style */}
+      <div style={{
+        width: 52, flexShrink: 0,
+        background: '#fff',
+        borderLeft: '1px solid #e2e8f0',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', padding: '16px 0',
+        gap: 24, zIndex: 50,
+      }}>
+        {/* Gear — settings placeholder */}
+        <button
+          title="Settings"
+          style={{
+            width: 40, height: 40, borderRadius: 10,
+            background: 'transparent',
+            border: '1.5px solid transparent',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all .15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; }}
+        >
+          <svg width="24" height="24" fill="none" stroke="#475569" strokeWidth="1.8" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#16a34a' }}>
-            These minutes were approved on {new Date(data.approvedAt).toLocaleString()}
-          </span>
-        </div>
-      )}
+        </button>
 
-      {/* Main content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 60px' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <MetadataHeader metadata={data.metadata} isEditing={isEditing} onUpdate={updateMetadata} />
-          <RollCallSection
-            rollCall={data.rollCall}
-            isEditing={isEditing}
-            onUpdate={updateRollCall}
-            onAdd={addAttendee}
-            onRemove={removeAttendee}
-          />
-          {data.sections.map(section => (
-            <MinutesSection
-              key={section.id}
-              section={section}
-              isEditing={isEditing}
-              onUpdateContent={html => updateSectionContent(section.id, html)}
-              onUpdateMotion={(mi, field, value) => updateMotion(section.id, mi, field, value)}
-            />
-          ))}
+        {/* Edit toggle */}
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          title={isEditing ? 'Switch to view mode' : 'Switch to edit mode'}
+          style={{
+            width: 40, height: 40, borderRadius: 10,
+            background: isEditing ? '#f1f5f9' : 'transparent',
+            border: isEditing ? '1.5px solid #cbd5e1' : '1.5px solid transparent',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all .15s',
+          }}
+          onMouseEnter={e => { if (!isEditing) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; } }}
+          onMouseLeave={e => { if (!isEditing) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
+        >
+          {isEditing ? (
+            <svg width="24" height="24" fill="none" stroke="#475569" strokeWidth="1.8" viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          ) : (
+            <svg width="24" height="24" fill="none" stroke="#cbd5e1" strokeWidth="1.8" viewBox="0 0 24 24">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          )}
+        </button>
+
+        {/* Approval — share link */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowApprovalPanel(!showApprovalPanel)}
+            title={data.approvedAt ? 'Approved — click to manage' : 'Share for approval'}
+            style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: data.approvedAt ? '#f0fdf4' : showApprovalPanel ? '#f1f5f9' : 'transparent',
+              border: data.approvedAt ? '1.5px solid #dcfce7' : showApprovalPanel ? '1.5px solid #cbd5e1' : '1.5px solid transparent',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all .15s',
+            }}
+            onMouseEnter={e => { if (!data.approvedAt && !showApprovalPanel) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; } }}
+            onMouseLeave={e => { if (!data.approvedAt && !showApprovalPanel) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
+          >
+            <svg width="24" height="24" fill="none" stroke={data.approvedAt ? '#22c55e' : '#475569'} strokeWidth="1.8" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </button>
+
+          {/* Approval flyout panel */}
+          {showApprovalPanel && (
+            <div style={{
+              position: 'absolute', top: 0, right: 52,
+              background: '#fff', borderRadius: 10, padding: '14px 16px',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+              border: '1px solid #e2e8f0',
+              width: 240, zIndex: 300,
+            }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 10 }}>
+                Approval
+              </div>
+
+              {data.approvedAt ? (
+                <>
+                  <div style={{
+                    padding: '8px 10px', background: '#f0fdf4', borderRadius: 8,
+                    border: '1px solid #dcfce7', marginBottom: 10,
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}>
+                    <svg width="14" height="14" fill="none" stroke="#22c55e" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a' }}>Approved</div>
+                      <div style={{ fontSize: 9, color: '#22c55e' }}>{new Date(data.approvedAt).toLocaleString()}</div>
+                    </div>
+                  </div>
+                  <button onClick={() => { unapprove(); setShowApprovalPanel(false); }} style={{
+                    width: '100%', padding: '7px', background: '#fff', border: '1.5px solid #e2e8f0',
+                    borderRadius: 6, fontSize: 11, fontWeight: 600, color: '#94a3b8', cursor: 'pointer',
+                  }}>
+                    Revoke Approval
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => { approveMinutes(); setShowApprovalPanel(false); }} disabled={!approval.name?.trim()} style={{
+                    width: '100%', padding: '8px', marginBottom: 8,
+                    background: approval.name?.trim() ? 'linear-gradient(135deg, #22c55e, #16a34a)' : '#e2e8f0',
+                    border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 700,
+                    color: approval.name?.trim() ? '#fff' : '#94a3b8', cursor: approval.name?.trim() ? 'pointer' : 'default',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  }}>
+                    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Approve Now
+                  </button>
+                  {!approval.name?.trim() && (
+                    <div style={{ fontSize: 9, color: '#94a3b8', textAlign: 'center', marginBottom: 8 }}>
+                      Fill in the sign-off name at the bottom first
+                    </div>
+                  )}
+                  <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 8 }}>
+                    <button onClick={copyApprovalLink} style={{
+                      width: '100%', padding: '7px', background: '#f8fafc', border: '1.5px solid #e2e8f0',
+                      borderRadius: 6, fontSize: 11, fontWeight: 600, color: '#475569', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    }}>
+                      <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                      Copy Approval Link
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
+
+        {/* Export Word */}
+        <button
+          onClick={() => exportToDocx(data, approval)}
+          title="Export to Word"
+          style={{
+            width: 40, height: 40, borderRadius: 10,
+            background: 'transparent',
+            border: '1.5px solid transparent',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all .15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; }}
+        >
+          <svg width="24" height="24" fill="none" stroke="#475569" strokeWidth="1.8" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        </button>
+
+        <div style={{ flex: 1 }} />
       </div>
     </div>
   );
