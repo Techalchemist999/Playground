@@ -118,9 +118,19 @@ Cllr Woodill: I second.
 
 Mayor Veach: Discussion?
 
-Cllr Wall: This is a great community event. Full support.
+Cllr Wall: I'd like to propose an amendment. I move that the main motion be amended by reducing the contribution from $3,000 to $1,500 and directing the remaining $1,500 to the sidewalk repair reserve.
 
-Mayor Veach: All in favour? Carried unanimously.
+Cllr Rabel: I second the amendment for discussion purposes.
+
+Mayor Veach: We have an amendment on the floor. Discussion?
+
+Cllr Johnston: I disagree. The Recreation Commission has provided a detailed budget showing they need the full $3,000. Cutting it in half would eliminate the fireworks display.
+
+Cllr Woodill: I agree with Councillor Johnston. This is a signature community event and we should fund it properly.
+
+Mayor Veach: All in favour of the amendment? All opposed? The amendment is defeated 1-4.
+
+Mayor Veach: We return to the original motion. All in favour? Carried unanimously.
 
 9. Unfinished Business
 

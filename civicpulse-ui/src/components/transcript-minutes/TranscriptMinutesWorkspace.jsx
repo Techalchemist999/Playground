@@ -32,9 +32,6 @@ function MetadataHeader({ metadata, isEditing, onUpdate }) {
         padding: '20px 24px 16px',
         borderBottom: '1px solid #e8eaf0',
       }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', color: COLORS.primary, marginBottom: 6 }}>
-          Meeting Minutes
-        </div>
         <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.headingText, letterSpacing: '-0.3px' }}>
           Meeting Minutes
         </div>
@@ -192,7 +189,7 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
 }
 
 // ─── Motion Card ─────────────────────────────
-function MotionCard({ motion, isEditing, onUpdate }) {
+function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
   const resultColors = {
     carried: { bg: '#f0fdf4', border: '#dcfce7', color: '#22c55e', label: 'CARRIED' },
     defeated: { bg: '#fef2f2', border: '#fee2e2', color: '#dc2626', label: 'DEFEATED' },
@@ -210,8 +207,22 @@ function MotionCard({ motion, isEditing, onUpdate }) {
       borderRadius: '0 10px 10px 0',
       overflow: 'hidden', marginTop: 8,
     }}>
-      {/* Motion text */}
-      <div style={{ padding: '12px 16px 8px' }}>
+      {/* Resolution number + Motion text */}
+      {resolutionNumber && (
+        <div style={{
+          padding: '6px 16px 0', display: 'flex', alignItems: 'center', gap: 6,
+        }}>
+          <span style={{
+            fontSize: 9, fontWeight: 700, letterSpacing: .8,
+            color: '#475569', background: '#f1f5f9',
+            border: '1px solid #cbd5e1', borderRadius: 4,
+            padding: '2px 8px',
+          }}>
+            {resolutionNumber}
+          </span>
+        </div>
+      )}
+      <div style={{ padding: `${resolutionNumber ? '6px' : '12px'} 16px 8px` }}>
         <div style={{
           fontSize: 8, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
           color: CATEGORY_COLORS.motion.color, marginBottom: 6,
@@ -332,7 +343,7 @@ function MotionCard({ motion, isEditing, onUpdate }) {
 }
 
 // ─── Minutes Section ─────────────────────────────
-function MinutesSection({ section, isEditing, onUpdateContent, onUpdateMotion }) {
+function MinutesSection({ section, isEditing, onUpdateContent, onUpdateMotion, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -389,6 +400,7 @@ function MinutesSection({ section, isEditing, onUpdateContent, onUpdateMotion })
               motion={motion}
               isEditing={isEditing}
               onUpdate={(field, value) => onUpdateMotion(mi, field, value)}
+              resolutionNumber={resolutionMap?.[motion.id]}
             />
           ))}
         </div>
@@ -577,6 +589,41 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
   const [data, setData] = useState(session.transcriptMinutesData);
   const [isEditing, setIsEditing] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
+  const [resolutionMode, setResolutionMode] = useState('manual'); // 'manual' | 'continue' | 'none'
+  const [resolutionPrefix, setResolutionPrefix] = useState('2026-01');
+  const [lastMeetingEndNum, setLastMeetingEndNum] = useState('2026-42'); // simulated last meeting's last resolution
+
+  // Build a global resolution number map for all motions across sections
+  const resolutionMap = {};
+  let resCount = 0;
+
+  // Determine effective starting resolution
+  const effectivePrefix = resolutionMode === 'continue'
+    ? (() => {
+        const parts = lastMeetingEndNum.split('-');
+        const prefix = parts.slice(0, -1).join('-');
+        const lastNum = parseInt(parts[parts.length - 1], 10) || 0;
+        return `${prefix}-${String(lastNum + 1).padStart(2, '0')}`;
+      })()
+    : resolutionPrefix;
+
+  if (resolutionMode !== 'none') {
+    (data?.sections || []).forEach(section => {
+      (section.motions || []).forEach(motion => {
+        resCount++;
+        const parts = effectivePrefix.split('-');
+        const prefix = parts.slice(0, -1).join('-');
+        const startNum = parseInt(parts[parts.length - 1], 10) || 1;
+        const num = String(startNum + resCount - 1).padStart(2, '0');
+        resolutionMap[motion.id] = `${prefix}-${num}`;
+      });
+    });
+  } else {
+    // Count motions but don't assign numbers
+    (data?.sections || []).forEach(section => {
+      (section.motions || []).forEach(() => { resCount++; });
+    });
+  }
 
   const updateMetadata = useCallback((field, value) => {
     setData(prev => ({ ...prev, metadata: { ...prev.metadata, [field]: value } }));
@@ -701,6 +748,101 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
         }}>
           <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <MetadataHeader metadata={data.metadata} isEditing={isEditing} onUpdate={updateMetadata} />
+
+            {/* Resolution numbering */}
+            <div style={{ ...cardStyle, padding: '14px 24px' }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#475569', marginBottom: 10 }}>
+                Resolution Numbering
+              </div>
+
+              {/* Three options */}
+              <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+                {[
+                  { id: 'manual', label: 'Start At' },
+                  { id: 'continue', label: 'Continue From Last Meeting' },
+                  { id: 'none', label: 'No Resolution Numbers' },
+                ].map(opt => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setResolutionMode(opt.id)}
+                    style={{
+                      padding: '6px 12px', borderRadius: 8, fontSize: 10, fontWeight: 600,
+                      cursor: 'pointer', transition: 'all .15s',
+                      border: `1.5px solid ${resolutionMode === opt.id ? '#475569' : '#e2e8f0'}`,
+                      background: resolutionMode === opt.id ? '#f1f5f9' : '#fff',
+                      color: resolutionMode === opt.id ? '#0f172a' : '#64748b',
+                      display: 'flex', alignItems: 'center', gap: 5,
+                    }}
+                  >
+                    <div style={{
+                      width: 14, height: 14, borderRadius: 4,
+                      border: `1.5px solid ${resolutionMode === opt.id ? '#475569' : '#cbd5e1'}`,
+                      background: resolutionMode === opt.id ? '#475569' : '#fff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {resolutionMode === opt.id && (
+                        <svg width="8" height="8" fill="none" stroke="#fff" strokeWidth="3" viewBox="0 0 24 24">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </div>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Manual input */}
+              {resolutionMode === 'manual' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <input
+                    value={resolutionPrefix}
+                    onChange={e => setResolutionPrefix(e.target.value)}
+                    style={{
+                      width: 120, padding: '5px 10px', fontSize: 13, fontWeight: 700,
+                      color: '#0f172a', background: '#f8fafc',
+                      border: '1.5px solid #cbd5e1', borderRadius: 6,
+                      fontFamily: 'inherit', textAlign: 'center',
+                    }}
+                  />
+                  <span style={{ fontSize: 10, color: '#94a3b8' }}>
+                    {resCount} resolution{resCount !== 1 ? 's' : ''}: {resolutionPrefix} through {(() => {
+                      const parts = resolutionPrefix.split('-');
+                      const prefix = parts.slice(0, -1).join('-');
+                      const startNum = parseInt(parts[parts.length - 1], 10) || 1;
+                      return `${prefix}-${String(startNum + resCount - 1).padStart(2, '0')}`;
+                    })()}
+                  </span>
+                </div>
+              )}
+
+              {/* Continue from last meeting */}
+              {resolutionMode === 'continue' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 10, color: '#64748b' }}>Last meeting ended at</span>
+                  <input
+                    value={lastMeetingEndNum}
+                    onChange={e => setLastMeetingEndNum(e.target.value)}
+                    style={{
+                      width: 100, padding: '5px 10px', fontSize: 12, fontWeight: 700,
+                      color: '#0f172a', background: '#f8fafc',
+                      border: '1.5px solid #cbd5e1', borderRadius: 6,
+                      fontFamily: 'inherit', textAlign: 'center',
+                    }}
+                  />
+                  <span style={{ fontSize: 10, color: '#94a3b8' }}>
+                    → starting at {effectivePrefix}, {resCount} resolution{resCount !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              )}
+
+              {/* No resolution numbers */}
+              {resolutionMode === 'none' && (
+                <span style={{ fontSize: 10, color: '#94a3b8', fontStyle: 'italic' }}>
+                  Resolution numbers will not be assigned to motions.
+                </span>
+              )}
+            </div>
+
             <RollCallSection
               rollCall={data.rollCall}
               isEditing={isEditing}
@@ -715,6 +857,7 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
                 isEditing={isEditing}
                 onUpdateContent={html => updateSectionContent(section.id, html)}
                 onUpdateMotion={(mi, field, value) => updateMotion(section.id, mi, field, value)}
+                resolutionMap={resolutionMap}
               />
             ))}
 

@@ -208,11 +208,18 @@ function enrichWithDemoMotions(sections, speakers) {
       },
     });
 
-    // 6. Canada Day — carried unanimously
+    // 6. Canada Day — AMENDMENT DEFEATED, original carried
     newBizSec.motions.push({
       id: 'motion-canadaday',
       text: 'THAT Council approves a contribution of $3,000 from the events reserve to the Pouce Coupe Recreation Commission for the 2026 Canada Day celebration.',
-      mover: s3, seconder: s4, result: 'carried', amendment: null,
+      mover: s3, seconder: s4, result: 'carried',
+      amendment: {
+        text: 'reducing the contribution from $3,000 to $1,500 and directing the remaining $1,500 to the sidewalk repair reserve.',
+        mover: s2,
+        seconder: s1,
+        result: 'defeated',
+        status: 'defeated',
+      },
     });
 
     // 7. DEFEATED motion — rezoning request

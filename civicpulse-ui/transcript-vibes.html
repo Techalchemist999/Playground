@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Transcript Style (10 Options)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:28px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1100px;margin:0 auto;}
+.sw{background:#fff;border-radius:14px;border:2px solid #e2e8f0;overflow:hidden;cursor:pointer;transition:all .3s;box-shadow:0 2px 10px rgba(0,0,0,.03);}
+.sw:hover{border-color:#a5b4fc;box-shadow:0 6px 24px rgba(99,102,241,.12);transform:translateY(-2px);}
+.sw.selected{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+.sh{padding:10px 16px 8px;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid #f1f5f9;}
+.sh h2{font-size:13px;font-weight:700;color:#0f172a;}
+.sh p{font-size:9px;color:#94a3b8;margin-left:auto;font-style:italic;}
+.preview{padding:10px 12px;background:#fff;height:320px;overflow-y:auto;}
+
+#result{display:none;max-width:1100px;margin:20px auto 0;background:#fff;border-radius:14px;border:2px solid #6366f1;padding:16px;text-align:center;}
+#result .label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+#result .pick{font-size:18px;font-weight:800;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div style="max-width:1100px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>Transcript Style — 10 Options</h1>
+  <p class="subtitle">Same conversation from a Pouce Coupe council meeting. How should it look?</p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const lines = [
+  {s:'Mayor Veach',t:'7:02 PM',tx:'I\'d like to call this meeting to order. It is 7:02 PM. We have a quorum present.'},
+  {s:'Mayor Veach',t:'7:02 PM',tx:'Can I have a motion to adopt the agenda as presented?'},
+  {s:'Cllr Rabel',t:'7:02 PM',tx:'I move to adopt the agenda.'},
+  {s:'Cllr Johnston',t:'7:02 PM',tx:'Seconded.'},
+  {s:'Mayor Veach',t:'7:02 PM',tx:'All in favour? Carried unanimously.'},
+  {s:'Cllr Wall',t:'7:03 PM',tx:'I move we adopt the minutes of February 10th as presented.'},
+  {s:'Cllr Woodill',t:'7:03 PM',tx:'I\'ll second that.'},
+  {s:'Mayor Veach',t:'7:03 PM',tx:'All in favour? Carried. Now we have a delegation from Pine Avenue.'},
+  {s:'Delegation',t:'7:04 PM',tx:'Thank you Mayor and Council. We represent twelve households on Pine Avenue experiencing drainage issues over the past two winters.'},
+  {s:'CAO',t:'7:05 PM',tx:'We did an assessment last fall. The ditch needs regrading — approximately $18,000, within the existing roads budget.'},
+  {s:'Cllr Rabel',t:'7:06 PM',tx:'I move that Council give Bylaw 1021 third and final reading.'},
+  {s:'Cllr Wall',t:'7:07 PM',tx:'Before we vote, I\'d like to propose an amendment to add section 14 regarding public consultation.'},
+];
+
+// Assign consistent colors to speakers
+const speakers = {};
+const palette = ['#475569','#64748b','#334155','#94a3b8','#0f172a'];
+let si = 0;
+lines.forEach(l => { if (!speakers[l.s]) speakers[l.s] = palette[si++ % palette.length]; });
+
+// Avatars
+const initials = (name) => name.split(' ').map(w=>w[0]).join('').substring(0,2);
+
+const designs = [
+  // 1: Current — timestamp + text, no speaker name
+  {
+    id:'current', num:'01', name:'Current — Timestamp + Text',
+    desc:'Minimal. Timestamp left, text right. No speaker identification.',
+    render: () => lines.map((l,i) => `<div style="display:flex;gap:10px;padding:5px 0;${i<lines.length-1?'border-bottom:1px solid #f8fafc;':''}">
+      <span style="font-size:10px;font-weight:600;color:#94a3b8;white-space:nowrap;min-width:40px;padding-top:2px;">${l.t}</span>
+      <span style="font-size:12px;color:#334155;line-height:1.7;">${l.tx}</span>
+    </div>`).join('')
+  },
+  // 2: Speaker name + text — chat bubble style
+  {
+    id:'chat', num:'02', name:'Chat Bubbles',
+    desc:'Speaker name above, text in a rounded bubble. Alternating alignment for dialogue feel.',
+    render: () => lines.map((l,i) => {
+      const isLeft = i % 2 === 0;
+      return `<div style="display:flex;flex-direction:column;align-items:${isLeft?'flex-start':'flex-end'};margin-bottom:8px;">
+        <div style="font-size:8px;font-weight:700;color:#94a3b8;margin-bottom:2px;padding:0 8px;">${l.s} · ${l.t}</div>
+        <div style="max-width:85%;padding:8px 12px;border-radius:${isLeft?'4px 12px 12px 12px':'12px 4px 12px 12px'};background:${isLeft?'#f8fafc':'#f1f5f9'};border:1px solid #e2e8f0;font-size:11px;color:#334155;line-height:1.6;">${l.tx}</div>
+      </div>`;
+    }).join('')
+  },
+  // 3: Speaker initials avatar + name + text
+  {
+    id:'avatar', num:'03', name:'Avatar + Speaker Name',
+    desc:'Initials circle, bold speaker name, then text. Professional meeting feel.',
+    render: () => lines.map((l,i) => `<div style="display:flex;gap:10px;padding:6px 0;${i<lines.length-1?'border-bottom:1px solid #f8fafc;':''}">
+      <div style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#64748b;flex-shrink:0;">${initials(l.s)}</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:1px;">
+          <span style="font-size:11px;font-weight:700;color:#0f172a;">${l.s}</span>
+          <span style="font-size:8px;color:#94a3b8;">${l.t}</span>
+        </div>
+        <div style="font-size:12px;color:#334155;line-height:1.7;">${l.tx}</div>
+      </div>
+    </div>`).join('')
+  },
+  // 4: Screenplay format — speaker centered caps, text below
+  {
+    id:'screenplay', num:'04', name:'Screenplay Format',
+    desc:'Speaker name centered in uppercase. Text below with wide margins. Formal, documentary.',
+    render: () => lines.map(l => `<div style="margin-bottom:12px;">
+      <div style="text-align:center;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:2px;">${l.s}</div>
+      <div style="font-size:12px;color:#334155;line-height:1.8;padding:0 20px;text-align:center;">${l.tx}</div>
+    </div>`).join('')
+  },
+  // 5: Hansard style — speaker bold left margin, text indented
+  {
+    id:'hansard', num:'05', name:'Hansard / Parliamentary',
+    desc:'Speaker name bold and left-aligned in a fixed column. Text indented. Official minutes style.',
+    render: () => lines.map((l,i) => `<div style="display:flex;gap:0;padding:4px 0;${i<lines.length-1?'border-bottom:1px solid #f8fafc;':''}">
+      <div style="width:100px;flex-shrink:0;padding-right:10px;text-align:right;">
+        <div style="font-size:10px;font-weight:700;color:#0f172a;">${l.s}</div>
+        <div style="font-size:7px;color:#cbd5e1;">${l.t}</div>
+      </div>
+      <div style="flex:1;font-size:12px;color:#334155;line-height:1.7;border-left:2px solid #f1f5f9;padding-left:12px;">${l.tx}</div>
+    </div>`).join('')
+  },
+  // 6: Color-coded speakers — each speaker gets a left bar color
+  {
+    id:'color-bar', num:'06', name:'Speaker Color Bar',
+    desc:'Each speaker has a unique colored left bar. Name + text inline. Quick visual grouping.',
+    render: () => {
+      const colors = {'Mayor Veach':'#475569','Cllr Rabel':'#64748b','Cllr Johnston':'#94a3b8','Cllr Wall':'#334155','Cllr Woodill':'#0f172a','Delegation':'#cbd5e1','CAO':'#e2e8f0'};
+      return lines.map((l,i) => `<div style="border-left:3px solid ${colors[l.s]||'#e2e8f0'};padding:4px 0 4px 10px;margin-bottom:4px;">
+        <span style="font-size:9px;font-weight:700;color:${colors[l.s]||'#94a3b8'};">${l.s}</span>
+        <span style="font-size:8px;color:#cbd5e1;margin-left:4px;">${l.t}</span>
+        <div style="font-size:12px;color:#334155;line-height:1.7;margin-top:1px;">${l.tx}</div>
+      </div>`).join('');
+    }
+  },
+  // 7: Compact — no speaker names, just continuous text with timestamps as margin notes
+  {
+    id:'compact', num:'07', name:'Continuous Text + Margin Times',
+    desc:'Flowing paragraph with timestamps in the margin. Speaker changes marked by em dash. Dense, readable.',
+    render: () => {
+      let lastSpeaker = '';
+      return `<div style="position:relative;padding-left:48px;">` + lines.map(l => {
+        const newSpeaker = l.s !== lastSpeaker;
+        lastSpeaker = l.s;
+        return `<span style="font-size:12px;color:#334155;line-height:2;">${newSpeaker?`<span style="position:absolute;left:0;font-size:8px;color:#cbd5e1;font-variant-numeric:tabular-nums;">${l.t}</span><strong style="color:#0f172a;">${l.s}:</strong> `:''}${l.tx} </span>`;
+      }).join('') + `</div>`;
+    }
+  },
+  // 8: Card per entry — each line is a mini card
+  {
+    id:'cards', num:'08', name:'Entry Cards',
+    desc:'Each transcript entry as its own card with speaker, time, and text. Visual separation.',
+    render: () => lines.map(l => `<div style="background:#fff;border:1px solid #f1f5f9;border-radius:8px;padding:8px 12px;margin-bottom:4px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+        <span style="font-size:10px;font-weight:700;color:#0f172a;">${l.s}</span>
+        <span style="font-size:8px;color:#cbd5e1;">·</span>
+        <span style="font-size:8px;color:#94a3b8;">${l.t}</span>
+      </div>
+      <div style="font-size:12px;color:#334155;line-height:1.7;">${l.tx}</div>
+    </div>`).join('')
+  },
+  // 9: Monospace terminal — fixed-width, raw data feel
+  {
+    id:'terminal', num:'09', name:'Terminal / Raw',
+    desc:'Monospace font, timestamps as prefixes, speaker in brackets. Data-first, no decoration.',
+    render: () => `<div style="font-family:'Courier New',monospace;font-size:11px;line-height:1.8;color:#334155;">` +
+      lines.map(l => `<div><span style="color:#94a3b8;">[${l.t}]</span> <span style="color:#64748b;font-weight:700;">${l.s}:</span> ${l.tx}</div>`).join('') + `</div>`
+  },
+  // 10: Grouped by speaker — consecutive lines from same speaker grouped together
+  {
+    id:'grouped', num:'10', name:'Speaker Grouped',
+    desc:'Consecutive lines from the same speaker merged into one block. Reduces visual noise.',
+    render: () => {
+      const groups = [];
+      lines.forEach(l => {
+        const last = groups[groups.length-1];
+        if (last && last.s === l.s) {
+          last.txs.push(l.tx);
+          last.t2 = l.t;
+        } else {
+          groups.push({s:l.s, t:l.t, t2:l.t, txs:[l.tx]});
+        }
+      });
+      return groups.map((g,i) => `<div style="display:flex;gap:10px;padding:8px 0;${i<groups.length-1?'border-bottom:1px solid #f1f5f9;':''}">
+        <div style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#64748b;flex-shrink:0;">${initials(g.s)}</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:2px;">
+            <span style="font-size:11px;font-weight:700;color:#0f172a;">${g.s}</span>
+            <span style="font-size:8px;color:#94a3b8;">${g.t}${g.t2!==g.t?' – '+g.t2:''}</span>
+          </div>
+          ${g.txs.map(tx => `<div style="font-size:12px;color:#334155;line-height:1.7;margin-bottom:3px;">${tx}</div>`).join('')}
+        </div>
+      </div>`).join('');
+    }
+  },
+];
+
+document.getElementById('grid').innerHTML = designs.map(d =>
+  `<div class="sw" onclick="select(this,'${d.id}')">
+    <div class="sh"><span class="tag">${d.num}</span><h2>${d.name}</h2><p>${d.desc}</p></div>
+    <div class="preview">${d.render()}</div>
+  </div>`
+).join('');
+
+const nm={};designs.forEach(d=>nm[d.id]=`${d.num} — ${d.name}`);
+function select(el,id){document.querySelectorAll('.sw').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');document.getElementById('result').style.display='block';document.getElementById('pick-text').textContent=nm[id];}
+</script>
+</body>
+</html>
