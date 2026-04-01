@@ -14,7 +14,7 @@ function stripHtml(html) {
 function MetadataHeader({ metadata, isEditing, onUpdate }) {
   const meetingTypes = ['Regular Meeting', 'In Camera Meeting', 'Committee Meeting', 'Special Meeting', 'Public Hearing'];
   const fields = [
-    { key: 'municipality', label: 'Municipality' },
+    { key: 'municipality', label: 'Local Government' },
     { key: 'meetingType', label: 'Meeting Type', options: meetingTypes },
     { key: 'date', label: 'Date', type: 'date' },
     { key: 'time', label: 'Time' },
@@ -36,7 +36,7 @@ function MetadataHeader({ metadata, isEditing, onUpdate }) {
           Meeting Minutes
         </div>
         <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.headingText, letterSpacing: '-0.3px' }}>
-          {metadata.municipality || 'Council Meeting'}
+          Meeting Minutes
         </div>
       </div>
       <div style={{ padding: '16px 24px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
@@ -258,6 +258,50 @@ function MotionCard({ motion, isEditing, onUpdate }) {
         </div>
       </div>
 
+      {/* Amendment block */}
+      {motion.amendment && (() => {
+        const a = motion.amendment;
+        const aColors = {
+          carried: { bg: '#f0fdf4', border: '#dcfce7', color: '#22c55e', label: 'AMENDMENT CARRIED' },
+          defeated: { bg: '#fef2f2', border: '#fee2e2', color: '#dc2626', label: 'AMENDMENT DEFEATED' },
+        };
+        const ac = aColors[a.status || a.result] || { bg: '#f8fafc', border: '#e2e8f0', color: '#64748b', label: 'AMENDMENT' };
+
+        return (
+          <div style={{
+            margin: '0 16px 8px',
+            background: ac.bg,
+            border: `1px solid ${ac.border}`,
+            borderLeft: `3px solid ${ac.color}`,
+            borderRadius: '0 8px 8px 0',
+            padding: '10px 14px',
+          }}>
+            <div style={{
+              fontSize: 8, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
+              color: ac.color, marginBottom: 6,
+            }}>
+              {ac.label}
+            </div>
+            <div style={{
+              fontSize: 11, lineHeight: 1.7, color: COLORS.bodyText, marginBottom: 8,
+              textDecoration: a.status === 'defeated' ? 'line-through' : 'none',
+            }}>
+              THAT the main motion be amended by {a.text}
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <div style={{ flex: 1, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 5, padding: '3px 6px' }}>
+                <div style={{ fontSize: 6, fontWeight: 700, letterSpacing: .6, textTransform: 'uppercase', color: '#64748b' }}>Moved By</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#0f172a' }}>{a.mover}</div>
+              </div>
+              <div style={{ flex: 1, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 5, padding: '3px 6px' }}>
+                <div style={{ fontSize: 6, fontWeight: 700, letterSpacing: .6, textTransform: 'uppercase', color: '#64748b' }}>Seconded By</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#0f172a' }}>{a.seconder}</div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Result */}
       <div style={{
         padding: '8px 16px',
@@ -278,7 +322,9 @@ function MotionCard({ motion, isEditing, onUpdate }) {
             {resultOptions.map(opt => <option key={opt} value={opt}>{opt.toUpperCase()}</option>)}
           </select>
         ) : (
-          <span style={{ fontSize: 11, fontWeight: 700, color: r.color }}>{r.label}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: r.color }}>
+            {motion.amendment?.status === 'carried' ? `${r.label} (AS AMENDED)` : r.label}
+          </span>
         )}
       </div>
     </div>
@@ -527,7 +573,7 @@ function exportToDocx(data, approval) {
 }
 
 // ─── Main Workspace ─────────────────────────────
-export default function TranscriptMinutesWorkspace({ session }) {
+export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes, onBgThemeChange }) {
   const [data, setData] = useState(session.transcriptMinutesData);
   const [isEditing, setIsEditing] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
@@ -618,6 +664,7 @@ export default function TranscriptMinutesWorkspace({ session }) {
   }
 
   const [showApprovalPanel, setShowApprovalPanel] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const copyApprovalLink = useCallback(() => {
     const url = `${window.location.origin}${window.location.pathname}?approve=${data.metadata.date || 'draft'}`;
@@ -645,7 +692,13 @@ export default function TranscriptMinutesWorkspace({ session }) {
         )}
 
         {/* Scrollable content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 60px' }}>
+        <div style={{
+          flex: 1, overflowY: 'auto', padding: '20px 20px 60px',
+          ...(bgTheme?.bg?.includes?.('gradient')
+            ? { backgroundImage: bgTheme.bg }
+            : { background: bgTheme?.bg || '#ffffff' }),
+          transition: 'background 0.3s ease',
+        }}>
           <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <MetadataHeader metadata={data.metadata} isEditing={isEditing} onUpdate={updateMetadata} />
             <RollCallSection
@@ -711,25 +764,67 @@ export default function TranscriptMinutesWorkspace({ session }) {
         alignItems: 'center', padding: '16px 0',
         gap: 24, zIndex: 50,
       }}>
-        {/* Gear — settings placeholder */}
-        <button
-          title="Settings"
-          style={{
-            width: 40, height: 40, borderRadius: 10,
-            background: 'transparent',
-            border: '1.5px solid transparent',
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all .15s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; }}
-        >
-          <svg width="24" height="24" fill="none" stroke="#475569" strokeWidth="1.8" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-        </button>
+        {/* Gear — settings with color picker */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            title="Settings"
+            style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: showSettings ? '#f1f5f9' : 'transparent',
+              border: showSettings ? '1.5px solid #cbd5e1' : '1.5px solid transparent',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all .15s',
+            }}
+            onMouseEnter={e => { if (!showSettings) e.currentTarget.style.background = '#f8fafc'; }}
+            onMouseLeave={e => { if (!showSettings) e.currentTarget.style.background = showSettings ? '#f1f5f9' : 'transparent'; }}
+          >
+            <svg width="24" height="24" fill="none" stroke="#475569" strokeWidth="1.8" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </button>
+          {showSettings && (
+            <div style={{
+              position: 'absolute', top: 0, right: 52,
+              background: '#fff', borderRadius: 10, padding: '12px 14px',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+              border: '1px solid #e2e8f0',
+              width: 200, zIndex: 300,
+            }}>
+              <span style={{
+                fontSize: 9, fontWeight: 700, color: '#94a3b8',
+                letterSpacing: '1px', textTransform: 'uppercase',
+                display: 'block', marginBottom: 8,
+              }}>
+                Theme
+              </span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {(bgThemes || []).map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => onBgThemeChange?.(t)}
+                    title={t.label}
+                    style={{
+                      width: 28, height: 28, borderRadius: '50%',
+                      background: t.bg?.includes?.('gradient') ? t.bg : t.dot,
+                      border: bgTheme?.id === t.id ? '2.5px solid #0f172a' : '2px solid #e2e8f0',
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s, border 0.15s',
+                      transform: bgTheme?.id === t.id ? 'scale(1.15)' : 'scale(1)',
+                    }}
+                  />
+                ))}
+              </div>
+              {bgTheme && (
+                <span style={{ fontSize: 8.5, color: '#94a3b8', display: 'block', marginTop: 6 }}>
+                  {bgTheme.label}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Edit toggle */}
         <button

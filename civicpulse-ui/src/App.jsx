@@ -56,7 +56,9 @@ export default function App() {
           />
         )}
         {session.view === 'minutes' && <MinutesWorkspace session={session} />}
-        {session.view === 'transcript-minutes' && <TranscriptMinutesWorkspace session={session} />}
+        {session.view === 'transcript-minutes' && (
+          <TranscriptMinutesWorkspace session={session} bgTheme={bgTheme} bgThemes={BG_THEMES} onBgThemeChange={setBgTheme} />
+        )}
       </PageShell>
     </ToastProvider>
   );
