@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda + Rules — 10 Matching Vibes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 32px; }
+  h1 { text-align: center; font-size: 22px; color: #0f172a; margin-bottom: 6px; }
+  .subtitle { text-align: center; font-size: 13px; color: #64748b; margin-bottom: 40px; }
+  .design-block { margin-bottom: 56px; }
+  .design-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: #94a3b8; margin-bottom: 12px; padding-left: 4px;
+  }
+  .design-label span { color: #475569; font-size: 13px; letter-spacing: 0; text-transform: none; margin-left: 6px; }
+  .pair {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+  .panel {
+    border-radius: 12px; overflow: hidden; min-height: 420px;
+    display: flex; flex-direction: column;
+  }
+  .panel-title {
+    font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 3px; display: inline-block; margin-bottom: 8px;
+  }
+
+  /* ============ DESIGN 1 — Cartographic Ink ============ */
+  .d1 .panel { background: #fafaf8; border: 1.5px solid #d4cfc4; }
+  .d1 .panel-head { padding: 10px 14px 8px; border-bottom: 1.5px solid #d4cfc4; display: flex; align-items: center; justify-content: space-between; }
+  .d1 .panel-head h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #5c5647; }
+  .d1 .counter { font-size: 9px; color: #a09a8c; font-weight: 600; }
+  .d1 .progress { height: 3px; background: #e8e4da; border-radius: 2px; margin: 0 14px 0; overflow: hidden; }
+  .d1 .progress-fill { height: 100%; background: #5c5647; width: 38%; }
+  .d1 .item-row {
+    display: flex; gap: 10px; padding: 7px 14px; border-bottom: 1px dotted #d4cfc4;
+    align-items: flex-start;
+  }
+  .d1 .marker {
+    width: 18px; height: 18px; border: 1.5px solid #5c5647; border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 800; color: #5c5647; flex-shrink: 0;
+  }
+  .d1 .marker.active { background: #5c5647; color: #fafaf8; }
+  .d1 .marker.done { border-color: #a09a8c; color: #a09a8c; }
+  .d1 .item-title { font-size: 11px; font-weight: 600; color: #3d3a33; line-height: 1.4; }
+  .d1 .item-title.done { text-decoration: line-through; color: #a09a8c; }
+  .d1 .item-title.active { font-weight: 700; color: #1a1815; }
+  .d1 .item-sub { font-size: 8px; color: #a09a8c; margin-top: 1px; }
+  .d1 .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    background: #f0ede5; border-radius: 5px; margin-bottom: 4px; cursor: pointer;
+  }
+  .d1 .cat-bar span { font-size: 10px; font-weight: 700; color: #5c5647; }
+  .d1 .cat-count { font-size: 8px; color: #a09a8c; margin-left: auto; }
+  .d1 .chip {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    border: 1.5px solid #d4cfc4; font-size: 10px; font-weight: 600; color: #5c5647;
+    background: #fafaf8; margin: 2px;
+  }
+  .d1 .chip.active { background: #5c5647; color: #fafaf8; border-color: #5c5647; }
+  .d1 .body { padding: 8px 10px; flex: 1; }
+  .d1 .tab-row {
+    display: flex; justify-content: center; padding: 6px 10px 0;
+  }
+  .d1 .tab-group { display: flex; background: #f0ede5; border-radius: 5px; padding: 2px; }
+  .d1 .tab { padding: 3px 8px; border: none; border-radius: 3px; font-size: 9px; font-weight: 600; color: #a09a8c; background: transparent; cursor: pointer; }
+  .d1 .tab.active { background: #fafaf8; color: #5c5647; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+
+  /* ============ DESIGN 2 — Midnight Dark ============ */
+  .d2 .panel { background: #1a1d23; border: 1px solid #2d3139; }
+  .d2 .panel-head { padding: 10px 14px 8px; border-bottom: 1px solid #2d3139; display: flex; align-items: center; justify-content: space-between; }
+  .d2 .panel-head h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #8b95a5; }
+  .d2 .counter { font-size: 9px; color: #5a6270; font-weight: 600; }
+  .d2 .counter b { color: #c4ccda; }
+  .d2 .progress { height: 3px; background: #2d3139; border-radius: 2px; margin: 0 14px; overflow: hidden; }
+  .d2 .progress-fill { height: 100%; background: #6366f1; width: 38%; }
+  .d2 .item-row { display: flex; gap: 10px; padding: 7px 14px; border-bottom: 1px solid #22262d; align-items: flex-start; }
+  .d2 .marker {
+    width: 18px; height: 18px; border: 1.5px solid #3d4450; border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 800; color: #5a6270; flex-shrink: 0;
+  }
+  .d2 .marker.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+  .d2 .marker.done { border-color: #3d4450; color: #3d4450; }
+  .d2 .item-title { font-size: 11px; font-weight: 600; color: #c4ccda; line-height: 1.4; }
+  .d2 .item-title.done { text-decoration: line-through; color: #3d4450; }
+  .d2 .item-title.active { font-weight: 700; color: #e8ecf2; }
+  .d2 .item-sub { font-size: 8px; color: #5a6270; margin-top: 1px; }
+  .d2 .body { padding: 8px 10px; flex: 1; }
+  .d2 .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    background: #22262d; border-radius: 5px; margin-bottom: 4px;
+  }
+  .d2 .cat-bar span { font-size: 10px; font-weight: 700; color: #c4ccda; }
+  .d2 .cat-count { font-size: 8px; color: #5a6270; margin-left: auto; }
+  .d2 .chip {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    border: 1.5px solid #3d4450; font-size: 10px; font-weight: 600; color: #8b95a5;
+    background: #1a1d23; margin: 2px;
+  }
+  .d2 .chip.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+  .d2 .tab-row { display: flex; justify-content: center; padding: 6px 10px 0; }
+  .d2 .tab-group { display: flex; background: #22262d; border-radius: 5px; padding: 2px; }
+  .d2 .tab { padding: 3px 8px; border: none; border-radius: 3px; font-size: 9px; font-weight: 600; color: #5a6270; background: transparent; cursor: pointer; }
+  .d2 .tab.active { background: #2d3139; color: #c4ccda; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+
+  /* ============ DESIGN 3 — Soft Gradient ============ */
+  .d3 .panel { background: linear-gradient(160deg, #faf5ff 0%, #f0f9ff 100%); border: 1px solid #e0d4fc; }
+  .d3 .panel-head { padding: 10px 14px 8px; border-bottom: 1px solid #e0d4fc55; display: flex; align-items: center; justify-content: space-between; }
+  .d3 .panel-head h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #7c3aed; }
+  .d3 .counter { font-size: 9px; color: #a78bfa; font-weight: 600; }
+  .d3 .counter b { color: #5b21b6; }
+  .d3 .progress { height: 4px; background: #ede9fe; border-radius: 2px; margin: 0 14px; overflow: hidden; }
+  .d3 .progress-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #3b82f6); width: 38%; border-radius: 2px; }
+  .d3 .item-row { display: flex; gap: 10px; padding: 7px 14px; border-bottom: 1px solid #e0d4fc33; align-items: flex-start; }
+  .d3 .marker {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid #c4b5fd; display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 800; color: #a78bfa; flex-shrink: 0;
+  }
+  .d3 .marker.active { background: linear-gradient(135deg, #7c3aed, #3b82f6); border-color: transparent; color: #fff; }
+  .d3 .marker.done { border-color: #ddd6fe; color: #ddd6fe; }
+  .d3 .item-title { font-size: 11px; font-weight: 600; color: #4c1d95; line-height: 1.4; }
+  .d3 .item-title.done { text-decoration: line-through; color: #c4b5fd; }
+  .d3 .item-title.active { font-weight: 700; }
+  .d3 .item-sub { font-size: 8px; color: #a78bfa; margin-top: 1px; }
+  .d3 .body { padding: 8px 10px; flex: 1; }
+  .d3 .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    background: #ede9fe55; border-radius: 8px; margin-bottom: 4px;
+  }
+  .d3 .cat-bar span { font-size: 10px; font-weight: 700; color: #5b21b6; }
+  .d3 .cat-count { font-size: 8px; color: #a78bfa; margin-left: auto; }
+  .d3 .chip {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    border: 1.5px solid #ddd6fe; font-size: 10px; font-weight: 600; color: #5b21b6;
+    background: #fff; margin: 2px;
+  }
+  .d3 .chip.active { background: linear-gradient(135deg, #7c3aed, #3b82f6); color: #fff; border-color: transparent; }
+  .d3 .tab-row { display: flex; justify-content: center; padding: 6px 10px 0; }
+  .d3 .tab-group { display: flex; background: #ede9fe55; border-radius: 8px; padding: 2px; }
+  .d3 .tab { padding: 3px 8px; border: none; border-radius: 6px; font-size: 9px; font-weight: 600; color: #a78bfa; background: transparent; cursor: pointer; }
+  .d3 .tab.active { background: #fff; color: #5b21b6; box-shadow: 0 1px 4px rgba(124,58,237,.12); }
+
+  /* ============ DESIGN 4 — Neo-Brutalist ============ */
+  .d4 .panel { background: #fffdf0; border: 2.5px solid #0f172a; border-radius: 4px !important; box-shadow: 4px 4px 0 #0f172a; }
+  .d4 .panel-head { padding: 10px 14px 8px; border-bottom: 2.5px solid #0f172a; display: flex; align-items: center; justify-content: space-between; }
+  .d4 .panel-head h3 { font-size: 11px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: #0f172a; }
+  .d4 .counter { font-size: 10px; color: #0f172a; font-weight: 800; }
+  .d4 .progress { height: 6px; background: #e2e8f0; border: 1.5px solid #0f172a; border-radius: 0; margin: 0 14px; overflow: hidden; }
+  .d4 .progress-fill { height: 100%; background: #facc15; width: 38%; }
+  .d4 .item-row { display: flex; gap: 10px; padding: 7px 14px; border-bottom: 1.5px solid #0f172a; align-items: flex-start; }
+  .d4 .marker {
+    width: 20px; height: 20px; border: 2px solid #0f172a; border-radius: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 900; color: #0f172a; flex-shrink: 0;
+  }
+  .d4 .marker.active { background: #facc15; }
+  .d4 .marker.done { background: #e2e8f0; color: #94a3b8; border-color: #94a3b8; }
+  .d4 .item-title { font-size: 11px; font-weight: 700; color: #0f172a; line-height: 1.4; }
+  .d4 .item-title.done { text-decoration: line-through; color: #94a3b8; }
+  .d4 .item-sub { font-size: 8px; color: #64748b; margin-top: 1px; }
+  .d4 .body { padding: 8px 10px; flex: 1; }
+  .d4 .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+    background: #facc15; border: 1.5px solid #0f172a; margin-bottom: 4px;
+  }
+  .d4 .cat-bar span { font-size: 10px; font-weight: 900; color: #0f172a; }
+  .d4 .cat-count { font-size: 8px; color: #0f172a; margin-left: auto; font-weight: 800; }
+  .d4 .chip {
+    display: inline-block; padding: 4px 10px; border-radius: 0;
+    border: 2px solid #0f172a; font-size: 10px; font-weight: 800; color: #0f172a;
+    background: #fffdf0; margin: 2px;
+  }
+  .d4 .chip.active { background: #0f172a; color: #facc15; }
+  .d4 .tab-row { display: flex; justify-content: center; padding: 6px 10px 0; }
+  .d4 .tab-group { display: flex; border: 2px solid #0f172a; padding: 0; }
+  .d4 .tab { padding: 4px 8px; border: none; border-right: 2px solid #0f172a; font-size: 9px; font-weight: 800; color: #0f172a; background: transparent; cursor: pointer; }
+  .d4 .tab:last-child { border-right: none; }
+  .d4 .tab.active { background: #facc15; }
+
+  /* ============ DESIGN 5 — Glassmorphism ============ */
+  .d5-wrap { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 20px; }
+  .d5 .panel { background: rgba(255,255,255,.15); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.25); }
+  .d5 .panel-head { padding: 10px 14px 8px; border-bottom: 1px solid rgba(255,255,255,.15); display: flex; align-items: center; justify-content: space-between; }
+  .d5 .panel-head h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,.9); }
+  .d5 .counter { font-size: 9px; color: rgba(255,255,255,.5); font-weight: 600; }
+  .d5 .counter b { color: rgba(255,255,255,.9); }
+  .d5 .progress { height: 3px; background: rgba(255,255,255,.15); border-radius: 2px; margin: 0 14px; overflow: hidden; }
+  .d5 .progress-fill { height: 100%; background: rgba(255,255,255,.7); width: 38%; }
+  .d5 .item-row { display: flex; gap: 10px; padding: 7px 14px; border-bottom: 1px solid rgba(255,255,255,.08); align-items: flex-start; }
+  .d5 .marker {
+    width: 18px; height: 18px; border: 1.5px solid rgba(255,255,255,.35); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 800; color: rgba(255,255,255,.5); flex-shrink: 0;
+  }
+  .d5 .marker.active { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.6); color: #fff; }
+  .d5 .marker.done { border-color: rgba(255,255,255,.15); color: rgba(255,255,255,.25); }
+  .d5 .item-title { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.85); line-height: 1.4; }
+  .d5 .item-title.done { text-decoration: line-through; color: rgba(255,255,255,.3); }
+  .d5 .item-title.active { font-weight: 700; color: #fff; }
+  .d5 .item-sub { font-size: 8px; color: rgba(255,255,255,.4); margin-top: 1px; }
+  .d5 .body { padding: 8px 10px; flex: 1; }
+  .d5 .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    background: rgba(255,255,255,.1); border-radius: 6px; margin-bottom: 4px;
+  }
+  .d5 .cat-bar span { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.9); }
+  .d5 .cat-count { font-size: 8px; color: rgba(255,255,255,.4); margin-left: auto; }
+  .d5 .chip {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    border: 1.5px solid rgba(255,255,255,.25); font-size: 10px; font-weight: 600;
+    color: rgba(255,255,255,.85); background: rgba(255,255,255,.08); margin: 2px;
+  }
+  .d5 .chip.active { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.5); color: #fff; }
+  .d5 .tab-row { display: flex; justify-content: center; padding: 6px 10px 0; }
+  .d5 .tab-group { display: flex; background: rgba(255,255,255,.1); border-radius: 6px; padding: 2px; }
+  .d5 .tab { padding: 3px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; color: rgba(255,255,255,.4); background: transparent; cursor: pointer; }
+  .d5 .tab.active { background: rgba(255,255,255,.2); color: #fff; }
+
+  /* ============ DESIGN 6 — Warm Earth ============ */
+  .d6 .panel { background: #faf7f2; border: 1px solid #e6dfd1; }
+  .d6 .panel-head { padding: 10px 14px 8px; border-bottom: 1px solid #e6dfd1; display: flex; align-items: center; justify-content: space-between; }
+  .d6 .panel-head h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #92400e; }
+  .d6 .counter { font-size: 9px; color: #b45309; font-weight: 600; }
+  .d6 .counter b { color: #78350f; }
+  .d6 .progress { height: 4px; background: #fde68a55; border-radius: 2px; margin: 0 14px; overflow: hidden; }
+  .d6 .progress-fill { height: 100%; background: #d97706; width: 38%; border-radius: 2px; }
+  .d6 .item-row { display: flex; gap: 10px; padding: 7px 14px; border-bottom: 1px dashed #e6dfd188; align-items: flex-start; }
+  .d6 .marker {
+    width: 18px; height: 18px; border: 2px solid #d97706; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 800; color: #d97706; flex-shrink: 0;
+  }
+  .d6 .marker.active { background: #d97706; color: #fff; }
+  .d6 .marker.done { border-color: #e6dfd1; color: #e6dfd1; }
+  .d6 .item-title { font-size: 11px; font-weight: 600; color: #78350f; line-height: 1.4; }
+  .d6 .item-title.done { text-decoration: line-through; color: #d6cfc1; }
+  .d6 .item-title.active { font-weight: 700; color: #451a03; }
+  .d6 .item-sub { font-size: 8px; color: #b45309; margin-top: 1px; }
+  .d6 .body { padding: 8px 10px; flex: 1; }
+  .d6 .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    background: #fef3c7; border-left: 3px solid #d97706; border-radius: 0 6px 6px 0; margin-bottom: 4px;
+  }
+  .d6 .cat-bar span { font-size: 10px; font-weight: 700; color: #92400e; }
+  .d6 .cat-count { font-size: 8px; color: #b45309; margin-left: auto; }
+  .d6 .chip {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    border: 1.5px solid #fde68a; font-size: 10px; font-weight: 600; color: #92400e;
+    background: #fffbeb; margin: 2px;
+  }
+  .d6 .chip.active { background: #d97706; color: #fff; border-color: #d97706; }
+  .d6 .tab-row { display: flex; justify-content: center; padding: 6px 10px 0; }
+  .d6 .tab-group { display: flex; background: #fef3c755; border-radius: 6px; padding: 2px; }
+  .d6 .tab { padding: 3px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; color: #b45309; background: transparent; cursor: pointer; }
+  .d6 .tab.active { background: #fff; color: #92400e; box-shadow: 0 1px 3px rgba(146,64,14,.1); }
+
+  /* ============ DESIGN 7 — Monochrome Minimal ============ */
+  .d7 .panel { background: #fff; border: 1px solid #e5e5e5; }
+  .d7 .panel-head { padding: 10px 14px 8px; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; justify-content: space-between; }
+  .d7 .panel-head h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #525252; }
+  .d7 .counter { font-size: 9px; color: #a3a3a3; font-weight: 600; }
+  .d7 .counter b { color: #171717; }
+  .d7 .progress { height: 2px; background: #e5e5e5; margin: 0 14px; overflow: hidden; }
+  .d7 .progress-fill { height: 100%; background: #171717; width: 38%; }
+  .d7 .item-row { display: flex; gap: 10px; padding: 8px 14px; border-bottom: 1px solid #f5f5f5; align-items: flex-start; }
+  .d7 .marker {
+    width: 6px; height: 6px; border-radius: 50%; background: #d4d4d4;
+    flex-shrink: 0; margin-top: 5px;
+  }
+  .d7 .marker.active { background: #171717; width: 8px; height: 8px; margin-top: 4px; }
+  .d7 .marker.done { background: #e5e5e5; }
+  .d7 .item-title { font-size: 11px; font-weight: 500; color: #525252; line-height: 1.4; }
+  .d7 .item-title.done { color: #d4d4d4; }
+  .d7 .item-title.active { font-weight: 700; color: #171717; }
+  .d7 .item-sub { font-size: 8px; color: #a3a3a3; margin-top: 1px; }
+  .d7 .body { padding: 8px 10px; flex: 1; }
+  .d7 .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 6px 0;
+    border-bottom: 1px solid #e5e5e5; margin-bottom: 4px;
+  }
+  .d7 .cat-bar span { font-size: 10px; font-weight: 700; color: #171717; }
+  .d7 .cat-count { font-size: 8px; color: #a3a3a3; margin-left: auto; }
+  .d7 .chip {
+    display: inline-block; padding: 4px 10px; border-radius: 4px;
+    border: 1px solid #e5e5e5; font-size: 10px; font-weight: 500; color: #525252;
+    background: #fff; margin: 2px;
+  }
+  .d7 .chip.active { background: #171717; color: #fff; border-color: #171717; }
+  .d7 .tab-row { display: flex; justify-content: center; padding: 6px 10px 0; }
+  .d7 .tab-group { display: flex; gap: 0; border-bottom: 1px solid #e5e5e5; }
+  .d7 .tab { padding: 4px 10px; border: none; font-size: 9px; font-weight: 600; color: #a3a3a3; background: transparent; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .d7 .tab.active { color: #171717; border-bottom-color: #171717; }
+
+  /* ============ DESIGN 8 — Forest Green ============ */
+  .d8 .panel { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .d8 .panel-head { padding: 10px 14px 8px; border-bottom: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: space-between; }
+  .d8 .panel-head h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #166534; }
+  .d8 .counter { font-size: 9px; color: #4ade80; font-weight: 600; }
+  .d8 .counter b { color: #166534; }
+  .d8 .progress { height: 4px; background: #dcfce7; border-radius: 4px; margin: 0 14px; overflow: hidden; }
+  .d8 .progress-fill { height: 100%; background: #16a34a; width: 38%; border-radius: 4px; }
+  .d8 .item-row { display: flex; gap: 10px; padding: 7px 14px; border-bottom: 1px solid #dcfce7; align-items: flex-start; }
+  .d8 .marker {
+    width: 18px; height: 18px; border: 1.5px solid #86efac; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 800; color: #4ade80; flex-shrink: 0;
+  }
+  .d8 .marker.active { background: #16a34a; border-color: #16a34a; color: #fff; }
+  .d8 .marker.done { border-color: #dcfce7; color: #bbf7d0; }
+  .d8 .item-title { font-size: 11px; font-weight: 600; color: #166534; line-height: 1.4; }
+  .d8 .item-title.done { text-decoration: line-through; color: #86efac; }
+  .d8 .item-title.active { font-weight: 700; color: #052e16; }
+  .d8 .item-sub { font-size: 8px; color: #4ade80; margin-top: 1px; }
+  .d8 .body { padding: 8px 10px; flex: 1; }
+  .d8 .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    background: #dcfce7; border-radius: 6px; margin-bottom: 4px;
+  }
+  .d8 .cat-bar span { font-size: 10px; font-weight: 700; color: #166534; }
+  .d8 .cat-count { font-size: 8px; color: #4ade80; margin-left: auto; }
+  .d8 .chip {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    border: 1.5px solid #86efac; font-size: 10px; font-weight: 600; color: #166534;
+    background: #f0fdf4; margin: 2px;
+  }
+  .d8 .chip.active { background: #16a34a; color: #fff; border-color: #16a34a; }
+  .d8 .tab-row { display: flex; justify-content: center; padding: 6px 10px 0; }
+  .d8 .tab-group { display: flex; background: #dcfce7; border-radius: 6px; padding: 2px; }
+  .d8 .tab { padding: 3px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; color: #4ade80; background: transparent; cursor: pointer; }
+  .d8 .tab.active { background: #fff; color: #166534; box-shadow: 0 1px 3px rgba(22,101,52,.1); }
+
+  /* ============ DESIGN 9 — Blueprint ============ */
+  .d9 .panel { background: #f0f4ff; border: 1.5px solid #93b4f5; border-radius: 4px !important; }
+  .d9 .panel-head { padding: 10px 14px 8px; border-bottom: 1.5px dashed #93b4f5; display: flex; align-items: center; justify-content: space-between; }
+  .d9 .panel-head h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #1e40af; font-family: 'Courier New', monospace; }
+  .d9 .counter { font-size: 9px; color: #60a5fa; font-weight: 600; font-family: 'Courier New', monospace; }
+  .d9 .counter b { color: #1e3a8a; }
+  .d9 .progress { height: 3px; background: #bfdbfe; margin: 0 14px; overflow: hidden; }
+  .d9 .progress-fill { height: 100%; background: #1e40af; width: 38%; }
+  .d9 .item-row { display: flex; gap: 10px; padding: 7px 14px; border-bottom: 1px dashed #93b4f555; align-items: flex-start; }
+  .d9 .marker {
+    width: 18px; height: 18px; border: 1.5px solid #93b4f5; border-radius: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 800; color: #60a5fa; flex-shrink: 0;
+    font-family: 'Courier New', monospace;
+  }
+  .d9 .marker.active { background: #1e40af; border-color: #1e40af; color: #fff; }
+  .d9 .marker.done { border-color: #bfdbfe; color: #bfdbfe; }
+  .d9 .item-title { font-size: 11px; font-weight: 600; color: #1e3a8a; line-height: 1.4; }
+  .d9 .item-title.done { text-decoration: line-through; color: #93c5fd; }
+  .d9 .item-title.active { font-weight: 700; color: #172554; }
+  .d9 .item-sub { font-size: 8px; color: #60a5fa; margin-top: 1px; }
+  .d9 .body { padding: 8px 10px; flex: 1; }
+  .d9 .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    background: #dbeafe; border-left: 3px solid #1e40af; margin-bottom: 4px;
+  }
+  .d9 .cat-bar span { font-size: 10px; font-weight: 700; color: #1e40af; font-family: 'Courier New', monospace; }
+  .d9 .cat-count { font-size: 8px; color: #60a5fa; margin-left: auto; font-family: 'Courier New', monospace; }
+  .d9 .chip {
+    display: inline-block; padding: 4px 10px; border-radius: 2px;
+    border: 1.5px solid #93b4f5; font-size: 10px; font-weight: 600; color: #1e40af;
+    background: #eff6ff; margin: 2px; font-family: 'Courier New', monospace;
+  }
+  .d9 .chip.active { background: #1e40af; color: #fff; border-color: #1e40af; }
+  .d9 .tab-row { display: flex; justify-content: center; padding: 6px 10px 0; }
+  .d9 .tab-group { display: flex; border: 1.5px solid #93b4f5; }
+  .d9 .tab { padding: 4px 8px; border: none; border-right: 1.5px solid #93b4f5; font-size: 9px; font-weight: 700; color: #60a5fa; background: transparent; cursor: pointer; font-family: 'Courier New', monospace; }
+  .d9 .tab:last-child { border-right: none; }
+  .d9 .tab.active { background: #1e40af; color: #fff; }
+
+  /* ============ DESIGN 10 — Soft Rose ============ */
+  .d10 .panel { background: #fff5f5; border: 1px solid #fecdd3; }
+  .d10 .panel-head { padding: 10px 14px 8px; border-bottom: 1px solid #fecdd3; display: flex; align-items: center; justify-content: space-between; }
+  .d10 .panel-head h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #be123c; }
+  .d10 .counter { font-size: 9px; color: #fb7185; font-weight: 600; }
+  .d10 .counter b { color: #9f1239; }
+  .d10 .progress { height: 4px; background: #ffe4e6; border-radius: 4px; margin: 0 14px; overflow: hidden; }
+  .d10 .progress-fill { height: 100%; background: #e11d48; width: 38%; border-radius: 4px; }
+  .d10 .item-row { display: flex; gap: 10px; padding: 7px 14px; border-bottom: 1px solid #ffe4e6; align-items: flex-start; }
+  .d10 .marker {
+    width: 18px; height: 18px; border: 1.5px solid #fda4af; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 800; color: #fb7185; flex-shrink: 0;
+  }
+  .d10 .marker.active { background: #e11d48; border-color: #e11d48; color: #fff; }
+  .d10 .marker.done { border-color: #ffe4e6; color: #fecdd3; }
+  .d10 .item-title { font-size: 11px; font-weight: 600; color: #9f1239; line-height: 1.4; }
+  .d10 .item-title.done { text-decoration: line-through; color: #fda4af; }
+  .d10 .item-title.active { font-weight: 700; color: #881337; }
+  .d10 .item-sub { font-size: 8px; color: #fb7185; margin-top: 1px; }
+  .d10 .body { padding: 8px 10px; flex: 1; }
+  .d10 .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    background: #ffe4e6; border-radius: 8px; margin-bottom: 4px;
+  }
+  .d10 .cat-bar span { font-size: 10px; font-weight: 700; color: #be123c; }
+  .d10 .cat-count { font-size: 8px; color: #fb7185; margin-left: auto; }
+  .d10 .chip {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    border: 1.5px solid #fecdd3; font-size: 10px; font-weight: 600; color: #be123c;
+    background: #fff1f2; margin: 2px;
+  }
+  .d10 .chip.active { background: #e11d48; color: #fff; border-color: #e11d48; }
+  .d10 .tab-row { display: flex; justify-content: center; padding: 6px 10px 0; }
+  .d10 .tab-group { display: flex; background: #ffe4e6; border-radius: 8px; padding: 2px; }
+  .d10 .tab { padding: 3px 8px; border: none; border-radius: 6px; font-size: 9px; font-weight: 600; color: #fb7185; background: transparent; cursor: pointer; }
+  .d10 .tab.active { background: #fff; color: #be123c; box-shadow: 0 1px 3px rgba(225,29,72,.1); }
+</style>
+</head>
+<body>
+
+<h1>Agenda + Rules Panel — Matching Vibes</h1>
+<p class="subtitle">10 side-by-side designs. Same data, same structure, different vibes.</p>
+
+<!-- ================= DESIGN 1 — Cartographic Ink ================= -->
+<div class="design-block d1">
+  <div class="design-label">#1 <span>Cartographic Ink</span></div>
+  <div class="pair">
+    <!-- AGENDA -->
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Agenda</h3>
+        <span class="counter"><b>5</b> / 13</span>
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div>
+        <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+        <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+        <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+        <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+        <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+        <div class="item-row" style="background:#f5f3ed"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+        <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+        <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+        <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+      </div>
+    </div>
+    <!-- RULES -->
+    <div class="panel">
+      <div class="tab-row">
+        <div class="tab-group">
+          <div class="tab active">Robert's Rules</div>
+          <div class="tab">Procedure Bylaw</div>
+          <div class="tab">Past Precedent</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip active">Main Motion</span>
+          <span class="chip">Adopt/Approve</span>
+        </div>
+        <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Amend</span>
+          <span class="chip">Amend the Amendment</span>
+        </div>
+        <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Postpone Definitely</span>
+          <span class="chip">Table</span>
+          <span class="chip">Take from Table</span>
+        </div>
+        <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Call the Question</span>
+          <span class="chip">Point of Order</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DESIGN 2 — Midnight Dark ================= -->
+<div class="design-block d2">
+  <div class="design-label">#2 <span>Midnight Dark</span></div>
+  <div class="pair">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Agenda</h3>
+        <span class="counter"><b>5</b> / 13</span>
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div>
+        <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+        <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+        <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+        <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+        <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+        <div class="item-row" style="background:#22262d"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+        <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+        <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+        <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="tab-row">
+        <div class="tab-group">
+          <div class="tab active">Robert's Rules</div>
+          <div class="tab">Procedure Bylaw</div>
+          <div class="tab">Past Precedent</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip active">Main Motion</span>
+          <span class="chip">Adopt/Approve</span>
+        </div>
+        <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Amend</span>
+          <span class="chip">Amend the Amendment</span>
+        </div>
+        <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Postpone Definitely</span>
+          <span class="chip">Table</span>
+          <span class="chip">Take from Table</span>
+        </div>
+        <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Call the Question</span>
+          <span class="chip">Point of Order</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DESIGN 3 — Soft Gradient ================= -->
+<div class="design-block d3">
+  <div class="design-label">#3 <span>Soft Gradient</span></div>
+  <div class="pair">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Agenda</h3>
+        <span class="counter"><b>5</b> / 13</span>
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div>
+        <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+        <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+        <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+        <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+        <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+        <div class="item-row" style="background:rgba(124,58,237,.06)"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+        <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+        <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+        <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="tab-row">
+        <div class="tab-group">
+          <div class="tab active">Robert's Rules</div>
+          <div class="tab">Procedure Bylaw</div>
+          <div class="tab">Past Precedent</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip active">Main Motion</span>
+          <span class="chip">Adopt/Approve</span>
+        </div>
+        <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Amend</span>
+          <span class="chip">Amend the Amendment</span>
+        </div>
+        <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Postpone Definitely</span>
+          <span class="chip">Table</span>
+          <span class="chip">Take from Table</span>
+        </div>
+        <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Call the Question</span>
+          <span class="chip">Point of Order</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DESIGN 4 — Neo-Brutalist ================= -->
+<div class="design-block d4">
+  <div class="design-label">#4 <span>Neo-Brutalist</span></div>
+  <div class="pair">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Agenda</h3>
+        <span class="counter">5 / 13</span>
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div>
+        <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+        <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+        <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+        <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+        <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+        <div class="item-row" style="background:#fef9c3"><div class="marker active">6</div><div><div class="item-title">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+        <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+        <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+        <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="tab-row">
+        <div class="tab-group">
+          <div class="tab active">Robert's Rules</div>
+          <div class="tab">Procedure Bylaw</div>
+          <div class="tab">Past Precedent</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip active">Main Motion</span>
+          <span class="chip">Adopt/Approve</span>
+        </div>
+        <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Amend</span>
+          <span class="chip">Amend the Amendment</span>
+        </div>
+        <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Postpone Definitely</span>
+          <span class="chip">Table</span>
+          <span class="chip">Take from Table</span>
+        </div>
+        <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Call the Question</span>
+          <span class="chip">Point of Order</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DESIGN 5 — Glassmorphism ================= -->
+<div class="design-block d5">
+  <div class="design-label">#5 <span>Glassmorphism</span></div>
+  <div class="d5-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Agenda</h3>
+          <span class="counter"><b>5</b> / 13</span>
+        </div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row" style="background:rgba(255,255,255,.08)"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row">
+          <div class="tab-group">
+            <div class="tab active">Robert's Rules</div>
+            <div class="tab">Procedure Bylaw</div>
+            <div class="tab">Past Precedent</div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div style="padding:4px 0 8px 10px">
+            <span class="chip active">Main Motion</span>
+            <span class="chip">Adopt/Approve</span>
+          </div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div style="padding:4px 0 8px 10px">
+            <span class="chip">Amend</span>
+            <span class="chip">Amend the Amendment</span>
+          </div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div style="padding:4px 0 8px 10px">
+            <span class="chip">Postpone Definitely</span>
+            <span class="chip">Table</span>
+            <span class="chip">Take from Table</span>
+          </div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div style="padding:4px 0 8px 10px">
+            <span class="chip">Call the Question</span>
+            <span class="chip">Point of Order</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DESIGN 6 — Warm Earth ================= -->
+<div class="design-block d6">
+  <div class="design-label">#6 <span>Warm Earth</span></div>
+  <div class="pair">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Agenda</h3>
+        <span class="counter"><b>5</b> / 13</span>
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div>
+        <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+        <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+        <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+        <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+        <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+        <div class="item-row" style="background:#fef3c733"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+        <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+        <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+        <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="tab-row">
+        <div class="tab-group">
+          <div class="tab active">Robert's Rules</div>
+          <div class="tab">Procedure Bylaw</div>
+          <div class="tab">Past Precedent</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip active">Main Motion</span>
+          <span class="chip">Adopt/Approve</span>
+        </div>
+        <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Amend</span>
+          <span class="chip">Amend the Amendment</span>
+        </div>
+        <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Postpone Definitely</span>
+          <span class="chip">Table</span>
+          <span class="chip">Take from Table</span>
+        </div>
+        <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Call the Question</span>
+          <span class="chip">Point of Order</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DESIGN 7 — Monochrome Minimal ================= -->
+<div class="design-block d7">
+  <div class="design-label">#7 <span>Monochrome Minimal</span></div>
+  <div class="pair">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Agenda</h3>
+        <span class="counter"><b>5</b> / 13</span>
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div>
+        <div class="item-row"><div class="marker done"></div><div><div class="item-title done">Call to Order</div></div></div>
+        <div class="item-row"><div class="marker done"></div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+        <div class="item-row"><div class="marker done"></div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+        <div class="item-row"><div class="marker done"></div><div><div class="item-title done">Delegations</div></div></div>
+        <div class="item-row"><div class="marker done"></div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+        <div class="item-row"><div class="marker active"></div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+        <div class="item-row"><div class="marker"></div><div><div class="item-title">Financial Report — Q1</div></div></div>
+        <div class="item-row"><div class="marker"></div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+        <div class="item-row"><div class="marker"></div><div><div class="item-title">Correspondence</div></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="tab-row">
+        <div class="tab-group">
+          <div class="tab active">Robert's Rules</div>
+          <div class="tab">Procedure Bylaw</div>
+          <div class="tab">Past Precedent</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip active">Main Motion</span>
+          <span class="chip">Adopt/Approve</span>
+        </div>
+        <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Amend</span>
+          <span class="chip">Amend the Amendment</span>
+        </div>
+        <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Postpone Definitely</span>
+          <span class="chip">Table</span>
+          <span class="chip">Take from Table</span>
+        </div>
+        <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Call the Question</span>
+          <span class="chip">Point of Order</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DESIGN 8 — Forest Green ================= -->
+<div class="design-block d8">
+  <div class="design-label">#8 <span>Forest Green</span></div>
+  <div class="pair">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Agenda</h3>
+        <span class="counter"><b>5</b> / 13</span>
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div>
+        <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+        <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+        <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+        <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+        <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+        <div class="item-row" style="background:#dcfce733"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+        <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+        <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+        <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="tab-row">
+        <div class="tab-group">
+          <div class="tab active">Robert's Rules</div>
+          <div class="tab">Procedure Bylaw</div>
+          <div class="tab">Past Precedent</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip active">Main Motion</span>
+          <span class="chip">Adopt/Approve</span>
+        </div>
+        <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Amend</span>
+          <span class="chip">Amend the Amendment</span>
+        </div>
+        <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Postpone Definitely</span>
+          <span class="chip">Table</span>
+          <span class="chip">Take from Table</span>
+        </div>
+        <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Call the Question</span>
+          <span class="chip">Point of Order</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DESIGN 9 — Blueprint ================= -->
+<div class="design-block d9">
+  <div class="design-label">#9 <span>Blueprint</span></div>
+  <div class="pair">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Agenda</h3>
+        <span class="counter"><b>5</b> / 13</span>
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div>
+        <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+        <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+        <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+        <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+        <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+        <div class="item-row" style="background:#dbeafe55"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+        <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+        <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+        <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="tab-row">
+        <div class="tab-group">
+          <div class="tab active">Robert's Rules</div>
+          <div class="tab">Procedure Bylaw</div>
+          <div class="tab">Past Precedent</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip active">Main Motion</span>
+          <span class="chip">Adopt/Approve</span>
+        </div>
+        <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Amend</span>
+          <span class="chip">Amend the Amendment</span>
+        </div>
+        <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Postpone Definitely</span>
+          <span class="chip">Table</span>
+          <span class="chip">Take from Table</span>
+        </div>
+        <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Call the Question</span>
+          <span class="chip">Point of Order</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DESIGN 10 — Soft Rose ================= -->
+<div class="design-block d10">
+  <div class="design-label">#10 <span>Soft Rose</span></div>
+  <div class="pair">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Agenda</h3>
+        <span class="counter"><b>5</b> / 13</span>
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div>
+        <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+        <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+        <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+        <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+        <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+        <div class="item-row" style="background:#ffe4e633"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+        <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+        <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+        <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="tab-row">
+        <div class="tab-group">
+          <div class="tab active">Robert's Rules</div>
+          <div class="tab">Procedure Bylaw</div>
+          <div class="tab">Past Precedent</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip active">Main Motion</span>
+          <span class="chip">Adopt/Approve</span>
+        </div>
+        <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Amend</span>
+          <span class="chip">Amend the Amendment</span>
+        </div>
+        <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Postpone Definitely</span>
+          <span class="chip">Table</span>
+          <span class="chip">Take from Table</span>
+        </div>
+        <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+        <div style="padding:4px 0 8px 10px">
+          <span class="chip">Call the Question</span>
+          <span class="chip">Point of Order</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
