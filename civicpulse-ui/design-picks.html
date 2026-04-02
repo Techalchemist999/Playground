@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicPulse — 15 Design Picks</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0e0e14;padding:28px 32px;color:#fff}
+h1{text-align:center;font-size:24px;font-weight:800;margin-bottom:4px}
+.sub{text-align:center;font-size:12px;color:rgba(255,255,255,.4);margin-bottom:10px;line-height:1.7}
+.rec{display:inline-block;font-size:8px;font-weight:800;letter-spacing:1px;padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:middle}
+.rec.top{background:#22c55e;color:#fff}
+.rec.strong{background:#3b82f6;color:#fff}
+.rec.fun{background:#a855f7;color:#fff}
+
+.block{margin-bottom:52px}
+.label{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:4px;padding-left:2px}
+.label b{color:rgba(255,255,255,.6);font-size:13px;letter-spacing:0;text-transform:none;margin-left:6px;font-weight:700}
+.why{font-size:11px;color:rgba(255,255,255,.35);margin-bottom:14px;padding-left:2px;line-height:1.6;max-width:800px}
+
+.scene{border-radius:20px;padding:22px;overflow:hidden}
+.tri{display:grid;grid-template-columns:1.15fr .95fr .9fr;gap:16px}
+.col-lbl{font-size:7px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;text-align:center;margin-bottom:5px;opacity:.4}
+
+/* Shared panel skeleton */
+.p{border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.ph{padding:11px 14px 9px;display:flex;align-items:center;justify-content:space-between}
+.ph h3{font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase}
+.cnt{font-size:9px;font-weight:600}.cnt b{font-weight:800}
+.bar{height:3px;margin:0 14px;border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;width:38%;border-radius:2px}
+.row{display:flex;gap:9px;padding:6px 14px;align-items:flex-start}
+.mk{width:17px;height:17px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;flex-shrink:0}
+.tt{font-size:10.5px;font-weight:600;line-height:1.35}
+.ts{font-size:8px;margin-top:1px}
+
+/* Rules */
+.bd{padding:7px 11px;flex:1}
+.cb{display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:7px;margin-bottom:4px}
+.cb span{font-size:10px;font-weight:700}.cc{font-size:8px;margin-left:auto}
+.cps{padding:3px 0 7px 9px}
+.cp{display:inline-block;padding:4px 10px;border-radius:999px;font-size:9.5px;font-weight:600;margin:2px}
+.trow{display:flex;justify-content:center;padding:7px 10px 0}
+.tg{display:flex;border-radius:7px;padding:2px}
+.t{padding:3px 8px;border:none;border-radius:5px;font-size:9px;font-weight:600;cursor:pointer;background:transparent}
+
+/* Setup card */
+.sc{display:flex;flex-direction:column}
+.sh{padding:16px 18px 12px;border-radius:12px 12px 0 0}
+.slogo{display:flex;align-items:center;gap:5px;margin-bottom:8px}
+.sico{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center}
+.slogo span{font-size:8px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase}
+.stitle{font-size:16px;font-weight:800;letter-spacing:-.3px;margin-bottom:3px}
+.sdesc{font-size:10.5px;line-height:1.6}
+.sbody{padding:14px 18px 16px;flex:1}
+.slbl{font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:7px}
+.sdiv{height:1px;margin:10px 0}
+.apk{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;margin-bottom:5px}
+.apki{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px}
+.apkt{font-size:11.5px;font-weight:700}
+.apkm{font-size:9.5px;margin-top:1px}
+.btn{width:100%;padding:10px;border-radius:9px;border:none;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.btnr{display:flex;gap:7px;margin-top:7px}
+.btnr .btn{flex:1;font-size:11px}
+</style>
+</head>
+<body>
+
+<h1>CivicPulse — 15 Design Picks</h1>
+<p class="sub">
+  Curated for readability during fast council sessions, professional civic settings, and 2-3 hour comfort.<br>
+  Each theme applied to: <b>Agenda Creator</b> | <b>Live Sidebar</b> | <b>Rules Panel</b>
+</p>
+<p style="text-align:center;margin-bottom:40px">
+  <span class="rec top">TOP PICK</span> = Designer's recommendation
+  <span class="rec strong">STRONG</span> = Excellent readability
+  <span class="rec fun">BOLD</span> = Statement piece
+</p>
+
+<script>
+const D = document;
+const W = (h) => D.write(h);
+
+// SVGs
+const sun=`<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+const play=`<svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>`;
+const doc=`<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+const chk=`<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+function panel(s) {
+  // s = style object with all color tokens
+  const mkRow = (n,status,title,sub) => {
+    const cls = status==='done'?'done':status==='active'?'active':'';
+    return `<div class="row" style="${status==='active'?'background:'+s.activeBg:''}">
+      <div class="mk" style="border:1.5px solid ${status==='done'?s.mkDone:status==='active'?s.mkActive:s.mkPend};
+        background:${status==='active'?s.mkActiveBg:'transparent'};color:${status==='done'?s.mkDone:status==='active'?s.mkActiveC:s.mkPend}">${n}</div>
+      <div><div class="tt" style="color:${status==='done'?s.ttDone:status==='active'?s.ttActive:s.ttPend};
+        ${status==='done'?'text-decoration:line-through;':''}${status==='active'?'font-weight:700;':''}">${title}</div>
+        ${sub?`<div class="ts" style="color:${s.sub}">${sub}</div>`:''}</div></div>`;
+  };
+
+  return `
+  <div class="block">
+    <div class="label">${s.num} <b>${s.name}</b>${s.badge}</div>
+    <div class="why">${s.why}</div>
+    <div class="scene" style="background:${s.sceneBg};${s.sceneExtra||''}">
+      <div class="tri">
+
+        <!-- SETUP -->
+        <div>
+          <div class="col-lbl" style="color:${s.colLbl}">Agenda Creator</div>
+          <div class="p sc" style="background:${s.panelBg};border:${s.panelBorder};${s.font||''}">
+            <div class="sh" style="background:${s.headerBg};border-bottom:${s.headerLine}">
+              <div class="slogo"><div class="sico" style="background:${s.logoBg};color:${s.logoC}">${sun}</div>
+              <span style="color:${s.logoTxt}">CivicPulse</span></div>
+              <div class="stitle" style="color:${s.heading}">${s.titleText||'New Meeting Session'}</div>
+              <div class="sdesc" style="color:${s.desc}">Start a real-time council meeting session. Choose a source, attach an agenda, and begin.</div>
+            </div>
+            <div class="sbody">
+              <div class="slbl" style="color:${s.lbl}">Attach Agenda</div>
+              <div class="apk" style="background:${s.pickSelBg};border:1.5px solid ${s.pickSelBdr}">
+                <div class="apki" style="background:${s.pickSelIcon};color:${s.pickSelIconC}">${chk}</div>
+                <div><div class="apkt" style="color:${s.pickSelTxt}">Regular Council — Apr 2</div>
+                <div class="apkm" style="color:${s.pickMeta}">13 items</div></div>
+              </div>
+              <div class="apk" style="background:${s.pickBg};border:1.5px solid ${s.pickBdr}">
+                <div class="apki" style="background:${s.pickIcon};color:${s.pickIconC}">${doc}</div>
+                <div><div class="apkt" style="color:${s.pickTxt}">Special Meeting — Budget</div>
+                <div class="apkm" style="color:${s.pickMeta}">6 items</div></div>
+              </div>
+              <div class="sdiv" style="background:${s.divider}"></div>
+              <button class="btn" style="background:${s.btnPrimBg};color:${s.btnPrimC};${s.btnShadow||''}">${play} Start Meeting</button>
+              <div class="btnr">
+                <button class="btn" style="background:${s.btnSecBg};border:1.5px solid ${s.btnSecBdr};color:${s.btnSecC}">Live Test</button>
+                <button class="btn" style="background:${s.btnSecBg};border:1.5px solid ${s.btnSecBdr};color:${s.btnSecC}">Demo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIVE AGENDA -->
+        <div>
+          <div class="col-lbl" style="color:${s.colLbl}">Live Agenda</div>
+          <div class="p" style="background:${s.panelBg};border:${s.panelBorder};${s.font||''}">
+            <div class="ph" style="border-bottom:${s.headerLine}"><h3 style="color:${s.heading}">Agenda</h3><span class="cnt" style="color:${s.sub}"><b style="color:${s.heading}">5</b> / 13</span></div>
+            <div class="bar" style="background:${s.barBg}"><div class="bar-fill" style="background:${s.barFill}"></div></div>
+            ${mkRow(1,'done','Call to Order')}
+            ${mkRow(2,'done','Adoption of Agenda')}
+            ${mkRow(3,'done','Adoption of Minutes')}
+            ${mkRow(4,'done','Delegations')}
+            ${mkRow(5,'done','Public Hearing — Bylaw 1021')}
+            ${mkRow(6,'active','CAO Report','Monthly operations update')}
+            ${mkRow(7,'','Financial Report — Q1')}
+            ${mkRow(8,'','New Business','3 motions')}
+            ${mkRow(9,'','Correspondence')}
+            ${mkRow(10,'','In-Camera')}
+            ${mkRow(11,'','Adjournment')}
+          </div>
+        </div>
+
+        <!-- RULES -->
+        <div>
+          <div class="col-lbl" style="color:${s.colLbl}">Rules Panel</div>
+          <div class="p" style="background:${s.panelBg};border:${s.panelBorder};${s.font||''}">
+            <div class="trow"><div class="tg" style="background:${s.tabBg}">
+              <div class="t" style="background:${s.tabActiveBg};color:${s.tabActiveC};${s.tabShadow||''}">Robert's Rules</div>
+              <div class="t" style="color:${s.tabC}">Procedure</div>
+              <div class="t" style="color:${s.tabC}">Precedent</div>
+            </div></div>
+            <div class="bd">
+              <div class="cb" style="background:${s.catBg}"><span style="color:${s.catC}">Main Motions</span><span class="cc" style="color:${s.catCount}">2</span></div>
+              <div class="cps"><span class="cp" style="background:${s.chipActBg};border:1.5px solid ${s.chipActBdr};color:${s.chipActC}">Main Motion</span><span class="cp" style="background:${s.chipBg};border:1.5px solid ${s.chipBdr};color:${s.chipC}">Adopt/Approve</span></div>
+              <div class="cb" style="background:${s.catBg}"><span style="color:${s.catC}">Amending Motions</span><span class="cc" style="color:${s.catCount}">2</span></div>
+              <div class="cps"><span class="cp" style="background:${s.chipBg};border:1.5px solid ${s.chipBdr};color:${s.chipC}">Amend</span><span class="cp" style="background:${s.chipBg};border:1.5px solid ${s.chipBdr};color:${s.chipC}">Amend the Amendment</span></div>
+              <div class="cb" style="background:${s.catBg}"><span style="color:${s.catC}">Postpone & Defer</span><span class="cc" style="color:${s.catCount}">3</span></div>
+              <div class="cps"><span class="cp" style="background:${s.chipBg};border:1.5px solid ${s.chipBdr};color:${s.chipC}">Postpone</span><span class="cp" style="background:${s.chipBg};border:1.5px solid ${s.chipBdr};color:${s.chipC}">Table</span><span class="cp" style="background:${s.chipBg};border:1.5px solid ${s.chipBdr};color:${s.chipC}">Take from Table</span></div>
+              <div class="cb" style="background:${s.catBg}"><span style="color:${s.catC}">Voting & Procedure</span><span class="cc" style="color:${s.catCount}">2</span></div>
+              <div class="cps"><span class="cp" style="background:${s.chipBg};border:1.5px solid ${s.chipBdr};color:${s.chipC}">Call the Question</span><span class="cp" style="background:${s.chipBg};border:1.5px solid ${s.chipBdr};color:${s.chipC}">Point of Order</span></div>
+              <div class="cb" style="background:${s.catBg}"><span style="color:${s.catC}">Readings & Bylaws</span><span class="cc" style="color:${s.catCount}">2</span></div>
+              <div class="cps"><span class="cp" style="background:${s.chipBg};border:1.5px solid ${s.chipBdr};color:${s.chipC}">First Reading</span><span class="cp" style="background:${s.chipBg};border:1.5px solid ${s.chipBdr};color:${s.chipC}">Third Reading</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>`;
+}
+
+// =====================================================
+// 15 DESIGNS
+// =====================================================
+
+// 1 — Slate Professional (current token system, elevated)
+W(panel({
+  num:'#1', name:'Slate Professional', badge:'<span class="rec top">TOP PICK</span>',
+  why:'Your current color system done right. Slate is the industry standard for gov-tech — trustworthy, neutral, high contrast. This is the safe bet that looks expensive.',
+  sceneBg:'#f1f5f9', colLbl:'#94a3b8',
+  panelBg:'#fff', panelBorder:'1px solid #e2e8f0',
+  headerBg:'linear-gradient(135deg,#f8fafc,#f1f5f9)', headerLine:'1px solid #e2e8f0',
+  logoBg:'linear-gradient(135deg,#475569,#64748b)', logoC:'#fff', logoTxt:'#475569',
+  heading:'#0f172a', desc:'#64748b', lbl:'#94a3b8', sub:'#94a3b8', divider:'#f1f5f9',
+  pickSelBg:'#f1f5f9', pickSelBdr:'#475569', pickSelIcon:'#475569', pickSelIconC:'#fff', pickSelTxt:'#475569',
+  pickBg:'#fff', pickBdr:'#e2e8f0', pickIcon:'#f1f5f9', pickIconC:'#94a3b8', pickTxt:'#334155', pickMeta:'#94a3b8',
+  btnPrimBg:'linear-gradient(135deg,#475569,#64748b)', btnPrimC:'#fff', btnShadow:'box-shadow:0 2px 10px rgba(71,85,105,.2)',
+  btnSecBg:'#f8fafc', btnSecBdr:'#e2e8f0', btnSecC:'#64748b',
+  barBg:'#e2e8f0', barFill:'#475569',
+  mkDone:'#cbd5e1', mkActive:'#0f172a', mkActiveBg:'#0f172a', mkActiveC:'#fff', mkPend:'#e2e8f0',
+  ttDone:'#cbd5e1', ttActive:'#0f172a', ttPend:'#475569', activeBg:'#f8fafc',
+  tabBg:'#f1f5f9', tabActiveBg:'#fff', tabActiveC:'#334155', tabC:'#94a3b8', tabShadow:'box-shadow:0 1px 2px rgba(0,0,0,.06)',
+  catBg:'#f8fafc', catC:'#334155', catCount:'#94a3b8',
+  chipActBg:'#f1f5f9', chipActBdr:'#475569', chipActC:'#0f172a',
+  chipBg:'#fff', chipBdr:'#e2e8f0', chipC:'#475569',
+}));
+
+// 2 — Indigo Civic
+W(panel({
+  num:'#2', name:'Indigo Civic', badge:'<span class="rec top">TOP PICK</span>',
+  why:'Indigo reads as "official" — think government seals, university crests. Warmer than slate, more personality, still fully professional. Great differentiation from generic SaaS.',
+  sceneBg:'#eef2ff', colLbl:'#818cf8',
+  panelBg:'#fff', panelBorder:'1px solid #e0e7ff',
+  headerBg:'linear-gradient(135deg,#eef2ff,#e0e7ff)', headerLine:'1px solid #e0e7ff',
+  logoBg:'linear-gradient(135deg,#4f46e5,#6366f1)', logoC:'#fff', logoTxt:'#4f46e5',
+  heading:'#1e1b4b', desc:'#6366f1', lbl:'#a5b4fc', sub:'#a5b4fc', divider:'#eef2ff',
+  pickSelBg:'#eef2ff', pickSelBdr:'#4f46e5', pickSelIcon:'#4f46e5', pickSelIconC:'#fff', pickSelTxt:'#4f46e5',
+  pickBg:'#fff', pickBdr:'#e0e7ff', pickIcon:'#eef2ff', pickIconC:'#a5b4fc', pickTxt:'#312e81', pickMeta:'#a5b4fc',
+  btnPrimBg:'linear-gradient(135deg,#4f46e5,#6366f1)', btnPrimC:'#fff', btnShadow:'box-shadow:0 2px 10px rgba(79,70,229,.25)',
+  btnSecBg:'#fafafe', btnSecBdr:'#e0e7ff', btnSecC:'#6366f1',
+  barBg:'#e0e7ff', barFill:'#4f46e5',
+  mkDone:'#c7d2fe', mkActive:'#4f46e5', mkActiveBg:'#4f46e5', mkActiveC:'#fff', mkPend:'#e0e7ff',
+  ttDone:'#c7d2fe', ttActive:'#1e1b4b', ttPend:'#4338ca', activeBg:'#eef2ff',
+  tabBg:'#eef2ff', tabActiveBg:'#fff', tabActiveC:'#312e81', tabC:'#a5b4fc', tabShadow:'box-shadow:0 1px 2px rgba(79,70,229,.08)',
+  catBg:'#f5f3ff', catC:'#312e81', catCount:'#a5b4fc',
+  chipActBg:'#eef2ff', chipActBdr:'#4f46e5', chipActC:'#312e81',
+  chipBg:'#fff', chipBdr:'#e0e7ff', chipC:'#4338ca',
+}));
+
+// 3 — Navy Command
+W(panel({
+  num:'#3', name:'Navy Command', badge:'<span class="rec strong">STRONG</span>',
+  why:'Dark navy is authoritative without being gloomy. Think Bloomberg terminal meets city hall. Excellent for low-light council chambers and evening sessions.',
+  sceneBg:'#0f172a', colLbl:'#475569',
+  panelBg:'#1e293b', panelBorder:'1px solid #334155',
+  headerBg:'#1a2332', headerLine:'1px solid #334155',
+  logoBg:'#3b82f6', logoC:'#fff', logoTxt:'#60a5fa',
+  heading:'#f1f5f9', desc:'#64748b', lbl:'#475569', sub:'#475569', divider:'#334155',
+  pickSelBg:'#1e3a5f', pickSelBdr:'#3b82f6', pickSelIcon:'#3b82f6', pickSelIconC:'#fff', pickSelTxt:'#93c5fd',
+  pickBg:'#1e293b', pickBdr:'#334155', pickIcon:'#334155', pickIconC:'#64748b', pickTxt:'#cbd5e1', pickMeta:'#475569',
+  btnPrimBg:'#3b82f6', btnPrimC:'#fff', btnShadow:'box-shadow:0 2px 10px rgba(59,130,246,.3)',
+  btnSecBg:'#1e293b', btnSecBdr:'#334155', btnSecC:'#94a3b8',
+  barBg:'#334155', barFill:'#3b82f6',
+  mkDone:'#334155', mkActive:'#3b82f6', mkActiveBg:'#3b82f6', mkActiveC:'#fff', mkPend:'#475569',
+  ttDone:'#475569', ttActive:'#f1f5f9', ttPend:'#94a3b8', activeBg:'rgba(59,130,246,.06)',
+  tabBg:'#0f172a', tabActiveBg:'#1e293b', tabActiveC:'#e2e8f0', tabC:'#475569',
+  catBg:'rgba(59,130,246,.06)', catC:'#93c5fd', catCount:'#475569',
+  chipActBg:'rgba(59,130,246,.12)', chipActBdr:'#3b82f6', chipActC:'#93c5fd',
+  chipBg:'#1e293b', chipBdr:'#334155', chipC:'#94a3b8',
+}));
+
+// 4 — Arctic Frost Glass
+W(panel({
+  num:'#4', name:'Arctic Frost Glass', badge:'<span class="rec top">TOP PICK</span>',
+  why:'Light glassmorphism that actually works — the frosted panels give depth without sacrificing readability. Feels modern and premium. This is the "wow" pick that still functions.',
+  sceneBg:'linear-gradient(135deg,#c3d5e8,#d5dff0,#e0eafc)', colLbl:'rgba(71,85,105,.4)',
+  sceneExtra:'box-shadow:inset 0 0 60px rgba(255,255,255,.3)',
+  panelBg:'rgba(255,255,255,.6)', panelBorder:'1px solid rgba(255,255,255,.75)',
+  headerBg:'rgba(255,255,255,.35)', headerLine:'1px solid rgba(0,0,0,.05)',
+  logoBg:'linear-gradient(135deg,#475569,#64748b)', logoC:'#fff', logoTxt:'#475569',
+  heading:'#1e293b', desc:'#64748b', lbl:'#94a3b8', sub:'#94a3b8', divider:'rgba(0,0,0,.06)',
+  pickSelBg:'rgba(71,85,105,.06)', pickSelBdr:'#475569', pickSelIcon:'#475569', pickSelIconC:'#fff', pickSelTxt:'#334155',
+  pickBg:'rgba(255,255,255,.4)', pickBdr:'rgba(0,0,0,.08)', pickIcon:'rgba(0,0,0,.04)', pickIconC:'#94a3b8', pickTxt:'#334155', pickMeta:'#94a3b8',
+  btnPrimBg:'linear-gradient(135deg,#475569,#64748b)', btnPrimC:'#fff', btnShadow:'box-shadow:0 3px 12px rgba(71,85,105,.2)',
+  btnSecBg:'rgba(255,255,255,.5)', btnSecBdr:'rgba(0,0,0,.1)', btnSecC:'#64748b',
+  barBg:'rgba(0,0,0,.06)', barFill:'#475569',
+  mkDone:'#cbd5e1', mkActive:'#0f172a', mkActiveBg:'#0f172a', mkActiveC:'#fff', mkPend:'#d4d4d8',
+  ttDone:'#cbd5e1', ttActive:'#0f172a', ttPend:'#475569', activeBg:'rgba(71,85,105,.04)',
+  tabBg:'rgba(0,0,0,.04)', tabActiveBg:'rgba(255,255,255,.6)', tabActiveC:'#334155', tabC:'#94a3b8', tabShadow:'box-shadow:0 1px 3px rgba(0,0,0,.06)',
+  catBg:'rgba(0,0,0,.03)', catC:'#334155', catCount:'#94a3b8',
+  chipActBg:'rgba(71,85,105,.08)', chipActBdr:'#475569', chipActC:'#1e293b',
+  chipBg:'rgba(255,255,255,.5)', chipBdr:'rgba(0,0,0,.08)', chipC:'#475569',
+}));
+
+// 5 — Warm Parchment
+W(panel({
+  num:'#5', name:'Warm Parchment', badge:'<span class="rec strong">STRONG</span>',
+  why:'Paper-like warmth says "official document" — think bylaws, council minutes, formal records. Pairs beautifully with the civic content. Comfortable for long reading sessions.',
+  sceneBg:'#f5f0e8', colLbl:'#a09a8c',
+  panelBg:'#fdfcf8', panelBorder:'1px solid #e6dfd1',
+  headerBg:'#f8f4ec', headerLine:'1px solid #e6dfd1',
+  logoBg:'#78716c', logoC:'#fff', logoTxt:'#78716c',
+  heading:'#292524', desc:'#78716c', lbl:'#a8a29e', sub:'#a8a29e', divider:'#e7e5e4',
+  pickSelBg:'#f5f0e8', pickSelBdr:'#78716c', pickSelIcon:'#78716c', pickSelIconC:'#fff', pickSelTxt:'#44403c',
+  pickBg:'#fdfcf8', pickBdr:'#e7e5e4', pickIcon:'#f5f0e8', pickIconC:'#a8a29e', pickTxt:'#44403c', pickMeta:'#a8a29e',
+  btnPrimBg:'linear-gradient(135deg,#78716c,#8a8378)', btnPrimC:'#fff', btnShadow:'box-shadow:0 2px 10px rgba(120,113,108,.2)',
+  btnSecBg:'#fdfcf8', btnSecBdr:'#e7e5e4', btnSecC:'#78716c',
+  barBg:'#e7e5e4', barFill:'#78716c',
+  mkDone:'#d6d3d1', mkActive:'#44403c', mkActiveBg:'#44403c', mkActiveC:'#fdfcf8', mkPend:'#e7e5e4',
+  ttDone:'#d6d3d1', ttActive:'#292524', ttPend:'#57534e', activeBg:'#f5f0e8',
+  tabBg:'#f5f0e8', tabActiveBg:'#fdfcf8', tabActiveC:'#44403c', tabC:'#a8a29e', tabShadow:'box-shadow:0 1px 2px rgba(0,0,0,.04)',
+  catBg:'#f8f4ec', catC:'#44403c', catCount:'#a8a29e',
+  chipActBg:'#f5f0e8', chipActBdr:'#78716c', chipActC:'#292524',
+  chipBg:'#fdfcf8', chipBdr:'#e7e5e4', chipC:'#57534e',
+}));
+
+// 6 — Ocean Teal
+W(panel({
+  num:'#6', name:'Ocean Teal', badge:'<span class="rec strong">STRONG</span>',
+  why:'Teal is calming and professional — used by hospitals and institutions for a reason. Excellent contrast ratios, distinctive without being loud. Great for long sessions.',
+  sceneBg:'#f0fdfa', colLbl:'#5eead4',
+  panelBg:'#fff', panelBorder:'1px solid #ccfbf1',
+  headerBg:'linear-gradient(135deg,#f0fdfa,#ccfbf1)', headerLine:'1px solid #ccfbf1',
+  logoBg:'linear-gradient(135deg,#0d9488,#14b8a6)', logoC:'#fff', logoTxt:'#0d9488',
+  heading:'#134e4a', desc:'#5eead4', lbl:'#99f6e4', sub:'#5eead4', divider:'#f0fdfa',
+  pickSelBg:'#f0fdfa', pickSelBdr:'#0d9488', pickSelIcon:'#0d9488', pickSelIconC:'#fff', pickSelTxt:'#0d9488',
+  pickBg:'#fff', pickBdr:'#ccfbf1', pickIcon:'#f0fdfa', pickIconC:'#5eead4', pickTxt:'#134e4a', pickMeta:'#5eead4',
+  btnPrimBg:'linear-gradient(135deg,#0d9488,#14b8a6)', btnPrimC:'#fff', btnShadow:'box-shadow:0 2px 10px rgba(13,148,136,.25)',
+  btnSecBg:'#f0fdfa', btnSecBdr:'#ccfbf1', btnSecC:'#0d9488',
+  barBg:'#ccfbf1', barFill:'#0d9488',
+  mkDone:'#99f6e4', mkActive:'#0d9488', mkActiveBg:'#0d9488', mkActiveC:'#fff', mkPend:'#ccfbf1',
+  ttDone:'#99f6e4', ttActive:'#134e4a', ttPend:'#115e59', activeBg:'#f0fdfa',
+  tabBg:'#f0fdfa', tabActiveBg:'#fff', tabActiveC:'#134e4a', tabC:'#5eead4', tabShadow:'box-shadow:0 1px 2px rgba(13,148,136,.08)',
+  catBg:'#f0fdfa', catC:'#134e4a', catCount:'#5eead4',
+  chipActBg:'#f0fdfa', chipActBdr:'#0d9488', chipActC:'#134e4a',
+  chipBg:'#fff', chipBdr:'#ccfbf1', chipC:'#115e59',
+}));
+
+// 7 — Forest & Gold
+W(panel({
+  num:'#7', name:'Forest & Gold', badge:'<span class="rec fun">BOLD</span>',
+  why:'Dark green + gold accents = municipal gravitas. Think city seals, council chamber woodwork, brass nameplates. Rich and distinguished, makes the tool feel like an institution.',
+  sceneBg:'#14231a', colLbl:'#4ade80',
+  panelBg:'#1c2e22', panelBorder:'1px solid #2d4a36',
+  headerBg:'#1a2b20', headerLine:'1px solid #2d4a36',
+  logoBg:'#ca8a04', logoC:'#fff', logoTxt:'#fbbf24',
+  heading:'#ecfdf5', desc:'#6ee7b7', lbl:'#4ade80', sub:'#4ade80', divider:'#2d4a36',
+  pickSelBg:'rgba(202,138,4,.08)', pickSelBdr:'#ca8a04', pickSelIcon:'#ca8a04', pickSelIconC:'#fff', pickSelTxt:'#fde68a',
+  pickBg:'#1c2e22', pickBdr:'#2d4a36', pickIcon:'#2d4a36', pickIconC:'#4ade80', pickTxt:'#bbf7d0', pickMeta:'#4ade80',
+  btnPrimBg:'linear-gradient(135deg,#ca8a04,#d97706)', btnPrimC:'#fff', btnShadow:'box-shadow:0 2px 10px rgba(202,138,4,.3)',
+  btnSecBg:'#1c2e22', btnSecBdr:'#2d4a36', btnSecC:'#6ee7b7',
+  barBg:'#2d4a36', barFill:'#ca8a04',
+  mkDone:'#2d4a36', mkActive:'#ca8a04', mkActiveBg:'#ca8a04', mkActiveC:'#fff', mkPend:'#3a5c42',
+  ttDone:'#3a5c42', ttActive:'#fde68a', ttPend:'#86efac', activeBg:'rgba(202,138,4,.04)',
+  tabBg:'#14231a', tabActiveBg:'#1c2e22', tabActiveC:'#ecfdf5', tabC:'#4ade80',
+  catBg:'rgba(202,138,4,.06)', catC:'#fde68a', catCount:'#4ade80',
+  chipActBg:'rgba(202,138,4,.1)', chipActBdr:'#ca8a04', chipActC:'#fde68a',
+  chipBg:'#1c2e22', chipBdr:'#2d4a36', chipC:'#86efac',
+}));
+
+// 8 — Soft Sage
+W(panel({
+  num:'#8', name:'Soft Sage', badge:'<span class="rec strong">STRONG</span>',
+  why:'Sage green is the color of calm focus — used in hospitals, spas, and reading rooms. Extremely easy on the eyes for multi-hour sessions. Unique without being distracting.',
+  sceneBg:'#f1f5f2', colLbl:'#86a891',
+  panelBg:'#fafcfa', panelBorder:'1px solid #dce8df',
+  headerBg:'#f1f7f3', headerLine:'1px solid #dce8df',
+  logoBg:'#588462', logoC:'#fff', logoTxt:'#588462',
+  heading:'#1a2e20', desc:'#6b8f74', lbl:'#99b3a0', sub:'#99b3a0', divider:'#e8f0ea',
+  pickSelBg:'#ebf5ee', pickSelBdr:'#588462', pickSelIcon:'#588462', pickSelIconC:'#fff', pickSelTxt:'#2d5a38',
+  pickBg:'#fafcfa', pickBdr:'#dce8df', pickIcon:'#ebf5ee', pickIconC:'#99b3a0', pickTxt:'#2d5a38', pickMeta:'#99b3a0',
+  btnPrimBg:'linear-gradient(135deg,#588462,#6b9975)', btnPrimC:'#fff', btnShadow:'box-shadow:0 2px 10px rgba(88,132,98,.2)',
+  btnSecBg:'#fafcfa', btnSecBdr:'#dce8df', btnSecC:'#6b8f74',
+  barBg:'#dce8df', barFill:'#588462',
+  mkDone:'#c5d9ca', mkActive:'#2d5a38', mkActiveBg:'#2d5a38', mkActiveC:'#fff', mkPend:'#dce8df',
+  ttDone:'#c5d9ca', ttActive:'#1a2e20', ttPend:'#4a7855', activeBg:'#f1f7f3',
+  tabBg:'#ebf5ee', tabActiveBg:'#fafcfa', tabActiveC:'#2d5a38', tabC:'#99b3a0', tabShadow:'box-shadow:0 1px 2px rgba(88,132,98,.08)',
+  catBg:'#f1f7f3', catC:'#2d5a38', catCount:'#99b3a0',
+  chipActBg:'#ebf5ee', chipActBdr:'#588462', chipActC:'#1a2e20',
+  chipBg:'#fafcfa', chipBdr:'#dce8df', chipC:'#4a7855',
+}));
+
+// 9 — Violet Glass
+W(panel({
+  num:'#9', name:'Violet Glass', badge:'<span class="rec fun">BOLD</span>',
+  why:'The glass effect from your favorites, refined. Purple gradient backdrop with frosted panels — modern, distinctive, looks amazing in demos. Less readable in bright daylight though.',
+  sceneBg:'linear-gradient(135deg,#667eea,#764ba2)', colLbl:'rgba(255,255,255,.3)',
+  panelBg:'rgba(255,255,255,.12)', panelBorder:'1px solid rgba(255,255,255,.18)',
+  headerBg:'rgba(255,255,255,.06)', headerLine:'1px solid rgba(255,255,255,.08)',
+  logoBg:'rgba(255,255,255,.2)', logoC:'#fff', logoTxt:'rgba(255,255,255,.7)',
+  heading:'rgba(255,255,255,.92)', desc:'rgba(255,255,255,.45)', lbl:'rgba(255,255,255,.3)', sub:'rgba(255,255,255,.3)', divider:'rgba(255,255,255,.08)',
+  pickSelBg:'rgba(255,255,255,.1)', pickSelBdr:'rgba(255,255,255,.35)', pickSelIcon:'rgba(255,255,255,.2)', pickSelIconC:'#fff', pickSelTxt:'rgba(255,255,255,.85)',
+  pickBg:'rgba(255,255,255,.04)', pickBdr:'rgba(255,255,255,.1)', pickIcon:'rgba(255,255,255,.08)', pickIconC:'rgba(255,255,255,.4)', pickTxt:'rgba(255,255,255,.7)', pickMeta:'rgba(255,255,255,.3)',
+  btnPrimBg:'rgba(255,255,255,.2)', btnPrimC:'#fff',
+  btnSecBg:'rgba(255,255,255,.04)', btnSecBdr:'rgba(255,255,255,.12)', btnSecC:'rgba(255,255,255,.65)',
+  barBg:'rgba(255,255,255,.1)', barFill:'rgba(255,255,255,.6)',
+  mkDone:'rgba(255,255,255,.1)', mkActive:'rgba(255,255,255,.55)', mkActiveBg:'rgba(255,255,255,.2)', mkActiveC:'#fff', mkPend:'rgba(255,255,255,.15)',
+  ttDone:'rgba(255,255,255,.2)', ttActive:'#fff', ttPend:'rgba(255,255,255,.7)', activeBg:'rgba(255,255,255,.04)',
+  tabBg:'rgba(255,255,255,.06)', tabActiveBg:'rgba(255,255,255,.14)', tabActiveC:'#fff', tabC:'rgba(255,255,255,.3)',
+  catBg:'rgba(255,255,255,.06)', catC:'rgba(255,255,255,.85)', catCount:'rgba(255,255,255,.3)',
+  chipActBg:'rgba(255,255,255,.15)', chipActBdr:'rgba(255,255,255,.35)', chipActC:'#fff',
+  chipBg:'rgba(255,255,255,.04)', chipBdr:'rgba(255,255,255,.12)', chipC:'rgba(255,255,255,.7)',
+}));
+
+// 10 — Copper & Cream
+W(panel({
+  num:'#10', name:'Copper & Cream', badge:'<span class="rec strong">STRONG</span>',
+  why:'Warm copper accents on cream — premium, boutique feel. Like a well-designed law office. Distinctive from typical blue/grey SaaS without being unprofessional.',
+  sceneBg:'#faf6f1', colLbl:'#b87333',
+  panelBg:'#fffefa', panelBorder:'1px solid #ede4d8',
+  headerBg:'#faf5ee', headerLine:'1px solid #ede4d8',
+  logoBg:'linear-gradient(135deg,#b87333,#cd853f)', logoC:'#fff', logoTxt:'#b87333',
+  heading:'#3c2415', desc:'#b87333', lbl:'#c9a882', sub:'#c9a882', divider:'#f0e8dd',
+  pickSelBg:'#faf0e4', pickSelBdr:'#b87333', pickSelIcon:'#b87333', pickSelIconC:'#fff', pickSelTxt:'#7c4a1e',
+  pickBg:'#fffefa', pickBdr:'#ede4d8', pickIcon:'#faf0e4', pickIconC:'#c9a882', pickTxt:'#5a3a1f', pickMeta:'#c9a882',
+  btnPrimBg:'linear-gradient(135deg,#b87333,#cd853f)', btnPrimC:'#fff', btnShadow:'box-shadow:0 2px 10px rgba(184,115,51,.2)',
+  btnSecBg:'#fffefa', btnSecBdr:'#ede4d8', btnSecC:'#b87333',
+  barBg:'#ede4d8', barFill:'#b87333',
+  mkDone:'#ddd4c7', mkActive:'#7c4a1e', mkActiveBg:'#7c4a1e', mkActiveC:'#fff', mkPend:'#ede4d8',
+  ttDone:'#ddd4c7', ttActive:'#3c2415', ttPend:'#8b6536', activeBg:'#faf5ee',
+  tabBg:'#f5ede3', tabActiveBg:'#fffefa', tabActiveC:'#3c2415', tabC:'#c9a882', tabShadow:'box-shadow:0 1px 2px rgba(184,115,51,.08)',
+  catBg:'#faf5ee', catC:'#5a3a1f', catCount:'#c9a882',
+  chipActBg:'#faf0e4', chipActBdr:'#b87333', chipActC:'#3c2415',
+  chipBg:'#fffefa', chipBdr:'#ede4d8', chipC:'#8b6536',
+}));
+
+// 11 — Midnight Ember
+W(panel({
+  num:'#11', name:'Midnight Ember', badge:'<span class="rec fun">BOLD</span>',
+  why:'Near-black with warm amber accents — dramatic, like candlelit council chambers. Works beautifully on high-res displays. The amber accent draws the eye to what matters.',
+  sceneBg:'#151012', colLbl:'#92400e',
+  panelBg:'#1f1a1c', panelBorder:'1px solid #3b2a20',
+  headerBg:'#1c1618', headerLine:'1px solid #3b2a20',
+  logoBg:'#d97706', logoC:'#fff', logoTxt:'#f59e0b',
+  heading:'#fef3c7', desc:'#a87832', lbl:'#92400e', sub:'#92400e', divider:'#3b2a20',
+  pickSelBg:'rgba(217,119,6,.08)', pickSelBdr:'#d97706', pickSelIcon:'#d97706', pickSelIconC:'#fff', pickSelTxt:'#fde68a',
+  pickBg:'#1f1a1c', pickBdr:'#3b2a20', pickIcon:'#2d2024', pickIconC:'#92400e', pickTxt:'#e8d5b5', pickMeta:'#92400e',
+  btnPrimBg:'linear-gradient(135deg,#d97706,#f59e0b)', btnPrimC:'#451a03', btnShadow:'box-shadow:0 2px 12px rgba(217,119,6,.3)',
+  btnSecBg:'#1f1a1c', btnSecBdr:'#3b2a20', btnSecC:'#d4a574',
+  barBg:'#3b2a20', barFill:'#d97706',
+  mkDone:'#3b2a20', mkActive:'#d97706', mkActiveBg:'#d97706', mkActiveC:'#451a03', mkPend:'#4a3528',
+  ttDone:'#4a3528', ttActive:'#fde68a', ttPend:'#d4a574', activeBg:'rgba(217,119,6,.04)',
+  tabBg:'#151012', tabActiveBg:'#1f1a1c', tabActiveC:'#fef3c7', tabC:'#92400e',
+  catBg:'rgba(217,119,6,.05)', catC:'#fde68a', catCount:'#92400e',
+  chipActBg:'rgba(217,119,6,.1)', chipActBdr:'#d97706', chipActC:'#fde68a',
+  chipBg:'#1f1a1c', chipBdr:'#3b2a20', chipC:'#d4a574',
+}));
+
+// 12 — Clean White
+W(panel({
+  num:'#12', name:'Clean White', badge:'<span class="rec strong">STRONG</span>',
+  why:'Radical simplicity — pure white, black text, minimal color. Like a well-typeset document. Maximum readability, zero distraction. For clerks who just want the information.',
+  sceneBg:'#f5f5f5', colLbl:'#a3a3a3',
+  panelBg:'#fff', panelBorder:'1px solid #e5e5e5',
+  headerBg:'#fafafa', headerLine:'1px solid #e5e5e5',
+  logoBg:'#171717', logoC:'#fff', logoTxt:'#525252',
+  heading:'#171717', desc:'#737373', lbl:'#a3a3a3', sub:'#a3a3a3', divider:'#f5f5f5',
+  pickSelBg:'#fafafa', pickSelBdr:'#171717', pickSelIcon:'#171717', pickSelIconC:'#fff', pickSelTxt:'#171717',
+  pickBg:'#fff', pickBdr:'#e5e5e5', pickIcon:'#f5f5f5', pickIconC:'#a3a3a3', pickTxt:'#404040', pickMeta:'#a3a3a3',
+  btnPrimBg:'#171717', btnPrimC:'#fff',
+  btnSecBg:'#fff', btnSecBdr:'#e5e5e5', btnSecC:'#525252',
+  barBg:'#e5e5e5', barFill:'#171717',
+  mkDone:'#d4d4d4', mkActive:'#171717', mkActiveBg:'#171717', mkActiveC:'#fff', mkPend:'#e5e5e5',
+  ttDone:'#d4d4d4', ttActive:'#171717', ttPend:'#525252', activeBg:'#fafafa',
+  tabBg:'#f5f5f5', tabActiveBg:'#fff', tabActiveC:'#171717', tabC:'#a3a3a3', tabShadow:'box-shadow:0 1px 2px rgba(0,0,0,.05)',
+  catBg:'#fafafa', catC:'#171717', catCount:'#a3a3a3',
+  chipActBg:'#f5f5f5', chipActBdr:'#171717', chipActC:'#171717',
+  chipBg:'#fff', chipBdr:'#e5e5e5', chipC:'#525252',
+}));
+
+// 13 — Cosmic Ink Glass
+W(panel({
+  num:'#13', name:'Cosmic Ink Glass', badge:'<span class="rec fun">BOLD</span>',
+  why:'Deep indigo glass — the most refined dark glassmorphism option. Periwinkle accents feel sophisticated, not gamey. Great for evening demos and wow-factor presentations.',
+  sceneBg:'linear-gradient(135deg,#0f0c29,#302b63,#24243e)', colLbl:'rgba(129,140,248,.28)',
+  panelBg:'rgba(255,255,255,.05)', panelBorder:'1px solid rgba(129,140,248,.15)',
+  headerBg:'rgba(129,140,248,.03)', headerLine:'1px solid rgba(129,140,248,.08)',
+  logoBg:'rgba(129,140,248,.15)', logoC:'#818cf8', logoTxt:'rgba(129,140,248,.5)',
+  heading:'#818cf8', desc:'rgba(255,255,255,.35)', lbl:'rgba(129,140,248,.25)', sub:'rgba(129,140,248,.25)', divider:'rgba(129,140,248,.06)',
+  pickSelBg:'rgba(129,140,248,.07)', pickSelBdr:'#818cf8', pickSelIcon:'rgba(129,140,248,.15)', pickSelIconC:'#818cf8', pickSelTxt:'#a5b4fc',
+  pickBg:'rgba(129,140,248,.02)', pickBdr:'rgba(129,140,248,.08)', pickIcon:'rgba(129,140,248,.05)', pickIconC:'rgba(129,140,248,.3)', pickTxt:'rgba(255,255,255,.6)', pickMeta:'rgba(129,140,248,.25)',
+  btnPrimBg:'rgba(129,140,248,.14)', btnPrimC:'#818cf8',
+  btnSecBg:'rgba(129,140,248,.03)', btnSecBdr:'rgba(129,140,248,.1)', btnSecC:'rgba(255,255,255,.48)',
+  barBg:'rgba(129,140,248,.08)', barFill:'#818cf8',
+  mkDone:'rgba(255,255,255,.05)', mkActive:'#818cf8', mkActiveBg:'rgba(129,140,248,.12)', mkActiveC:'#818cf8', mkPend:'rgba(129,140,248,.12)',
+  ttDone:'rgba(255,255,255,.12)', ttActive:'#a5b4fc', ttPend:'rgba(255,255,255,.55)', activeBg:'rgba(129,140,248,.03)',
+  tabBg:'rgba(129,140,248,.04)', tabActiveBg:'rgba(129,140,248,.1)', tabActiveC:'#818cf8', tabC:'rgba(129,140,248,.25)',
+  catBg:'rgba(129,140,248,.04)', catC:'#818cf8', catCount:'rgba(129,140,248,.22)',
+  chipActBg:'rgba(129,140,248,.1)', chipActBdr:'#818cf8', chipActC:'#a5b4fc',
+  chipBg:'rgba(129,140,248,.03)', chipBdr:'rgba(129,140,248,.1)', chipC:'rgba(255,255,255,.5)',
+}));
+
+// 14 — Rose Quartz
+W(panel({
+  num:'#14', name:'Rose Quartz', badge:'',
+  why:'Soft pink is unexpected for gov-tech — could feel fresh and modern, or out of place. Including it because some clerks love it. Works if CivicPulse wants to feel approachable vs authoritative.',
+  sceneBg:'#fff5f5', colLbl:'#f472b6',
+  panelBg:'#fff', panelBorder:'1px solid #fce7f3',
+  headerBg:'linear-gradient(135deg,#fff5f5,#fce7f3)', headerLine:'1px solid #fce7f3',
+  logoBg:'linear-gradient(135deg,#ec4899,#f472b6)', logoC:'#fff', logoTxt:'#db2777',
+  heading:'#831843', desc:'#ec4899', lbl:'#f9a8d4', sub:'#f9a8d4', divider:'#fce7f3',
+  pickSelBg:'#fdf2f8', pickSelBdr:'#db2777', pickSelIcon:'#db2777', pickSelIconC:'#fff', pickSelTxt:'#9d174d',
+  pickBg:'#fff', pickBdr:'#fce7f3', pickIcon:'#fdf2f8', pickIconC:'#f9a8d4', pickTxt:'#831843', pickMeta:'#f9a8d4',
+  btnPrimBg:'linear-gradient(135deg,#db2777,#ec4899)', btnPrimC:'#fff', btnShadow:'box-shadow:0 2px 10px rgba(219,39,119,.2)',
+  btnSecBg:'#fff', btnSecBdr:'#fce7f3', btnSecC:'#ec4899',
+  barBg:'#fce7f3', barFill:'#db2777',
+  mkDone:'#fbcfe8', mkActive:'#9d174d', mkActiveBg:'#9d174d', mkActiveC:'#fff', mkPend:'#fce7f3',
+  ttDone:'#fbcfe8', ttActive:'#831843', ttPend:'#be185d', activeBg:'#fdf2f8',
+  tabBg:'#fdf2f8', tabActiveBg:'#fff', tabActiveC:'#831843', tabC:'#f9a8d4', tabShadow:'box-shadow:0 1px 2px rgba(219,39,119,.06)',
+  catBg:'#fdf2f8', catC:'#831843', catCount:'#f9a8d4',
+  chipActBg:'#fdf2f8', chipActBdr:'#db2777', chipActC:'#831843',
+  chipBg:'#fff', chipBdr:'#fce7f3', chipC:'#be185d',
+}));
+
+// 15 — Slate Storm Glass
+W(panel({
+  num:'#15', name:'Slate Storm Glass', badge:'<span class="rec top">TOP PICK</span>',
+  why:'The best of both worlds — your current slate tokens applied to a dark glass backdrop. Professional readability meets visual depth. This is the "upgrade" button on your current design.',
+  sceneBg:'linear-gradient(135deg,#1e293b,#334155,#475569)', colLbl:'rgba(148,163,184,.4)',
+  panelBg:'rgba(255,255,255,.08)', panelBorder:'1px solid rgba(255,255,255,.12)',
+  headerBg:'rgba(255,255,255,.04)', headerLine:'1px solid rgba(255,255,255,.06)',
+  logoBg:'rgba(255,255,255,.12)', logoC:'#e2e8f0', logoTxt:'#94a3b8',
+  heading:'#e2e8f0', desc:'#64748b', lbl:'#475569', sub:'#475569', divider:'rgba(255,255,255,.06)',
+  pickSelBg:'rgba(255,255,255,.06)', pickSelBdr:'#94a3b8', pickSelIcon:'rgba(255,255,255,.12)', pickSelIconC:'#e2e8f0', pickSelTxt:'#e2e8f0',
+  pickBg:'rgba(255,255,255,.02)', pickBdr:'rgba(255,255,255,.08)', pickIcon:'rgba(255,255,255,.05)', pickIconC:'#64748b', pickTxt:'#cbd5e1', pickMeta:'#475569',
+  btnPrimBg:'rgba(255,255,255,.12)', btnPrimC:'#e2e8f0',
+  btnSecBg:'rgba(255,255,255,.03)', btnSecBdr:'rgba(255,255,255,.08)', btnSecC:'#94a3b8',
+  barBg:'rgba(255,255,255,.08)', barFill:'#94a3b8',
+  mkDone:'rgba(255,255,255,.06)', mkActive:'#e2e8f0', mkActiveBg:'rgba(255,255,255,.1)', mkActiveC:'#e2e8f0', mkPend:'rgba(255,255,255,.1)',
+  ttDone:'rgba(255,255,255,.15)', ttActive:'#f1f5f9', ttPend:'#94a3b8', activeBg:'rgba(255,255,255,.03)',
+  tabBg:'rgba(255,255,255,.04)', tabActiveBg:'rgba(255,255,255,.1)', tabActiveC:'#e2e8f0', tabC:'#475569',
+  catBg:'rgba(255,255,255,.04)', catC:'#cbd5e1', catCount:'#475569',
+  chipActBg:'rgba(255,255,255,.08)', chipActBdr:'#94a3b8', chipActC:'#e2e8f0',
+  chipBg:'rgba(255,255,255,.03)', chipBdr:'rgba(255,255,255,.08)', chipC:'#94a3b8',
+}));
+</script>
+
+</body>
+</html>
