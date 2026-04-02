@@ -14,19 +14,11 @@ import attachmentsRouter from './routes/attachments.js';
 const app = express();
 const PORT = 3001;
 
-// Init database
-initDB();
-console.log('Database initialized');
-
-// Middleware
 app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 app.use(morgan('dev'));
-
-// Static uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Routes
 app.use('/api', meetingsRouter);
 app.use('/api', agendaItemsRouter);
 app.use('/api', bylawsRouter);
@@ -35,6 +27,15 @@ app.use('/api', delegationsRouter);
 app.use('/api', searchRouter);
 app.use('/api', attachmentsRouter);
 
-app.listen(PORT, () => {
-  console.log(`AgendaFlow API running on http://localhost:${PORT}`);
+async function start() {
+  await initDB();
+  console.log('Database initialized');
+  app.listen(PORT, () => {
+    console.log(`AgendaFlow API running on http://localhost:${PORT}`);
+  });
+}
+
+start().catch(err => {
+  console.error('Failed to start:', err);
+  process.exit(1);
 });
