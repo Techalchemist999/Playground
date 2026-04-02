@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda + Rules — 10 Glassmorphism Vibes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #1a1a2e; padding: 32px; }
+  h1 { text-align: center; font-size: 22px; color: #fff; margin-bottom: 6px; }
+  .subtitle { text-align: center; font-size: 13px; color: rgba(255,255,255,.5); margin-bottom: 40px; }
+
+  .design-block { margin-bottom: 56px; }
+  .design-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,.35); margin-bottom: 12px; padding-left: 4px;
+  }
+  .design-label span { color: rgba(255,255,255,.7); font-size: 13px; letter-spacing: 0; text-transform: none; margin-left: 6px; }
+
+  .glass-wrap { border-radius: 20px; padding: 24px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .panel {
+    background: rgba(255,255,255,.12);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 14px; overflow: hidden; min-height: 420px;
+    display: flex; flex-direction: column;
+  }
+
+  .panel-head {
+    padding: 12px 16px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-head h3 {
+    font-size: 10px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase;
+  }
+  .counter { font-size: 9px; font-weight: 600; }
+  .counter b { font-weight: 800; }
+
+  .progress { height: 3px; margin: 0 16px; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 38%; border-radius: 2px; }
+
+  .item-row { display: flex; gap: 10px; padding: 7px 16px; align-items: flex-start; }
+  .marker {
+    width: 18px; height: 18px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 800; flex-shrink: 0;
+  }
+  .item-title { font-size: 11px; font-weight: 600; line-height: 1.4; }
+  .item-sub { font-size: 8px; margin-top: 1px; }
+
+  .body { padding: 8px 12px; flex: 1; }
+  .cat-bar {
+    display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+    border-radius: 8px; margin-bottom: 5px;
+  }
+  .cat-bar span { font-size: 10px; font-weight: 700; }
+  .cat-count { font-size: 8px; margin-left: auto; }
+  .chips { padding: 4px 0 8px 10px; }
+  .chip {
+    display: inline-block; padding: 5px 11px; border-radius: 999px;
+    font-size: 10px; font-weight: 600; margin: 2px;
+  }
+
+  .tab-row { display: flex; justify-content: center; padding: 8px 12px 0; }
+  .tab-group { display: flex; border-radius: 8px; padding: 2px; }
+  .tab {
+    padding: 4px 9px; border: none; border-radius: 6px;
+    font-size: 9px; font-weight: 600; cursor: pointer; background: transparent;
+  }
+
+  /* ===== 1 — Violet Aurora ===== */
+  .g1 .glass-wrap { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .g1 .panel-head { border-bottom: 1px solid rgba(255,255,255,.12); }
+  .g1 .panel-head h3 { color: rgba(255,255,255,.9); }
+  .g1 .counter { color: rgba(255,255,255,.4); } .g1 .counter b { color: rgba(255,255,255,.9); }
+  .g1 .progress { background: rgba(255,255,255,.12); } .g1 .progress-fill { background: rgba(255,255,255,.65); }
+  .g1 .item-row { border-bottom: 1px solid rgba(255,255,255,.06); }
+  .g1 .marker { border: 1.5px solid rgba(255,255,255,.3); color: rgba(255,255,255,.45); }
+  .g1 .marker.active { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.6); color: #fff; }
+  .g1 .marker.done { border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.2); }
+  .g1 .item-title { color: rgba(255,255,255,.8); } .g1 .item-title.done { text-decoration: line-through; color: rgba(255,255,255,.25); }
+  .g1 .item-title.active { color: #fff; font-weight: 700; } .g1 .item-sub { color: rgba(255,255,255,.35); }
+  .g1 .item-row.is-active { background: rgba(255,255,255,.06); }
+  .g1 .cat-bar { background: rgba(255,255,255,.08); } .g1 .cat-bar span { color: rgba(255,255,255,.85); } .g1 .cat-count { color: rgba(255,255,255,.35); }
+  .g1 .chip { border: 1.5px solid rgba(255,255,255,.2); color: rgba(255,255,255,.8); background: rgba(255,255,255,.06); }
+  .g1 .chip.active { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.45); color: #fff; }
+  .g1 .tab-group { background: rgba(255,255,255,.08); } .g1 .tab { color: rgba(255,255,255,.35); } .g1 .tab.active { background: rgba(255,255,255,.18); color: #fff; }
+
+  /* ===== 2 — Ocean Depth ===== */
+  .g2 .glass-wrap { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
+  .g2 .panel { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); }
+  .g2 .panel-head { border-bottom: 1px solid rgba(255,255,255,.08); }
+  .g2 .panel-head h3 { color: #5eead4; }
+  .g2 .counter { color: rgba(94,234,212,.35); } .g2 .counter b { color: #5eead4; }
+  .g2 .progress { background: rgba(94,234,212,.12); } .g2 .progress-fill { background: #5eead4; }
+  .g2 .item-row { border-bottom: 1px solid rgba(255,255,255,.04); }
+  .g2 .marker { border: 1.5px solid rgba(94,234,212,.3); color: rgba(94,234,212,.4); }
+  .g2 .marker.active { background: rgba(94,234,212,.2); border-color: #5eead4; color: #5eead4; }
+  .g2 .marker.done { border-color: rgba(255,255,255,.08); color: rgba(255,255,255,.15); }
+  .g2 .item-title { color: rgba(255,255,255,.75); } .g2 .item-title.done { text-decoration: line-through; color: rgba(255,255,255,.2); }
+  .g2 .item-title.active { color: #5eead4; font-weight: 700; } .g2 .item-sub { color: rgba(94,234,212,.35); }
+  .g2 .item-row.is-active { background: rgba(94,234,212,.06); }
+  .g2 .cat-bar { background: rgba(94,234,212,.08); } .g2 .cat-bar span { color: #5eead4; } .g2 .cat-count { color: rgba(94,234,212,.35); }
+  .g2 .chip { border: 1.5px solid rgba(94,234,212,.2); color: rgba(255,255,255,.7); background: rgba(94,234,212,.06); }
+  .g2 .chip.active { background: rgba(94,234,212,.2); border-color: #5eead4; color: #5eead4; }
+  .g2 .tab-group { background: rgba(94,234,212,.06); } .g2 .tab { color: rgba(94,234,212,.35); } .g2 .tab.active { background: rgba(94,234,212,.15); color: #5eead4; }
+
+  /* ===== 3 — Sunset Blaze ===== */
+  .g3 .glass-wrap { background: linear-gradient(135deg, #f12711, #f5af19); }
+  .g3 .panel { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.22); }
+  .g3 .panel-head { border-bottom: 1px solid rgba(255,255,255,.15); }
+  .g3 .panel-head h3 { color: #fff; }
+  .g3 .counter { color: rgba(255,255,255,.45); } .g3 .counter b { color: #fff; }
+  .g3 .progress { background: rgba(255,255,255,.15); } .g3 .progress-fill { background: #fff; }
+  .g3 .item-row { border-bottom: 1px solid rgba(255,255,255,.08); }
+  .g3 .marker { border: 1.5px solid rgba(255,255,255,.35); color: rgba(255,255,255,.5); }
+  .g3 .marker.active { background: rgba(255,255,255,.3); border-color: #fff; color: #fff; }
+  .g3 .marker.done { border-color: rgba(255,255,255,.15); color: rgba(255,255,255,.2); }
+  .g3 .item-title { color: rgba(255,255,255,.85); } .g3 .item-title.done { text-decoration: line-through; color: rgba(255,255,255,.3); }
+  .g3 .item-title.active { color: #fff; font-weight: 700; } .g3 .item-sub { color: rgba(255,255,255,.4); }
+  .g3 .item-row.is-active { background: rgba(255,255,255,.08); }
+  .g3 .cat-bar { background: rgba(255,255,255,.1); } .g3 .cat-bar span { color: #fff; } .g3 .cat-count { color: rgba(255,255,255,.4); }
+  .g3 .chip { border: 1.5px solid rgba(255,255,255,.25); color: rgba(255,255,255,.85); background: rgba(255,255,255,.08); }
+  .g3 .chip.active { background: rgba(255,255,255,.25); border-color: #fff; color: #fff; }
+  .g3 .tab-group { background: rgba(255,255,255,.1); } .g3 .tab { color: rgba(255,255,255,.4); } .g3 .tab.active { background: rgba(255,255,255,.2); color: #fff; }
+
+  /* ===== 4 — Emerald Mist ===== */
+  .g4 .glass-wrap { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .g4 .panel { background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.2); }
+  .g4 .panel-head { border-bottom: 1px solid rgba(255,255,255,.12); }
+  .g4 .panel-head h3 { color: rgba(255,255,255,.95); }
+  .g4 .counter { color: rgba(255,255,255,.4); } .g4 .counter b { color: #fff; }
+  .g4 .progress { background: rgba(255,255,255,.12); } .g4 .progress-fill { background: rgba(255,255,255,.7); }
+  .g4 .item-row { border-bottom: 1px solid rgba(255,255,255,.06); }
+  .g4 .marker { border: 1.5px solid rgba(255,255,255,.3); color: rgba(255,255,255,.45); }
+  .g4 .marker.active { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.6); color: #fff; }
+  .g4 .marker.done { border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.2); }
+  .g4 .item-title { color: rgba(255,255,255,.82); } .g4 .item-title.done { text-decoration: line-through; color: rgba(255,255,255,.25); }
+  .g4 .item-title.active { color: #fff; font-weight: 700; } .g4 .item-sub { color: rgba(255,255,255,.35); }
+  .g4 .item-row.is-active { background: rgba(255,255,255,.06); }
+  .g4 .cat-bar { background: rgba(255,255,255,.08); } .g4 .cat-bar span { color: rgba(255,255,255,.9); } .g4 .cat-count { color: rgba(255,255,255,.35); }
+  .g4 .chip { border: 1.5px solid rgba(255,255,255,.2); color: rgba(255,255,255,.8); background: rgba(255,255,255,.06); }
+  .g4 .chip.active { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.45); color: #fff; }
+  .g4 .tab-group { background: rgba(255,255,255,.08); } .g4 .tab { color: rgba(255,255,255,.35); } .g4 .tab.active { background: rgba(255,255,255,.18); color: #fff; }
+
+  /* ===== 5 — Midnight Rose ===== */
+  .g5 .glass-wrap { background: linear-gradient(135deg, #2b1055, #d53369); }
+  .g5 .panel { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.15); }
+  .g5 .panel-head { border-bottom: 1px solid rgba(255,255,255,.1); }
+  .g5 .panel-head h3 { color: #fda4af; }
+  .g5 .counter { color: rgba(253,164,175,.35); } .g5 .counter b { color: #fda4af; }
+  .g5 .progress { background: rgba(253,164,175,.12); } .g5 .progress-fill { background: #fda4af; }
+  .g5 .item-row { border-bottom: 1px solid rgba(255,255,255,.05); }
+  .g5 .marker { border: 1.5px solid rgba(253,164,175,.3); color: rgba(253,164,175,.4); }
+  .g5 .marker.active { background: rgba(253,164,175,.2); border-color: #fda4af; color: #fda4af; }
+  .g5 .marker.done { border-color: rgba(255,255,255,.08); color: rgba(255,255,255,.15); }
+  .g5 .item-title { color: rgba(255,255,255,.75); } .g5 .item-title.done { text-decoration: line-through; color: rgba(255,255,255,.2); }
+  .g5 .item-title.active { color: #fda4af; font-weight: 700; } .g5 .item-sub { color: rgba(253,164,175,.35); }
+  .g5 .item-row.is-active { background: rgba(253,164,175,.06); }
+  .g5 .cat-bar { background: rgba(253,164,175,.08); } .g5 .cat-bar span { color: #fda4af; } .g5 .cat-count { color: rgba(253,164,175,.35); }
+  .g5 .chip { border: 1.5px solid rgba(253,164,175,.2); color: rgba(255,255,255,.7); background: rgba(253,164,175,.06); }
+  .g5 .chip.active { background: rgba(253,164,175,.2); border-color: #fda4af; color: #fda4af; }
+  .g5 .tab-group { background: rgba(253,164,175,.06); } .g5 .tab { color: rgba(253,164,175,.35); } .g5 .tab.active { background: rgba(253,164,175,.15); color: #fda4af; }
+
+  /* ===== 6 — Arctic Frost ===== */
+  .g6 .glass-wrap { background: linear-gradient(135deg, #e0eafc, #cfdef3); }
+  .g6 .panel { background: rgba(255,255,255,.55); border-color: rgba(255,255,255,.7); }
+  .g6 .panel-head { border-bottom: 1px solid rgba(0,0,0,.06); }
+  .g6 .panel-head h3 { color: #334155; }
+  .g6 .counter { color: #94a3b8; } .g6 .counter b { color: #1e293b; }
+  .g6 .progress { background: rgba(0,0,0,.06); } .g6 .progress-fill { background: #475569; }
+  .g6 .item-row { border-bottom: 1px solid rgba(0,0,0,.04); }
+  .g6 .marker { border: 1.5px solid #cbd5e1; color: #94a3b8; }
+  .g6 .marker.active { background: #475569; border-color: #475569; color: #fff; }
+  .g6 .marker.done { border-color: #e2e8f0; color: #cbd5e1; }
+  .g6 .item-title { color: #475569; } .g6 .item-title.done { text-decoration: line-through; color: #cbd5e1; }
+  .g6 .item-title.active { color: #0f172a; font-weight: 700; } .g6 .item-sub { color: #94a3b8; }
+  .g6 .item-row.is-active { background: rgba(71,85,105,.04); }
+  .g6 .cat-bar { background: rgba(0,0,0,.04); } .g6 .cat-bar span { color: #334155; } .g6 .cat-count { color: #94a3b8; }
+  .g6 .chip { border: 1.5px solid #cbd5e1; color: #475569; background: rgba(255,255,255,.5); }
+  .g6 .chip.active { background: #475569; border-color: #475569; color: #fff; }
+  .g6 .tab-group { background: rgba(0,0,0,.04); } .g6 .tab { color: #94a3b8; } .g6 .tab.active { background: rgba(255,255,255,.7); color: #334155; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+
+  /* ===== 7 — Neon Noir ===== */
+  .g7 .glass-wrap { background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #0a0a0a); }
+  .g7 .panel { background: rgba(255,255,255,.04); border-color: rgba(168,85,247,.2); }
+  .g7 .panel-head { border-bottom: 1px solid rgba(168,85,247,.12); }
+  .g7 .panel-head h3 { color: #a855f7; text-shadow: 0 0 12px rgba(168,85,247,.4); }
+  .g7 .counter { color: rgba(168,85,247,.35); } .g7 .counter b { color: #a855f7; }
+  .g7 .progress { background: rgba(168,85,247,.1); } .g7 .progress-fill { background: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,.5); }
+  .g7 .item-row { border-bottom: 1px solid rgba(168,85,247,.06); }
+  .g7 .marker { border: 1.5px solid rgba(168,85,247,.3); color: rgba(168,85,247,.4); }
+  .g7 .marker.active { background: rgba(168,85,247,.2); border-color: #a855f7; color: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,.3); }
+  .g7 .marker.done { border-color: rgba(255,255,255,.06); color: rgba(255,255,255,.1); }
+  .g7 .item-title { color: rgba(255,255,255,.65); } .g7 .item-title.done { text-decoration: line-through; color: rgba(255,255,255,.15); }
+  .g7 .item-title.active { color: #a855f7; font-weight: 700; } .g7 .item-sub { color: rgba(168,85,247,.35); }
+  .g7 .item-row.is-active { background: rgba(168,85,247,.04); }
+  .g7 .cat-bar { background: rgba(168,85,247,.06); } .g7 .cat-bar span { color: #a855f7; } .g7 .cat-count { color: rgba(168,85,247,.35); }
+  .g7 .chip { border: 1.5px solid rgba(168,85,247,.2); color: rgba(255,255,255,.6); background: rgba(168,85,247,.04); }
+  .g7 .chip.active { background: rgba(168,85,247,.15); border-color: #a855f7; color: #a855f7; box-shadow: 0 0 6px rgba(168,85,247,.25); }
+  .g7 .tab-group { background: rgba(168,85,247,.04); } .g7 .tab { color: rgba(168,85,247,.3); } .g7 .tab.active { background: rgba(168,85,247,.12); color: #a855f7; }
+
+  /* ===== 8 — Golden Hour ===== */
+  .g8 .glass-wrap { background: linear-gradient(135deg, #f093fb, #f5576c, #fda085); }
+  .g8 .panel { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.25); }
+  .g8 .panel-head { border-bottom: 1px solid rgba(255,255,255,.15); }
+  .g8 .panel-head h3 { color: #fff; }
+  .g8 .counter { color: rgba(255,255,255,.45); } .g8 .counter b { color: #fff; }
+  .g8 .progress { background: rgba(255,255,255,.15); } .g8 .progress-fill { background: #fff; }
+  .g8 .item-row { border-bottom: 1px solid rgba(255,255,255,.08); }
+  .g8 .marker { border: 1.5px solid rgba(255,255,255,.35); color: rgba(255,255,255,.5); }
+  .g8 .marker.active { background: rgba(255,255,255,.3); border-color: #fff; color: #fff; }
+  .g8 .marker.done { border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.2); }
+  .g8 .item-title { color: rgba(255,255,255,.88); } .g8 .item-title.done { text-decoration: line-through; color: rgba(255,255,255,.3); }
+  .g8 .item-title.active { color: #fff; font-weight: 700; } .g8 .item-sub { color: rgba(255,255,255,.4); }
+  .g8 .item-row.is-active { background: rgba(255,255,255,.08); }
+  .g8 .cat-bar { background: rgba(255,255,255,.1); } .g8 .cat-bar span { color: #fff; } .g8 .cat-count { color: rgba(255,255,255,.4); }
+  .g8 .chip { border: 1.5px solid rgba(255,255,255,.25); color: rgba(255,255,255,.85); background: rgba(255,255,255,.08); }
+  .g8 .chip.active { background: rgba(255,255,255,.28); border-color: #fff; color: #fff; }
+  .g8 .tab-group { background: rgba(255,255,255,.1); } .g8 .tab { color: rgba(255,255,255,.4); } .g8 .tab.active { background: rgba(255,255,255,.22); color: #fff; }
+
+  /* ===== 9 — Slate Storm ===== */
+  .g9 .glass-wrap { background: linear-gradient(135deg, #2c3e50, #4ca1af); }
+  .g9 .panel { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.15); }
+  .g9 .panel-head { border-bottom: 1px solid rgba(255,255,255,.1); }
+  .g9 .panel-head h3 { color: #7dd3fc; }
+  .g9 .counter { color: rgba(125,211,252,.35); } .g9 .counter b { color: #7dd3fc; }
+  .g9 .progress { background: rgba(125,211,252,.1); } .g9 .progress-fill { background: #7dd3fc; }
+  .g9 .item-row { border-bottom: 1px solid rgba(255,255,255,.05); }
+  .g9 .marker { border: 1.5px solid rgba(125,211,252,.3); color: rgba(125,211,252,.4); }
+  .g9 .marker.active { background: rgba(125,211,252,.18); border-color: #7dd3fc; color: #7dd3fc; }
+  .g9 .marker.done { border-color: rgba(255,255,255,.08); color: rgba(255,255,255,.15); }
+  .g9 .item-title { color: rgba(255,255,255,.75); } .g9 .item-title.done { text-decoration: line-through; color: rgba(255,255,255,.2); }
+  .g9 .item-title.active { color: #7dd3fc; font-weight: 700; } .g9 .item-sub { color: rgba(125,211,252,.35); }
+  .g9 .item-row.is-active { background: rgba(125,211,252,.05); }
+  .g9 .cat-bar { background: rgba(125,211,252,.07); } .g9 .cat-bar span { color: #7dd3fc; } .g9 .cat-count { color: rgba(125,211,252,.35); }
+  .g9 .chip { border: 1.5px solid rgba(125,211,252,.2); color: rgba(255,255,255,.7); background: rgba(125,211,252,.05); }
+  .g9 .chip.active { background: rgba(125,211,252,.18); border-color: #7dd3fc; color: #7dd3fc; }
+  .g9 .tab-group { background: rgba(125,211,252,.06); } .g9 .tab { color: rgba(125,211,252,.35); } .g9 .tab.active { background: rgba(125,211,252,.14); color: #7dd3fc; }
+
+  /* ===== 10 — Cosmic Ink ===== */
+  .g10 .glass-wrap { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+  .g10 .panel { background: rgba(255,255,255,.06); border-color: rgba(129,140,248,.18); }
+  .g10 .panel-head { border-bottom: 1px solid rgba(129,140,248,.1); }
+  .g10 .panel-head h3 { color: #818cf8; }
+  .g10 .counter { color: rgba(129,140,248,.35); } .g10 .counter b { color: #818cf8; }
+  .g10 .progress { background: rgba(129,140,248,.1); } .g10 .progress-fill { background: #818cf8; }
+  .g10 .item-row { border-bottom: 1px solid rgba(129,140,248,.05); }
+  .g10 .marker { border: 1.5px solid rgba(129,140,248,.25); color: rgba(129,140,248,.35); }
+  .g10 .marker.active { background: rgba(129,140,248,.15); border-color: #818cf8; color: #818cf8; }
+  .g10 .marker.done { border-color: rgba(255,255,255,.06); color: rgba(255,255,255,.1); }
+  .g10 .item-title { color: rgba(255,255,255,.7); } .g10 .item-title.done { text-decoration: line-through; color: rgba(255,255,255,.15); }
+  .g10 .item-title.active { color: #818cf8; font-weight: 700; } .g10 .item-sub { color: rgba(129,140,248,.35); }
+  .g10 .item-row.is-active { background: rgba(129,140,248,.04); }
+  .g10 .cat-bar { background: rgba(129,140,248,.06); } .g10 .cat-bar span { color: #818cf8; } .g10 .cat-count { color: rgba(129,140,248,.3); }
+  .g10 .chip { border: 1.5px solid rgba(129,140,248,.18); color: rgba(255,255,255,.6); background: rgba(129,140,248,.04); }
+  .g10 .chip.active { background: rgba(129,140,248,.15); border-color: #818cf8; color: #818cf8; }
+  .g10 .tab-group { background: rgba(129,140,248,.04); } .g10 .tab { color: rgba(129,140,248,.3); } .g10 .tab.active { background: rgba(129,140,248,.12); color: #818cf8; }
+</style>
+</head>
+<body>
+
+<h1>Agenda + Rules — Glassmorphism Vibes</h1>
+<p class="subtitle">10 frosted-glass designs. Same layout, different gradient backdrops and accent colors.</p>
+
+<!-- TEMPLATE MACRO — each design block follows the same HTML, only the wrapper class changes -->
+
+<!-- ===== 1 — Violet Aurora ===== -->
+<div class="design-block g1">
+  <div class="design-label">#1 <span>Violet Aurora</span></div>
+  <div class="glass-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head"><h3>Agenda</h3><span class="counter"><b>5</b> / 13</span></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row is-active"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row"><div class="tab-group"><div class="tab active">Robert's Rules</div><div class="tab">Procedure Bylaw</div><div class="tab">Past Precedent</div></div></div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip active">Main Motion</span><span class="chip">Adopt/Approve</span></div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Amend</span><span class="chip">Amend the Amendment</span></div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div class="chips"><span class="chip">Postpone Definitely</span><span class="chip">Table</span><span class="chip">Take from Table</span></div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Call the Question</span><span class="chip">Point of Order</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 2 — Ocean Depth ===== -->
+<div class="design-block g2">
+  <div class="design-label">#2 <span>Ocean Depth</span></div>
+  <div class="glass-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head"><h3>Agenda</h3><span class="counter"><b>5</b> / 13</span></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row is-active"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row"><div class="tab-group"><div class="tab active">Robert's Rules</div><div class="tab">Procedure Bylaw</div><div class="tab">Past Precedent</div></div></div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip active">Main Motion</span><span class="chip">Adopt/Approve</span></div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Amend</span><span class="chip">Amend the Amendment</span></div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div class="chips"><span class="chip">Postpone Definitely</span><span class="chip">Table</span><span class="chip">Take from Table</span></div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Call the Question</span><span class="chip">Point of Order</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3 — Sunset Blaze ===== -->
+<div class="design-block g3">
+  <div class="design-label">#3 <span>Sunset Blaze</span></div>
+  <div class="glass-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head"><h3>Agenda</h3><span class="counter"><b>5</b> / 13</span></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row is-active"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row"><div class="tab-group"><div class="tab active">Robert's Rules</div><div class="tab">Procedure Bylaw</div><div class="tab">Past Precedent</div></div></div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip active">Main Motion</span><span class="chip">Adopt/Approve</span></div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Amend</span><span class="chip">Amend the Amendment</span></div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div class="chips"><span class="chip">Postpone Definitely</span><span class="chip">Table</span><span class="chip">Take from Table</span></div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Call the Question</span><span class="chip">Point of Order</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4 — Emerald Mist ===== -->
+<div class="design-block g4">
+  <div class="design-label">#4 <span>Emerald Mist</span></div>
+  <div class="glass-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head"><h3>Agenda</h3><span class="counter"><b>5</b> / 13</span></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row is-active"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row"><div class="tab-group"><div class="tab active">Robert's Rules</div><div class="tab">Procedure Bylaw</div><div class="tab">Past Precedent</div></div></div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip active">Main Motion</span><span class="chip">Adopt/Approve</span></div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Amend</span><span class="chip">Amend the Amendment</span></div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div class="chips"><span class="chip">Postpone Definitely</span><span class="chip">Table</span><span class="chip">Take from Table</span></div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Call the Question</span><span class="chip">Point of Order</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 5 — Midnight Rose ===== -->
+<div class="design-block g5">
+  <div class="design-label">#5 <span>Midnight Rose</span></div>
+  <div class="glass-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head"><h3>Agenda</h3><span class="counter"><b>5</b> / 13</span></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row is-active"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row"><div class="tab-group"><div class="tab active">Robert's Rules</div><div class="tab">Procedure Bylaw</div><div class="tab">Past Precedent</div></div></div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip active">Main Motion</span><span class="chip">Adopt/Approve</span></div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Amend</span><span class="chip">Amend the Amendment</span></div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div class="chips"><span class="chip">Postpone Definitely</span><span class="chip">Table</span><span class="chip">Take from Table</span></div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Call the Question</span><span class="chip">Point of Order</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6 — Arctic Frost ===== -->
+<div class="design-block g6">
+  <div class="design-label">#6 <span>Arctic Frost</span></div>
+  <div class="glass-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head"><h3>Agenda</h3><span class="counter"><b>5</b> / 13</span></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row is-active"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row"><div class="tab-group"><div class="tab active">Robert's Rules</div><div class="tab">Procedure Bylaw</div><div class="tab">Past Precedent</div></div></div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip active">Main Motion</span><span class="chip">Adopt/Approve</span></div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Amend</span><span class="chip">Amend the Amendment</span></div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div class="chips"><span class="chip">Postpone Definitely</span><span class="chip">Table</span><span class="chip">Take from Table</span></div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Call the Question</span><span class="chip">Point of Order</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 7 — Neon Noir ===== -->
+<div class="design-block g7">
+  <div class="design-label">#7 <span>Neon Noir</span></div>
+  <div class="glass-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head"><h3>Agenda</h3><span class="counter"><b>5</b> / 13</span></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row is-active"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row"><div class="tab-group"><div class="tab active">Robert's Rules</div><div class="tab">Procedure Bylaw</div><div class="tab">Past Precedent</div></div></div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip active">Main Motion</span><span class="chip">Adopt/Approve</span></div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Amend</span><span class="chip">Amend the Amendment</span></div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div class="chips"><span class="chip">Postpone Definitely</span><span class="chip">Table</span><span class="chip">Take from Table</span></div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Call the Question</span><span class="chip">Point of Order</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 8 — Golden Hour ===== -->
+<div class="design-block g8">
+  <div class="design-label">#8 <span>Golden Hour</span></div>
+  <div class="glass-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head"><h3>Agenda</h3><span class="counter"><b>5</b> / 13</span></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row is-active"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row"><div class="tab-group"><div class="tab active">Robert's Rules</div><div class="tab">Procedure Bylaw</div><div class="tab">Past Precedent</div></div></div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip active">Main Motion</span><span class="chip">Adopt/Approve</span></div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Amend</span><span class="chip">Amend the Amendment</span></div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div class="chips"><span class="chip">Postpone Definitely</span><span class="chip">Table</span><span class="chip">Take from Table</span></div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Call the Question</span><span class="chip">Point of Order</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 9 — Slate Storm ===== -->
+<div class="design-block g9">
+  <div class="design-label">#9 <span>Slate Storm</span></div>
+  <div class="glass-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head"><h3>Agenda</h3><span class="counter"><b>5</b> / 13</span></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row is-active"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row"><div class="tab-group"><div class="tab active">Robert's Rules</div><div class="tab">Procedure Bylaw</div><div class="tab">Past Precedent</div></div></div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip active">Main Motion</span><span class="chip">Adopt/Approve</span></div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Amend</span><span class="chip">Amend the Amendment</span></div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div class="chips"><span class="chip">Postpone Definitely</span><span class="chip">Table</span><span class="chip">Take from Table</span></div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Call the Question</span><span class="chip">Point of Order</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 10 — Cosmic Ink ===== -->
+<div class="design-block g10">
+  <div class="design-label">#10 <span>Cosmic Ink</span></div>
+  <div class="glass-wrap">
+    <div class="pair">
+      <div class="panel">
+        <div class="panel-head"><h3>Agenda</h3><span class="counter"><b>5</b> / 13</span></div>
+        <div class="progress"><div class="progress-fill"></div></div>
+        <div>
+          <div class="item-row"><div class="marker done">1</div><div><div class="item-title done">Call to Order</div></div></div>
+          <div class="item-row"><div class="marker done">2</div><div><div class="item-title done">Adoption of Agenda</div></div></div>
+          <div class="item-row"><div class="marker done">3</div><div><div class="item-title done">Adoption of Minutes — March 11</div></div></div>
+          <div class="item-row"><div class="marker done">4</div><div><div class="item-title done">Delegations</div></div></div>
+          <div class="item-row"><div class="marker done">5</div><div><div class="item-title done">Public Hearing — Bylaw 1021</div></div></div>
+          <div class="item-row is-active"><div class="marker active">6</div><div><div class="item-title active">CAO Report</div><div class="item-sub">Monthly operations update</div></div></div>
+          <div class="item-row"><div class="marker">7</div><div><div class="item-title">Financial Report — Q1</div></div></div>
+          <div class="item-row"><div class="marker">8</div><div><div class="item-title">New Business</div><div class="item-sub">3 motions</div></div></div>
+          <div class="item-row"><div class="marker">9</div><div><div class="item-title">Correspondence</div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-row"><div class="tab-group"><div class="tab active">Robert's Rules</div><div class="tab">Procedure Bylaw</div><div class="tab">Past Precedent</div></div></div>
+        <div class="body">
+          <div class="cat-bar"><span>Main Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip active">Main Motion</span><span class="chip">Adopt/Approve</span></div>
+          <div class="cat-bar"><span>Amending Motions</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Amend</span><span class="chip">Amend the Amendment</span></div>
+          <div class="cat-bar"><span>Postpone & Defer</span><span class="cat-count">3</span></div>
+          <div class="chips"><span class="chip">Postpone Definitely</span><span class="chip">Table</span><span class="chip">Take from Table</span></div>
+          <div class="cat-bar"><span>Voting & Procedure</span><span class="cat-count">2</span></div>
+          <div class="chips"><span class="chip">Call the Question</span><span class="chip">Point of Order</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
