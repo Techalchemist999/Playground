@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgendaFlow — Municipal Agenda Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#c3d5e8,#d5dff0,#e0eafc);min-height:100vh;color:#334155}
+
+/* Glass utilities */
+.glass{background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.75);border-radius:14px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.glass-h{background:rgba(255,255,255,.35);border-bottom:1px solid rgba(0,0,0,.05)}
+.glass-nav{background:rgba(255,255,255,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.8);box-shadow:0 1px 12px rgba(0,0,0,.04)}
+.glass-input{background:rgba(255,255,255,.5);border:1.5px solid rgba(0,0,0,.08);border-radius:8px;padding:8px 12px;font-size:13px;color:#334155;transition:all .15s;font-family:inherit;outline:none}
+.glass-input:focus{border-color:#475569;background:rgba(255,255,255,.7);box-shadow:0 0 0 3px rgba(71,85,105,.1)}
+.btn-p{background:linear-gradient(135deg,#475569,#64748b);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(71,85,105,.2);transition:all .15s;font-family:inherit}
+.btn-p:hover{box-shadow:0 4px 14px rgba(71,85,105,.3);transform:translateY(-1px)}
+.btn-s{background:rgba(255,255,255,.5);color:#64748b;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;padding:8px 18px;font-weight:600;font-size:13px;cursor:pointer;transition:all .15s;font-family:inherit}
+.btn-s:hover{border-color:#475569;color:#475569}
+.lbl{font-size:8px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#94a3b8}
+.badge{font-size:7px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.5px;text-transform:uppercase;display:inline-block}
+
+/* Nav */
+nav{position:sticky;top:0;z-index:50;padding:10px 24px;display:flex;align-items:center;gap:28px}
+.nav-logo{display:flex;align-items:center;gap:6px}
+.nav-logo-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#475569,#64748b);color:#fff}
+.nav-logo span{font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#475569}
+.nav-links{display:flex;gap:3px}
+.nav-links a{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;text-decoration:none;transition:all .15s}
+.nav-links a:hover{background:rgba(255,255,255,.35);color:#334155}
+.nav-links a.active{background:rgba(255,255,255,.6);color:#1e293b;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+
+/* Layout */
+main{padding:20px 24px}
+.page{display:none}
+.page.active{display:block}
+.three-col{display:grid;grid-template-columns:22% 1fr 24%;gap:16px;height:calc(100vh - 90px)}
+.two-col{display:grid;grid-template-columns:35% 1fr;gap:16px;height:calc(100vh - 140px)}
+
+/* Table */
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 16px;font-size:8px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#94a3b8}
+td{padding:12px 16px;font-size:12px;color:#475569;border-top:1px solid rgba(0,0,0,.03)}
+tr:hover td{background:rgba(255,255,255,.2)}
+
+/* Builder items */
+.b-item{display:flex;gap:8px;padding:7px 14px;align-items:center;border-bottom:1px solid rgba(0,0,0,.03);cursor:pointer;transition:all .1s}
+.b-item:hover{background:rgba(255,255,255,.25)}
+.b-item.sel{background:rgba(71,85,105,.06)}
+.b-grip{color:#cbd5e1;cursor:grab;font-size:10px;flex-shrink:0;user-select:none}
+.b-num{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;background:rgba(255,255,255,.4);border:1px solid rgba(0,0,0,.06);color:#475569;flex-shrink:0}
+.b-title{font-size:11px;font-weight:600;color:#334155;line-height:1.3}
+.b-desc{font-size:8px;color:#94a3b8;margin-top:1px}
+.b-tag{font-size:7px;font-weight:700;padding:1px 6px;border-radius:3px;display:inline-block;margin:2px 2px 0 0}
+.b-time{font-size:8px;color:#94a3b8;flex-shrink:0}
+.b-section{padding:5px 14px;background:rgba(0,0,0,.02);font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#94a3b8;display:flex;align-items:center;justify-content:space-between}
+
+/* Minutes editor */
+.min-item{padding:8px 0}
+.min-item label{font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.min-item textarea{width:100%;border-radius:8px;padding:8px 12px;font-size:12px;color:#334155;border:1.5px solid rgba(0,0,0,.06);background:rgba(255,255,255,.4);font-family:inherit;resize:vertical;outline:none;transition:all .15s}
+.min-item textarea:focus{border-color:#475569;background:rgba(255,255,255,.6)}
+
+/* Bylaw progress */
+.reading-bar{display:flex;gap:3px}
+.reading-dot{width:28px;height:5px;border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="glass-nav">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+    </div>
+    <span>AgendaFlow</span>
+  </div>
+  <div class="nav-links">
+    <a onclick="showPage('meetings')" id="tab-meetings" class="active">Meetings</a>
+    <a onclick="showPage('builder')" id="tab-builder">Agenda Builder</a>
+    <a onclick="showPage('bylaws')" id="tab-bylaws">Bylaws</a>
+    <a onclick="showPage('resolutions')" id="tab-resolutions">Resolutions</a>
+    <a onclick="showPage('minutes')" id="tab-minutes">Minutes</a>
+    <a onclick="showPage('search')" id="tab-search">Search</a>
+  </div>
+  <a href="design-picks.html" style="margin-left:auto;font-size:10px;font-weight:600;color:#94a3b8;text-decoration:none">&larr; Back to Design Picks</a>
+</nav>
+
+<main>
+
+<!-- ==================== MEETINGS PAGE ==================== -->
+<div class="page active" id="page-meetings">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div>
+      <h1 style="font-size:20px;font-weight:800;color:#1e293b">Meetings</h1>
+      <p style="font-size:12px;color:#94a3b8;margin-top:2px">Manage council meetings and their agendas</p>
+    </div>
+    <button class="btn-p" style="font-size:13px;display:flex;align-items:center;gap:6px">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Meeting
+    </button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <select class="glass-input" style="font-size:11px;padding:6px 10px"><option>All Types</option><option>Regular</option><option>Special</option><option>Closed</option><option>Committee of the Whole</option></select>
+    <select class="glass-input" style="font-size:11px;padding:6px 10px"><option>All Statuses</option><option>Draft</option><option>Published</option><option>Completed</option></select>
+  </div>
+  <div class="glass" style="overflow:hidden;max-width:1000px">
+    <table>
+      <thead><tr class="glass-h"><th>Meeting</th><th>Type</th><th>Date</th><th>Status</th><th>Items</th><th></th></tr></thead>
+      <tbody>
+        <tr style="cursor:pointer" onclick="showPage('builder')">
+          <td><div style="font-size:12px;font-weight:700;color:#1e293b">Regular Council Meeting</div><div style="font-size:10px;color:#94a3b8">Council Chambers</div></td>
+          <td>Regular</td><td>Apr 2, 2026 · 7:00 PM</td>
+          <td><span class="badge" style="background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0">DRAFT</span></td>
+          <td>13</td><td><span style="font-size:10px;color:#64748b;cursor:pointer">Edit</span></td>
+        </tr>
+        <tr>
+          <td><div style="font-size:12px;font-weight:700;color:#1e293b">Special Meeting — Budget Review</div><div style="font-size:10px;color:#94a3b8">Council Chambers</div></td>
+          <td>Special</td><td>Mar 28, 2026 · 2:00 PM</td>
+          <td><span class="badge" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe">PUBLISHED</span></td>
+          <td>4</td><td><span style="font-size:10px;color:#64748b;cursor:pointer">Edit</span></td>
+        </tr>
+        <tr>
+          <td><div style="font-size:12px;font-weight:700;color:#1e293b">Closed Session — Personnel</div><div style="font-size:10px;color:#94a3b8">Committee Room</div></td>
+          <td>Closed</td><td>Mar 25, 2026 · 6:00 PM</td>
+          <td><span class="badge" style="background:#f8fafc;color:#475569;border:1px solid #e2e8f0">COMPLETED</span></td>
+          <td>3</td><td><span style="font-size:10px;color:#64748b;cursor:pointer">View</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== AGENDA BUILDER PAGE ==================== -->
+<div class="page" id="page-builder">
+  <div class="three-col">
+    <!-- LEFT: Meeting info + sections -->
+    <div class="glass" style="display:flex;flex-direction:column;overflow:hidden">
+      <div class="glass-h" style="padding:14px 16px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+          <div style="width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#475569,#64748b)">
+            <svg width="9" height="9" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          </div>
+          <span style="font-size:8px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#64748b">AgendaFlow</span>
+          <span class="badge" style="background:#fef3c7;color:#92400e;margin-left:auto">DRAFT</span>
+        </div>
+        <div style="font-size:14px;font-weight:800;color:#1e293b">Regular Council Meeting</div>
+        <div style="display:flex;gap:10px;margin-top:4px;font-size:9px;font-weight:600;color:#64748b">
+          <span>📅 Apr 2, 2026</span><span>🕐 7:00 PM</span>
+        </div>
+        <div style="font-size:9px;color:#94a3b8;margin-top:2px">📍 Council Chambers</div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:8px 0">
+        <div style="padding:0 12px 6px"><div class="lbl">Sections</div></div>
+        <div id="section-nav"></div>
+      </div>
+      <div style="padding:10px 16px;border-top:1px solid rgba(0,0,0,.04);font-size:9px;color:#94a3b8;display:flex;justify-content:space-between">
+        <span>13 items</span><span>~94 min total</span>
+      </div>
+    </div>
+
+    <!-- CENTER: Agenda items -->
+    <div class="glass" style="display:flex;flex-direction:column;overflow:hidden">
+      <div class="glass-h" style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
+        <span class="lbl" style="font-size:9px">Agenda Items</span>
+        <button class="btn-p" style="font-size:10px;padding:5px 12px;display:flex;align-items:center;gap:4px">
+          <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Item
+        </button>
+      </div>
+      <div style="flex:1;overflow-y:auto" id="items-list"></div>
+    </div>
+
+    <!-- RIGHT: Item detail -->
+    <div class="glass" style="display:flex;flex-direction:column;overflow:hidden">
+      <div class="glass-h" style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
+        <span class="lbl" style="font-size:9px">Edit Item</span>
+        <span style="font-size:9px;color:#f87171;cursor:pointer;font-weight:600">Delete</span>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:14px 16px" id="item-detail">
+        <div style="text-align:center;padding:40px 0;color:#cbd5e1">
+          <div style="font-size:28px;margin-bottom:6px;opacity:.3">📝</div>
+          <div style="font-size:12px;font-weight:600;color:#94a3b8">Select an item</div>
+          <div style="font-size:10px;color:#cbd5e1;margin-top:4px">Click an agenda item to edit</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== BYLAWS PAGE ==================== -->
+<div class="page" id="page-bylaws">
+  <div style="margin-bottom:16px"><h1 style="font-size:20px;font-weight:800;color:#1e293b">Bylaw Tracker</h1><p style="font-size:12px;color:#94a3b8;margin-top:2px">Track bylaw readings across meetings</p></div>
+  <div class="glass" style="overflow:hidden;max-width:900px">
+    <table>
+      <thead><tr class="glass-h"><th>Bylaw #</th><th>Title</th><th>Reading</th><th>Status</th><th>Progress</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:700;color:#1e293b">1021</td>
+          <td>Noise Control Amendment Bylaw</td>
+          <td>3rd Reading</td>
+          <td><span class="badge" style="background:#eff6ff;color:#2563eb">ACTIVE</span></td>
+          <td><div class="reading-bar"><div class="reading-dot" style="background:#475569"></div><div class="reading-dot" style="background:#475569"></div><div class="reading-dot" style="background:#475569"></div><div class="reading-dot" style="background:#e2e8f0"></div></div></td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:#1e293b">1022</td>
+          <td>Zoning Amendment — 102 Railway Ave</td>
+          <td>1st Reading</td>
+          <td><span class="badge" style="background:#eff6ff;color:#2563eb">ACTIVE</span></td>
+          <td><div class="reading-bar"><div class="reading-dot" style="background:#475569"></div><div class="reading-dot" style="background:#e2e8f0"></div><div class="reading-dot" style="background:#e2e8f0"></div><div class="reading-dot" style="background:#e2e8f0"></div></div></td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:#1e293b">1018</td>
+          <td>Water Rates Amendment Bylaw</td>
+          <td>Adopted</td>
+          <td><span class="badge" style="background:#f0fdf4;color:#16a34a">ADOPTED</span></td>
+          <td><div class="reading-bar"><div class="reading-dot" style="background:#16a34a"></div><div class="reading-dot" style="background:#16a34a"></div><div class="reading-dot" style="background:#16a34a"></div><div class="reading-dot" style="background:#16a34a"></div></div></td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:#1e293b">1015</td>
+          <td>Extended Business Hours Bylaw</td>
+          <td>2nd Reading</td>
+          <td><span class="badge" style="background:#fffbeb;color:#d97706">DEFERRED</span></td>
+          <td><div class="reading-bar"><div class="reading-dot" style="background:#d97706"></div><div class="reading-dot" style="background:#d97706"></div><div class="reading-dot" style="background:#e2e8f0"></div><div class="reading-dot" style="background:#e2e8f0"></div></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== RESOLUTIONS PAGE ==================== -->
+<div class="page" id="page-resolutions">
+  <div style="margin-bottom:16px"><h1 style="font-size:20px;font-weight:800;color:#1e293b">Resolutions</h1><p style="font-size:12px;color:#94a3b8;margin-top:2px">Council resolutions — 2026</p></div>
+  <div class="glass" style="overflow:hidden;max-width:1000px">
+    <table>
+      <thead><tr class="glass-h"><th>Res #</th><th>Text</th><th>Moved / Seconded</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:700;color:#1e293b;white-space:nowrap">2026-001</td>
+          <td style="font-size:11px;max-width:400px">THAT Council awards the Main Street Beautification Project contract to Northern Landscapes in the amount of $78,500.</td>
+          <td style="font-size:11px;white-space:nowrap">Cllr Rabel / Cllr Johnston</td>
+          <td><span class="badge" style="background:#f0fdf4;color:#16a34a">CARRIED UNANIMOUSLY</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:#1e293b;white-space:nowrap">2026-002</td>
+          <td style="font-size:11px;max-width:400px">THAT Council adopts the minutes of the March 11, 2026 regular meeting as presented.</td>
+          <td style="font-size:11px;white-space:nowrap">Cllr Wall / Cllr Woodill</td>
+          <td><span class="badge" style="background:#f0fdf4;color:#16a34a">CARRIED</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:#1e293b;white-space:nowrap">2026-003</td>
+          <td style="font-size:11px;max-width:400px">THAT Council approves the budget amendment to increase the roads maintenance allocation by $25,000.</td>
+          <td style="font-size:11px;white-space:nowrap">Cllr Johnston / Cllr Rabel</td>
+          <td><span class="badge" style="background:#fef2f2;color:#dc2626">DEFEATED</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== MINUTES PAGE ==================== -->
+<div class="page" id="page-minutes">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div><h1 style="font-size:20px;font-weight:800;color:#1e293b">Minutes</h1><p style="font-size:12px;color:#94a3b8;margin-top:2px">Draft and manage meeting minutes</p></div>
+    <div style="display:flex;gap:8px"><button class="btn-s" style="font-size:11px">Export Word</button><button class="btn-p" style="font-size:11px">Save Draft</button></div>
+  </div>
+  <div class="two-col">
+    <!-- Agenda outline -->
+    <div class="glass" style="display:flex;flex-direction:column;overflow:hidden">
+      <div class="glass-h" style="padding:10px 14px">
+        <div class="lbl" style="font-size:9px">Agenda Outline</div>
+        <div style="font-size:9px;color:#94a3b8;margin-top:2px">Regular Council — Apr 2, 2026</div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:8px" id="minutes-outline"></div>
+    </div>
+    <!-- Editor -->
+    <div class="glass" style="display:flex;flex-direction:column;overflow:hidden">
+      <div class="glass-h" style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
+        <span class="lbl" style="font-size:9px">Minutes Editor</span>
+        <span class="badge" style="background:#fffbeb;color:#d97706;border:1px solid #fde68a">DRAFT</span>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:20px">
+        <div style="text-align:center;margin-bottom:20px">
+          <div style="font-size:13px;font-weight:700;color:#1e293b">MINUTES OF THE REGULAR MEETING OF COUNCIL</div>
+          <div style="font-size:11px;color:#64748b;margin-top:4px">April 2, 2026 — 7:00 PM — Council Chambers</div>
+        </div>
+        <div id="minutes-editor"></div>
+      </div>
+      <div style="padding:10px 16px;border-top:1px solid rgba(0,0,0,.04);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:9px;color:#94a3b8">Status: Draft · Last saved: —</span>
+        <div style="display:flex;gap:6px"><button class="btn-s" style="font-size:10px;padding:5px 12px">Submit for Review</button><button class="btn-p" style="font-size:10px;padding:5px 12px">Save Draft</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SEARCH PAGE ==================== -->
+<div class="page" id="page-search">
+  <h1 style="font-size:20px;font-weight:800;color:#1e293b;margin-bottom:16px">Search & Pending Items</h1>
+  <div style="display:flex;gap:4px;margin-bottom:12px">
+    <span onclick="document.getElementById('search-tab').style.display='block';document.getElementById('pending-tab').style.display='none';this.className='btn-p';this.nextElementSibling.className='btn-s'" class="btn-p" style="font-size:11px;padding:6px 14px;cursor:pointer">Search</span>
+    <span onclick="document.getElementById('pending-tab').style.display='block';document.getElementById('search-tab').style.display='none';this.className='btn-p';this.previousElementSibling.className='btn-s'" class="btn-s" style="font-size:11px;padding:6px 14px;cursor:pointer">Pending Items</span>
+  </div>
+  <div id="search-tab" style="max-width:700px">
+    <input class="glass-input" style="width:100%;font-size:13px;margin-bottom:12px" placeholder="Search meetings, agenda items, bylaws, resolutions...">
+    <div class="glass" style="padding:16px">
+      <div class="lbl" style="margin-bottom:8px">Meetings</div>
+      <div style="padding:6px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background=''">
+        <div style="font-size:12px;font-weight:600;color:#1e293b">Regular Council Meeting</div>
+        <div style="font-size:9px;color:#94a3b8">Apr 2, 2026 · regular</div>
+      </div>
+      <div style="padding:6px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background=''">
+        <div style="font-size:12px;font-weight:600;color:#1e293b">Special Meeting — Budget Review</div>
+        <div style="font-size:9px;color:#94a3b8">Mar 28, 2026 · special</div>
+      </div>
+      <div class="lbl" style="margin:12px 0 8px">Agenda Items</div>
+      <div style="padding:6px 10px;border-radius:8px;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background=''">
+        <div style="font-size:12px;font-weight:600;color:#1e293b">Main Street Beautification Contract Award</div>
+        <div style="font-size:9px;color:#94a3b8">new_business · resolution</div>
+      </div>
+    </div>
+  </div>
+  <div id="pending-tab" style="display:none;max-width:700px">
+    <div class="glass" style="overflow:hidden">
+      <div class="glass-h" style="padding:10px 14px"><span class="lbl" style="font-size:9px">Tabled & Deferred Items Across All Meetings</span></div>
+      <div style="padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.03)">
+        <div style="display:flex;align-items:center;gap:6px"><span class="badge" style="background:#fffbeb;color:#d97706">DEFERRED</span><span style="font-size:12px;font-weight:600;color:#1e293b">Extended Business Hours Bylaw — 2nd Reading</span></div>
+        <div style="font-size:9px;color:#94a3b8;margin-top:2px">From: Regular Council — Dec 17, 2025</div>
+      </div>
+      <div style="padding:12px 16px">
+        <div style="display:flex;align-items:center;gap:6px"><span class="badge" style="background:#fff7ed;color:#ea580c">TABLED</span><span style="font-size:12px;font-weight:600;color:#1e293b">Road Maintenance Budget — 2025</span></div>
+        <div style="font-size:9px;color:#94a3b8;margin-top:2px">From: Regular Council — Feb 10, 2026</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// Page navigation
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// Agenda data
+const items = [
+  { n:1, s:'call_to_order', title:'Call to Order', type:'information', pres:'Mayor Veach', min:1 },
+  { n:2, s:'adoption_of_agenda', title:'Adoption of Agenda', type:'motion', rec:'THAT Council adopts the agenda as presented.', min:2 },
+  { n:3, s:'adoption_of_minutes', title:'Adoption of Minutes — March 11', type:'motion', rec:'THAT Council adopts the minutes of the March 11, 2026 regular meeting as presented.', min:2 },
+  { n:4, s:'delegations', title:'Northern Landscapes — Main Street Project', type:'delegation', pres:'Sarah Chen, Northern Landscapes', min:10, tags:['Delegation'] },
+  { n:5, s:'bylaws', title:'Public Hearing — Bylaw 1021 Noise Control', type:'bylaw', pres:'CAO Williams', rec:'THAT Council give Bylaw 1021 third and final reading.', min:15, tags:['Bylaw','Public'] },
+  { n:6, s:'bylaws', title:'Bylaw 1022 — Zoning Amendment', type:'bylaw', pres:'Planner Davis', rec:'THAT Council give Bylaw 1022 first reading.', min:10, tags:['Bylaw'] },
+  { n:7, s:'reports', title:'CAO Monthly Report', type:'staff_report', pres:'CAO Williams', rec:'THAT Council receive this report for information.', min:10, tags:['Report'] },
+  { n:8, s:'reports', title:'Financial Report — Q1 2026', type:'staff_report', pres:'CFO Thompson', rec:'THAT Council receive the Q1 financial report.', min:15, tags:['Budget'] },
+  { n:9, s:'new_business', title:'Main Street Beautification Contract', type:'resolution', rec:'THAT Council awards the contract to Northern Landscapes for $78,500.', min:10, tags:['Motion'] },
+  { n:10, s:'new_business', title:'Canada Day Celebration Funding', type:'resolution', rec:'THAT Council approves $3,000 from events reserve.', min:10, tags:['Motion'] },
+  { n:11, s:'information_items', title:'Correspondence — Provincial Infrastructure Grant', type:'correspondence', min:3 },
+  { n:12, s:'questions', title:'Question Period', type:'information', min:5 },
+  { n:13, s:'adjournment', title:'Adjournment', type:'motion', min:1 },
+];
+
+const sections = [
+  {key:'call_to_order',label:'Call to Order'},{key:'adoption_of_agenda',label:'Adoption of Agenda'},
+  {key:'adoption_of_minutes',label:'Adoption of Minutes'},{key:'delegations',label:'Delegations'},
+  {key:'unfinished_business',label:'Unfinished Business'},{key:'reports',label:'Reports'},
+  {key:'bylaws',label:'Bylaws'},{key:'new_business',label:'New Business'},
+  {key:'information_items',label:'Information Items'},{key:'questions',label:'Question Period'},
+  {key:'adjournment',label:'Adjournment'},
+];
+
+const tagColors = {
+  Bylaw:{bg:'#fefce8',fg:'#a16207',b:'#fde68a'}, Public:{bg:'#eff6ff',fg:'#2563eb',b:'#bfdbfe'},
+  Delegation:{bg:'#ecfeff',fg:'#0891b2',b:'#a5f3fc'}, Report:{bg:'#f0fdf4',fg:'#16a34a',b:'#bbf7d0'},
+  Budget:{bg:'#fff7ed',fg:'#ea580c',b:'#fed7aa'}, Motion:{bg:'#eef2ff',fg:'#4f46e5',b:'#c7d2fe'},
+};
+
+// Render sections nav
+const secNav = document.getElementById('section-nav');
+sections.forEach(s => {
+  const count = items.filter(i => i.s === s.key).length;
+  secNav.innerHTML += `<div style="display:flex;align-items:center;gap:6px;padding:5px 12px;font-size:10px;font-weight:600;color:#475569;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background=''">
+    <span style="width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;background:rgba(0,0,0,.03);color:#94a3b8">${count}</span>
+    <span style="flex:1">${s.label}</span>
+  </div>`;
+});
+
+// Render agenda items
+const listEl = document.getElementById('items-list');
+let currentSection = '';
+items.forEach((item, idx) => {
+  const sec = sections.find(s => s.key === item.s);
+  if (item.s !== currentSection) {
+    currentSection = item.s;
+    const count = items.filter(i => i.s === item.s).length;
+    listEl.innerHTML += `<div class="b-section"><span>${sec?.label || item.s}</span><span style="font-size:8px;color:#cbd5e1">${count}</span></div>`;
+  }
+  const tags = (item.tags||[]).map(t => {
+    const c = tagColors[t]||{bg:'#f1f5f9',fg:'#475569',b:'#e2e8f0'};
+    return `<span class="b-tag" style="background:${c.bg};color:${c.fg};border:1px solid ${c.b}">${t}</span>`;
+  }).join('');
+
+  listEl.innerHTML += `<div class="b-item" onclick="selectItem(${idx})" id="bitem-${idx}">
+    <span class="b-grip">⠿</span>
+    <span class="b-num">${item.n}</span>
+    <div style="flex:1;min-width:0">
+      <div class="b-title">${item.title}</div>
+      ${item.pres ? `<div class="b-desc">${item.pres}</div>` : ''}
+      ${tags ? `<div style="margin-top:2px">${tags}</div>` : ''}
+    </div>
+    <span class="b-time">${item.min}m</span>
+  </div>`;
+});
+
+// Select item → show edit form
+function selectItem(idx) {
+  document.querySelectorAll('.b-item').forEach(el => el.classList.remove('sel'));
+  document.getElementById('bitem-'+idx).classList.add('sel');
+  const item = items[idx];
+  const sec = sections.find(s => s.key === item.s);
+  const detail = document.getElementById('item-detail');
+  detail.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><div class="lbl" style="margin-bottom:4px">Title</div><input class="glass-input" style="width:100%;font-size:12px" value="${item.title}"></div>
+      <div><div class="lbl" style="margin-bottom:4px">Section</div><select class="glass-input" style="width:100%;font-size:11px">${sections.map(s=>`<option ${s.key===item.s?'selected':''}>${s.label}</option>`).join('')}</select></div>
+      <div><div class="lbl" style="margin-bottom:4px">Type</div><select class="glass-input" style="width:100%;font-size:11px"><option ${item.type==='staff_report'?'selected':''}>Staff Report</option><option ${item.type==='bylaw'?'selected':''}>Bylaw</option><option ${item.type==='resolution'?'selected':''}>Resolution</option><option ${item.type==='delegation'?'selected':''}>Delegation</option><option ${item.type==='information'?'selected':''}>Information</option><option ${item.type==='correspondence'?'selected':''}>Correspondence</option><option ${item.type==='motion'?'selected':''}>Motion</option></select></div>
+      <div><div class="lbl" style="margin-bottom:4px">Presenter</div><input class="glass-input" style="width:100%;font-size:11px" value="${item.pres||''}" placeholder="e.g. CAO Smith"></div>
+      <div><div class="lbl" style="margin-bottom:4px">Est. Minutes</div><input class="glass-input" style="width:100%;font-size:11px" type="number" value="${item.min||''}"></div>
+      <div><div class="lbl" style="margin-bottom:4px">Staff Recommendation</div><textarea class="glass-input" style="width:100%;font-size:11px;resize:vertical" rows="3">${item.rec||''}</textarea></div>
+      <div style="display:flex;gap:12px">
+        <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:#475569;cursor:pointer"><input type="checkbox"> In-Camera</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:#475569;cursor:pointer"><input type="checkbox"> Late Item</label>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn-p" style="flex:1;font-size:11px;padding:8px">Save Changes</button>
+        <button class="btn-s" style="font-size:11px;padding:8px 14px" onclick="document.querySelectorAll('.b-item').forEach(e=>e.classList.remove('sel'));document.getElementById('item-detail').innerHTML='<div style=\\'text-align:center;padding:40px 0;color:#cbd5e1\\'><div style=\\'font-size:28px;margin-bottom:6px;opacity:.3\\'>📝</div><div style=\\'font-size:12px;font-weight:600;color:#94a3b8\\'>Select an item</div></div>'">Cancel</button>
+      </div>
+    </div>`;
+}
+
+// Render minutes outline + editor
+const minutesDraft = {
+  1:'Mayor Veach called the meeting to order at 7:00 PM.',
+  2:'MOVED by Cllr Wall, SECONDED by Cllr Johnston, THAT Council adopts the agenda as presented. CARRIED.',
+  3:'MOVED by Cllr Woodill, SECONDED by Cllr Rabel, THAT Council adopts the minutes of the March 11, 2026 regular meeting as presented. CARRIED.',
+};
+
+const outlineEl = document.getElementById('minutes-outline');
+const editorEl = document.getElementById('minutes-editor');
+items.forEach(item => {
+  const done = item.n <= 5;
+  outlineEl.innerHTML += `<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:10px;${done?'color:#cbd5e1':'color:#475569;font-weight:600'}" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background=''">
+    <span style="width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;${done?'background:#f1f5f9;color:#cbd5e1':'background:rgba(255,255,255,.4);border:1px solid rgba(0,0,0,.05);color:#475569'}">${item.n}</span>
+    <span style="${done?'text-decoration:line-through':''}">${item.title}</span>
+  </div>`;
+
+  editorEl.innerHTML += `<div class="min-item">
+    <label>${item.n}. ${item.title}</label>
+    <textarea rows="2" placeholder="Enter minutes for this section...">${minutesDraft[item.n]||''}</textarea>
+  </div>`;
+});
+</script>
+</body>
+</html>
