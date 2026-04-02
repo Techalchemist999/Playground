@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { COLORS } from '../../styles/tokens';
+import BiteCard from './BiteCard';
 
 const STATUS_STYLES = {
   pending:   { bg: '#f8fafc', color: '#94a3b8', border: '#e2e8f0', label: 'Pending' },
@@ -7,8 +8,27 @@ const STATUS_STYLES = {
   discussed: { bg: '#f1f5f9', color: '#64748b', border: '#cbd5e1', label: 'Discussed' },
 };
 
-export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, transcript = [], status, embedded, accentColor }) {
+export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, transcript = [], status, embedded, accentColor, resolvedMotions = [] }) {
   const [agendaExpanded, setAgendaExpanded] = useState(false);
+  const [expandedItems, setExpandedItems] = useState(new Set());
+
+  // Group resolved motions by agenda item number
+  const motionsByItem = {};
+  resolvedMotions.forEach(m => {
+    const key = m.agendaItemNumber || '—';
+    if (!motionsByItem[key]) motionsByItem[key] = [];
+    motionsByItem[key].push(m);
+  });
+  // Floor motions (no agenda item)
+  const floorMotions = resolvedMotions.filter(m => !m.agendaItemNumber);
+
+  const toggleItem = (num) => {
+    setExpandedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(num)) next.delete(num); else next.add(num);
+      return next;
+    });
+  };
   const total = agendaItems.length;
   const discussed = agendaItems.filter(i => i.status === 'discussed').length;
   const active = agendaItems.filter(i => i.status === 'active').length;
@@ -35,141 +55,155 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, 
               </div>
             </div>
           ) : (
-            <div style={{ flex: 1, overflowY: 'auto' }}>
-              {/* Progress bar */}
-              <div style={{ padding: '8px 10px 6px', flexShrink: 0 }}>
-                <div style={{
-                  height: 5, borderRadius: 3,
-                  background: '#f1f5f9',
-                  overflow: 'hidden',
-                  marginBottom: 4,
-                }}>
+            <div style={{ flex: 1, overflowY: 'auto', background: '#fafafa' }}>
+              {/* Legend header */}
+              <div style={{
+                padding: '8px 12px 6px',
+                borderBottom: '1px solid #e2e8f0',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', color: '#64748b' }}>Agenda Legend</span>
+                  <span style={{ fontSize: 9, color: '#94a3b8' }}><b style={{ color: '#334155' }}>{discussed}</b> / {total}</span>
+                </div>
+                <div style={{ height: 3, borderRadius: 2, background: '#e2e8f0', overflow: 'hidden' }}>
                   <div style={{ display: 'flex', height: '100%' }}>
-                    <div style={{ width: `${pctDiscussed}%`, background: accentColor || '#cbd5e1', transition: 'width .5s, background .3s' }} />
-                    <div style={{ width: `${pctActive}%`, background: `${accentColor || '#cbd5e1'}66`, transition: 'width .5s, background .3s' }} />
+                    <div style={{ width: `${pctDiscussed}%`, background: '#475569', transition: 'width .5s' }} />
+                    <div style={{ width: `${pctActive}%`, background: '#94a3b8', transition: 'width .5s' }} />
                   </div>
                 </div>
-                <span style={{ fontSize: 10, color: COLORS.mutedText }}>
-                  <b style={{ color: COLORS.bodyText }}>{discussed}</b> of {total} discussed
-                </span>
               </div>
 
-              {/* Current agenda item — always visible */}
-              {(() => {
-                const activeItem = agendaItems.find(i => i.status === 'active');
-                if (!activeItem) return null;
-                const idx = agendaItems.indexOf(activeItem);
-                const nextItem = agendaItems[idx + 1];
-                return (
-                  <div style={{ padding: '6px 10px 8px' }}>
-                    <div style={{
-                      background: COLORS.primaryLight,
-                      border: `1.5px solid ${COLORS.primaryBorder}`,
-                      borderRadius: 8, padding: '10px 12px',
-                    }}>
-                      <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: COLORS.primary, marginBottom: 3 }}>
-                        Now Discussing
-                      </div>
-                      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+              {/* Agenda items — map legend style */}
+              <div style={{ padding: '4px 0' }}>
+                {agendaItems.map((item, i) => {
+                  const isActive = item.status === 'active';
+                  const isDone = item.status === 'discussed';
+                  const itemMotions = motionsByItem[item.number] || [];
+                  const hasMotions = itemMotions.length > 0;
+                  const isItemOpen = expandedItems.has(item.number);
+
+                  return (
+                    <div key={item.number || i}>
+                      {/* Item row — map legend entry */}
+                      <div
+                        onClick={() => hasMotions && toggleItem(item.number)}
+                        style={{
+                          display: 'flex', gap: 8, padding: '6px 12px',
+                          borderBottom: '1px dotted #e2e8f0',
+                          cursor: hasMotions ? 'pointer' : 'default',
+                          background: isActive ? '#f1f5f9' : 'transparent',
+                          transition: 'background .15s',
+                        }}
+                      >
+                        {/* Square symbol — like a map legend marker */}
                         <div style={{
-                          width: 22, height: 22, borderRadius: 5,
-                          border: `2px solid ${COLORS.primary}`,
-                          boxShadow: '0 0 0 3px #e2e8f0',
+                          width: 16, height: 16, borderRadius: 2,
+                          border: `1.5px solid ${isActive ? '#0f172a' : isDone ? '#94a3b8' : '#cbd5e1'}`,
+                          background: isActive ? '#0f172a' : 'transparent',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0, fontSize: 10, fontWeight: 700, color: COLORS.primary,
+                          flexShrink: 0, fontSize: 8, fontWeight: 800,
+                          color: isActive ? '#fff' : isDone ? '#94a3b8' : '#64748b',
                         }}>
-                          {activeItem.number}
+                          {item.number || (i + 1)}
                         </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.primary, lineHeight: 1.3 }}>
-                            {activeItem.title}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontSize: 11, fontWeight: isActive ? 700 : 500,
+                            color: isActive ? '#0f172a' : isDone ? '#94a3b8' : '#334155',
+                            lineHeight: 1.3,
+                            textDecoration: isDone ? 'line-through' : 'none',
+                          }}>
+                            {item.title}
                           </div>
-                          {activeItem.description && (
-                            <div style={{ fontSize: 10, color: COLORS.secondaryText, marginTop: 2 }}>
-                              {activeItem.description}
+                          {isActive && item.description && (
+                            <div style={{ fontSize: 9, color: '#64748b', marginTop: 2 }}>{item.description}</div>
+                          )}
+                          {hasMotions && !isItemOpen && (
+                            <div style={{ fontSize: 7, color: '#94a3b8', marginTop: 1 }}>
+                              {itemMotions.length} motion{itemMotions.length > 1 ? 's' : ''}
                             </div>
                           )}
                         </div>
+                        {hasMotions && (
+                          <svg width="8" height="8" fill="none" stroke="#94a3b8" strokeWidth="2" viewBox="0 0 24 24"
+                            style={{ transform: isItemOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s', flexShrink: 0, marginTop: 4 }}>
+                            <polyline points="6 9 12 15 18 9" />
+                          </svg>
+                        )}
                       </div>
+                      {/* Expanded motions — full card design */}
+                      {isItemOpen && hasMotions && (
+                        <div style={{
+                          padding: '8px 12px 10px 28px',
+                          background: '#f8fafc',
+                          borderBottom: '1px dotted #e2e8f0',
+                          display: 'flex', flexDirection: 'column', gap: 8,
+                        }}>
+                          {itemMotions.map((topic, mi) => {
+                            const hasAmend = topic.amendment;
+                            const amendResolved = hasAmend && (hasAmend.status === 'carried' || hasAmend.status === 'defeated');
+                            if (!hasAmend) {
+                              // Simple motion — render as final card (full card with bottom stripe)
+                              return <BiteCard key={topic.normalized_id} topic={topic} index={mi} isNewest={false} accentColor={accentColor} cardMode="final" />;
+                            }
+                            // Motion with amendment — 3-step
+                            return (
+                              <div key={topic.normalized_id} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                                <BiteCard topic={{ ...topic, amendment: { ...hasAmend }, state: 'ACTIVE' }} index={mi} isNewest={false} accentColor={accentColor} cardMode="original" />
+                                <BiteCard topic={topic} index={mi} isNewest={false} accentColor={accentColor} cardMode="amendment" />
+                                {amendResolved && <BiteCard topic={topic} index={mi} isNewest={false} accentColor={accentColor} cardMode="final" />}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                    {nextItem && (
-                      <div style={{ fontSize: 9, color: COLORS.mutedText, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <span style={{ fontWeight: 700 }}>Up Next:</span> {nextItem.number}. {nextItem.title}
+                  );
+                })}
+
+                {/* Floor motions */}
+                {floorMotions.length > 0 && (
+                  <div>
+                    <div
+                      onClick={() => toggleItem('floor')}
+                      style={{
+                        display: 'flex', gap: 8, padding: '6px 12px',
+                        borderBottom: '1px dotted #e2e8f0',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <div style={{
+                        width: 16, height: 16, borderRadius: 2,
+                        border: '1.5px solid #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 9, fontWeight: 800, color: '#94a3b8', flexShrink: 0,
+                      }}>—</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 11, fontWeight: 500, color: '#64748b' }}>Floor Motions</div>
+                        <div style={{ fontSize: 7, color: '#94a3b8' }}>{floorMotions.length} motion{floorMotions.length > 1 ? 's' : ''}</div>
+                      </div>
+                      <svg width="8" height="8" fill="none" stroke="#94a3b8" strokeWidth="2" viewBox="0 0 24 24"
+                        style={{ transform: expandedItems.has('floor') ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s', flexShrink: 0, marginTop: 4 }}>
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </div>
+                    {expandedItems.has('floor') && (
+                      <div style={{ padding: '8px 12px 10px 28px', background: '#f8fafc', borderBottom: '1px dotted #e2e8f0', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {floorMotions.map((topic, mi) => {
+                          const hasAmend = topic.amendment;
+                          const amendResolved = hasAmend && (hasAmend.status === 'carried' || hasAmend.status === 'defeated');
+                          if (!hasAmend) {
+                            return <BiteCard key={topic.normalized_id} topic={topic} index={mi} isNewest={false} accentColor={accentColor} cardMode="final" />;
+                          }
+                          return (
+                            <div key={topic.normalized_id} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                              <BiteCard topic={{ ...topic, amendment: { ...hasAmend }, state: 'ACTIVE' }} index={mi} isNewest={false} accentColor={accentColor} cardMode="original" />
+                              <BiteCard topic={topic} index={mi} isNewest={false} accentColor={accentColor} cardMode="amendment" />
+                              {amendResolved && <BiteCard topic={topic} index={mi} isNewest={false} accentColor={accentColor} cardMode="final" />}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
-                  </div>
-                );
-              })()}
-
-              {/* Accordion — full agenda */}
-              <div style={{ padding: '0 10px 8px' }}>
-                <button
-                  onClick={() => setAgendaExpanded(!agendaExpanded)}
-                  style={{
-                    width: '100%', padding: '6px 10px',
-                    background: agendaExpanded ? '#f8fafc' : '#f1f5f9',
-                    border: `1px solid ${COLORS.cardBorder}`,
-                    borderRadius: agendaExpanded ? '6px 6px 0 0' : 6,
-                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-                    transition: 'all .15s',
-                  }}
-                >
-                  <svg
-                    width="10" height="10" fill="none" stroke={COLORS.mutedText} strokeWidth="2" viewBox="0 0 24 24"
-                    style={{ transform: agendaExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s' }}
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                  <span style={{ fontSize: 9, fontWeight: 600, color: COLORS.secondaryText }}>
-                    Full Agenda ({total} items)
-                  </span>
-                </button>
-                {agendaExpanded && (
-                  <div style={{
-                    border: `1px solid ${COLORS.cardBorder}`, borderTop: 'none',
-                    borderRadius: '0 0 6px 6px', background: '#fff',
-                    maxHeight: 300, overflowY: 'auto',
-                  }}>
-                    {agendaItems.map((item, i) => {
-                      const st = STATUS_STYLES[item.status] || STATUS_STYLES.pending;
-                      const isActive = item.status === 'active';
-                      return (
-                        <div
-                          key={item.number || i}
-                          style={{
-                            display: 'flex', gap: 8, padding: '6px 12px',
-                            borderLeft: isActive ? `3px solid ${COLORS.primary}` : '3px solid transparent',
-                            background: isActive ? COLORS.primaryLight : 'transparent',
-                            transition: 'all .3s',
-                          }}
-                        >
-                          <div style={{
-                            width: 18, height: 18, borderRadius: 4,
-                            border: `${isActive ? '2' : '1.5'}px solid ${isActive ? COLORS.primary : st.border}`,
-                            boxShadow: isActive ? '0 0 0 3px #e2e8f0' : 'none',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            flexShrink: 0, fontSize: 8, fontWeight: 700, color: st.color,
-                          }}>
-                            {item.number || (i + 1)}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{
-                              fontSize: 10, fontWeight: 600,
-                              color: isActive ? COLORS.primary : item.status === 'discussed' ? COLORS.mutedText : COLORS.headingText,
-                              lineHeight: 1.3,
-                              textDecoration: item.status === 'discussed' ? 'line-through' : 'none',
-                            }}>
-                              {item.title}
-                            </div>
-                            {item.description && (
-                              <div style={{ fontSize: 9, color: COLORS.mutedText, marginTop: 1 }}>
-                                {item.description}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
                   </div>
                 )}
               </div>

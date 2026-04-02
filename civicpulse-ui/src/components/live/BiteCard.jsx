@@ -251,9 +251,9 @@ export default function BiteCard({ topic, index, isNewest, accentColor, cardMode
   return (
     <div style={{
       background: '#fff',
-      borderRadius: isFinalMode ? '0 0 12px 12px' : isOriginalMode && topic.amendment ? '12px 12px 0 0' : 12,
+      borderRadius: (isFinalMode && amendment) ? '0 0 12px 12px' : isOriginalMode && topic.amendment ? '12px 12px 0 0' : 12,
       border: `1px solid ${COLORS.cardBorder}`,
-      borderTop: isFinalMode ? 'none' : `1px solid ${COLORS.cardBorder}`,
+      borderTop: (isFinalMode && amendment) ? 'none' : `1px solid ${COLORS.cardBorder}`,
       borderBottom: isOriginalMode && topic.amendment ? 'none' : `1px solid ${COLORS.cardBorder}`,
       overflow: 'hidden',
       flexShrink: 0,
@@ -276,8 +276,8 @@ export default function BiteCard({ topic, index, isNewest, accentColor, cardMode
         </div>
       )}
 
-      {/* Colour top bar — hidden on final mode (connects to accordion) */}
-      {!isFinalMode && (
+      {/* Colour top bar — hidden on final mode with amendment (connects to accordion) */}
+      {!(isFinalMode && amendment) && (
         <div style={{ height: 3, background: `linear-gradient(90deg, ${barColor}, ${barColor}55, transparent)` }} />
       )}
 

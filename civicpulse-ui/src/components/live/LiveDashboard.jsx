@@ -191,9 +191,8 @@ function snapPx(val) {
 
 // Panels: all values in % so they scale with window size
 const DEFAULT_PANELS = [
-  { id: 'agenda',   xPct: 1.5,  yPct: 2,   wPct: 17,  hPct: 96 },
-  { id: 'history',  xPct: 19.5, yPct: 2,   wPct: 48,  hPct: 46 },
-  { id: 'floor',    xPct: 19.5, yPct: 50,  wPct: 48,  hPct: 48 },
+  { id: 'agenda',   xPct: 1.5,  yPct: 2,   wPct: 25,  hPct: 96 },
+  { id: 'floor',    xPct: 27.5, yPct: 2,   wPct: 40,  hPct: 96 },
   { id: 'rules',    xPct: 68.5, yPct: 2,   wPct: 30,  hPct: 54 },
   { id: 'topics',   xPct: 68.5, yPct: 58,  wPct: 30,  hPct: 40 },
 ];
@@ -393,6 +392,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
         }}
       >
         {/* Agenda */}
+        {/* Agenda + Procedural Bites combined */}
         <div style={panelStyle('agenda')}>
           <div style={{ position: 'relative', display: 'flex', flex: 1, minHeight: 0 }}>
             <BentoPanel
@@ -413,28 +413,10 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                 status={session.status}
                 embedded
                 accentColor={accentColor}
+                resolvedMotions={Array.from(session.topics.values()).filter(t => t.state === 'EXPIRED' && t.category === 'motion')}
               />
             </BentoPanel>
             <EdgeHandles onEdgeDrag={(edge, e) => startDrag('agenda', e, edge)} />
-          </div>
-        </div>
-
-        {/* Procedural Bites — History */}
-        <div style={panelStyle('history')}>
-          <div style={{ position: 'relative', display: 'flex', flex: 1, minHeight: 0 }}>
-            <BentoPanel
-              title="Procedural Bites"
-              icon={iconBites}
-              badge={`${Array.from(session.topics.values()).filter(t => t.state === 'EXPIRED' && t.category === 'motion').length}`}
-              style={{ flex: 1, minHeight: 0 }}
-              headerProps={{
-                onMouseDown: (e) => startDrag('history', e, 'move'),
-                style: dragHandleStyle,
-              }}
-            >
-              <PBHistory topics={session.topics} agendaItems={session.agendaItems} accentColor={accentColor} />
-            </BentoPanel>
-            <EdgeHandles onEdgeDrag={(edge, e) => startDrag('history', e, edge)} />
           </div>
         </div>
 

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Procedure Alert (15 Designs)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:28px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;max-width:1200px;margin:0 auto;}
+.cat-label{grid-column:1/-1;font-size:12px;font-weight:800;color:#475569;letter-spacing:.5px;padding:12px 0 4px;border-bottom:1px solid #e2e8f0;margin-top:8px;}
+.sw{background:#fff;border-radius:12px;border:2px solid #e2e8f0;overflow:hidden;cursor:pointer;transition:all .3s;box-shadow:0 2px 8px rgba(0,0,0,.02);}
+.sw:hover{border-color:#a5b4fc;box-shadow:0 6px 20px rgba(99,102,241,.12);transform:translateY(-2px);}
+.sw.selected{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+.sh{padding:8px 12px 6px;display:flex;align-items:baseline;gap:6px;border-bottom:1px solid #f1f5f9;}
+.sh h2{font-size:11px;font-weight:700;color:#0f172a;}
+.sh p{font-size:8px;color:#94a3b8;margin-left:auto;font-style:italic;}
+.preview{padding:8px;background:#f8fafc;}
+.alert-area{display:flex;flex-direction:column;gap:4px;}
+#result{display:none;max-width:1200px;margin:20px auto 0;background:#fff;border-radius:12px;border:2px solid #6366f1;padding:14px;text-align:center;}
+#result .label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+#result .pick{font-size:16px;font-weight:800;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div style="max-width:1200px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>Procedure Alert — 15 Designs</h1>
+  <p class="subtitle">Three categories: Glassmorphism (1-5), Minimalism (6-10), Cartographic (11-15). Each shows two alerts: Motion Procedure + Voting.</p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const a1 = { sec: 's.11', title: 'Motion Procedure', rule: 'A motion must be moved and seconded before being debated or voted upon.', time: '7:06 PM' };
+const a2 = { sec: 's.12', title: 'Voting', rule: 'Each member present must vote unless they have a conflict of interest.', time: '7:08 PM' };
+const x = `<svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+
+const designs = [
+  // ===== GLASSMORPHISM (1-5) =====
+  { cat: 'Glassmorphism', id:'g1', num:'01', name:'Frosted Panel',
+    desc:'Translucent frosted glass with blur backdrop',
+    html: `<div style="padding:8px;background:linear-gradient(135deg,#e0e7ff,#f0fdf4);border-radius:8px;">
+      <div class="alert-area">${[a1,a2].map(a=>`<div style="backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.5);border-radius:10px;padding:8px 10px;box-shadow:0 4px 16px rgba(0,0,0,.04);">
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">
+          <span style="font-size:7px;font-weight:700;color:#475569;background:rgba(255,255,255,.6);padding:1px 5px;border-radius:3px;">${a.sec}</span>
+          <span style="font-size:9px;font-weight:700;color:#0f172a;">${a.title}</span>
+          <span style="font-size:7px;color:#94a3b8;margin-left:auto;">${a.time}</span>
+          <span style="color:#94a3b8;cursor:pointer;opacity:.4;">${x}</span>
+        </div>
+        <div style="font-size:9px;color:#475569;line-height:1.5;">${a.rule}</div>
+      </div>`).join('')}</div>
+    </div>`
+  },
+  { cat: 'Glassmorphism', id:'g2', num:'02', name:'Glass Card Stack',
+    desc:'Stacked glass cards with depth shadows',
+    html: `<div style="padding:8px;background:linear-gradient(160deg,#dbeafe,#ede9fe);border-radius:8px;">
+      <div class="alert-area">${[a1,a2].map((a,i)=>`<div style="backdrop-filter:blur(16px);background:rgba(255,255,255,${.65+i*.1});border:1px solid rgba(255,255,255,.4);border-radius:12px;padding:8px 12px;box-shadow:0 ${8-i*3}px ${20-i*6}px rgba(0,0,0,.06);transform:translateY(${i*-2}px);">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:24px;height:24px;border-radius:8px;background:rgba(99,102,241,.1);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#6366f1;">!</div>
+          <div style="flex:1;"><div style="font-size:9px;font-weight:700;color:#0f172a;">${a.sec} — ${a.title}</div><div style="font-size:8px;color:#475569;line-height:1.5;margin-top:1px;">${a.rule}</div></div>
+          <span style="color:#94a3b8;cursor:pointer;opacity:.3;">${x}</span>
+        </div>
+      </div>`).join('')}</div>
+    </div>`
+  },
+  { cat: 'Glassmorphism', id:'g3', num:'03', name:'Frosted Sidebar',
+    desc:'Left accent glow with frosted body',
+    html: `<div style="padding:8px;background:linear-gradient(135deg,#f0fdf4,#ecfeff);border-radius:8px;">
+      <div class="alert-area">${[a1,a2].map(a=>`<div style="display:flex;backdrop-filter:blur(10px);background:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.4);border-radius:0 10px 10px 0;border-left:3px solid rgba(71,85,105,.3);padding:7px 10px;box-shadow:0 2px 12px rgba(0,0,0,.03);">
+        <div style="flex:1;"><div style="font-size:7px;font-weight:700;color:rgba(71,85,105,.6);margin-bottom:2px;">${a.sec} · ${a.time}</div><div style="font-size:9px;font-weight:700;color:#0f172a;margin-bottom:1px;">${a.title}</div><div style="font-size:8px;color:#475569;line-height:1.5;">${a.rule}</div></div>
+        <span style="color:#94a3b8;cursor:pointer;opacity:.3;align-self:flex-start;">${x}</span>
+      </div>`).join('')}</div>
+    </div>`
+  },
+  { cat: 'Glassmorphism', id:'g4', num:'04', name:'Orb Glow Alert',
+    desc:'Glowing orb icon with frosted glass card',
+    html: `<div style="padding:8px;background:#f1f5f9;border-radius:8px;">
+      <div class="alert-area">${[a1,a2].map(a=>`<div style="display:flex;align-items:flex-start;gap:8px;backdrop-filter:blur(8px);background:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.5);border-radius:10px;padding:8px 10px;">
+        <div style="width:20px;height:20px;border-radius:50%;background:rgba(71,85,105,.08);box-shadow:0 0 12px rgba(71,85,105,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+          <svg width="10" height="10" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01"/><circle cx="12" cy="12" r="10" stroke-width="1.5"/></svg>
+        </div>
+        <div style="flex:1;"><div style="font-size:9px;font-weight:700;color:#0f172a;margin-bottom:1px;">${a.title} <span style="font-weight:500;color:#94a3b8;">· ${a.sec}</span></div><div style="font-size:8px;color:#475569;line-height:1.5;">${a.rule}</div></div>
+      </div>`).join('')}</div>
+    </div>`
+  },
+  { cat: 'Glassmorphism', id:'g5', num:'05', name:'Floating Toast',
+    desc:'Floating glass toasts with subtle border glow',
+    html: `<div style="padding:8px;background:linear-gradient(180deg,#f8fafc,#f1f5f9);border-radius:8px;">
+      <div class="alert-area">${[a1,a2].map(a=>`<div style="backdrop-filter:blur(14px);background:rgba(255,255,255,.8);border:1px solid rgba(203,213,225,.3);border-radius:999px;padding:6px 14px;display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(0,0,0,.03);">
+        <span style="font-size:7px;font-weight:700;color:#64748b;background:#f1f5f9;padding:2px 5px;border-radius:3px;">${a.sec}</span>
+        <span style="font-size:9px;font-weight:600;color:#0f172a;flex:1;">${a.title}</span>
+        <span style="font-size:7px;color:#94a3b8;">${a.time}</span>
+      </div>`).join('')}</div>
+    </div>`
+  },
+  // ===== MINIMALISM (6-10) =====
+  { cat: 'Minimalism', id:'m1', num:'06', name:'Single Line',
+    desc:'One-line alert — section + title only. Ultra compact.',
+    html: `<div class="alert-area">${[a1,a2].map(a=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;">
+      <div style="width:4px;height:4px;border-radius:50%;background:#94a3b8;flex-shrink:0;"></div>
+      <span style="font-size:8px;font-weight:700;color:#64748b;">${a.sec}</span>
+      <span style="font-size:9px;color:#334155;flex:1;">${a.title}</span>
+      <span style="font-size:7px;color:#cbd5e1;">${a.time}</span>
+    </div>`).join('')}</div>`
+  },
+  { cat: 'Minimalism', id:'m2', num:'07', name:'Underline Rule',
+    desc:'Title with subtle underline. Rule text on hover/expand.',
+    html: `<div class="alert-area">${[a1,a2].map(a=>`<div style="padding:5px 8px;border-bottom:1px solid #f1f5f9;">
+      <div style="display:flex;align-items:baseline;gap:6px;">
+        <span style="font-size:8px;color:#cbd5e1;">${a.sec}</span>
+        <span style="font-size:10px;font-weight:600;color:#0f172a;">${a.title}</span>
+        <span style="font-size:7px;color:#cbd5e1;margin-left:auto;">${a.time}</span>
+      </div>
+      <div style="font-size:8px;color:#94a3b8;margin-top:2px;line-height:1.5;">${a.rule}</div>
+    </div>`).join('')}</div>`
+  },
+  { cat: 'Minimalism', id:'m3', num:'08', name:'Left Bar Mono',
+    desc:'Thin grey left bar. No background color, no border.',
+    html: `<div class="alert-area" style="padding:4px;">${[a1,a2].map(a=>`<div style="border-left:2px solid #cbd5e1;padding:4px 10px;margin-bottom:4px;">
+      <div style="font-size:9px;font-weight:700;color:#0f172a;">${a.title}</div>
+      <div style="font-size:8px;color:#64748b;line-height:1.5;margin-top:1px;">${a.rule}</div>
+      <div style="font-size:7px;color:#cbd5e1;margin-top:2px;">${a.sec} · ${a.time}</div>
+    </div>`).join('')}</div>`
+  },
+  { cat: 'Minimalism', id:'m4', num:'09', name:'Number Badge',
+    desc:'Large section number, title beside it. Rule below. Clean.',
+    html: `<div class="alert-area" style="padding:4px;">${[a1,a2].map(a=>`<div style="display:flex;gap:8px;padding:6px 4px;border-bottom:1px solid #f8fafc;">
+      <div style="font-size:16px;font-weight:800;color:#e2e8f0;line-height:1;min-width:24px;text-align:right;">${a.sec.replace('s.','')}</div>
+      <div style="flex:1;"><div style="font-size:10px;font-weight:700;color:#0f172a;margin-bottom:1px;">${a.title}</div><div style="font-size:8px;color:#64748b;line-height:1.5;">${a.rule}</div></div>
+    </div>`).join('')}</div>`
+  },
+  { cat: 'Minimalism', id:'m5', num:'10', name:'Pill Strip',
+    desc:'Alerts as horizontal pill strip at the bottom',
+    html: `<div style="display:flex;flex-wrap:wrap;gap:3px;padding:6px;">${[a1,a2].map(a=>`<div style="display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:#f8fafc;border:1px solid #e2e8f0;">
+      <span style="font-size:7px;font-weight:700;color:#64748b;">${a.sec}</span>
+      <span style="font-size:9px;font-weight:600;color:#334155;">${a.title}</span>
+    </div>`).join('')}</div>`
+  },
+  // ===== CARTOGRAPHIC (11-15) =====
+  { cat: 'Cartographic', id:'c1', num:'11', name:'Map Legend',
+    desc:'Styled like a map legend — symbol + label + description',
+    html: `<div style="padding:6px 8px;background:#fafaf8;border:1px solid #e8e5de;border-radius:6px;">
+      <div style="font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8b7355;margin-bottom:4px;border-bottom:1px solid #e8e5de;padding-bottom:3px;">Procedure Legend</div>
+      ${[a1,a2].map(a=>`<div style="display:flex;gap:6px;padding:4px 0;border-bottom:1px dotted #e8e5de;">
+        <div style="width:14px;height:14px;border:1.5px solid #8b7355;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#8b7355;flex-shrink:0;">${a.sec.replace('s.','')}</div>
+        <div style="flex:1;"><div style="font-size:9px;font-weight:700;color:#5c4b28;">${a.title}</div><div style="font-size:8px;color:#8b7355;line-height:1.5;">${a.rule}</div></div>
+      </div>`).join('')}
+    </div>`
+  },
+  { cat: 'Cartographic', id:'c2', num:'12', name:'Compass Rose',
+    desc:'Directional markers with dotted borders, parchment feel',
+    html: `<div style="padding:8px;background:#fefdfb;border-radius:6px;">
+      ${[a1,a2].map(a=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border:1px dashed #d4c8a8;border-radius:6px;margin-bottom:4px;background:#faf8f2;">
+        <div style="font-size:14px;color:#c9a96e;flex-shrink:0;">◆</div>
+        <div style="flex:1;"><div style="font-size:9px;font-weight:700;color:#5c4b28;font-variant:small-caps;">${a.sec} — ${a.title}</div><div style="font-size:8px;color:#8b7355;line-height:1.5;margin-top:1px;">${a.rule}</div></div>
+      </div>`).join('')}
+    </div>`
+  },
+  { cat: 'Cartographic', id:'c3', num:'13', name:'Survey Marker',
+    desc:'Numbered survey pins with measurement-style lines',
+    html: `<div style="padding:6px 8px;position:relative;">
+      <div style="position:absolute;left:14px;top:20px;bottom:10px;width:1px;border-left:1px dashed #c9b88c;"></div>
+      ${[a1,a2].map((a,i)=>`<div style="display:flex;align-items:flex-start;gap:10px;padding:6px 0;position:relative;">
+        <div style="width:18px;height:18px;border-radius:50%;background:#faf8f2;border:2px solid #c9a96e;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#8b7355;flex-shrink:0;z-index:1;">${i+1}</div>
+        <div style="flex:1;padding:4px 8px;background:#fefdfb;border:1px solid #e8e5de;border-radius:4px;">
+          <div style="font-size:9px;font-weight:700;color:#5c4b28;">${a.title} <span style="font-weight:500;color:#c9a96e;">[${a.sec}]</span></div>
+          <div style="font-size:8px;color:#8b7355;line-height:1.5;margin-top:1px;">${a.rule}</div>
+        </div>
+      </div>`).join('')}
+    </div>`
+  },
+  { cat: 'Cartographic', id:'c4', num:'14', name:'Topographic Lines',
+    desc:'Contour-line borders, elevation numbers, earthy palette',
+    html: `<div style="padding:6px;background:#f8f6f0;border-radius:6px;">
+      ${[a1,a2].map(a=>`<div style="padding:6px 10px;margin-bottom:4px;border-radius:6px;border:1.5px solid #d4c8a8;background:linear-gradient(135deg,#fefdfb,#faf8f2);position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-4px;right:-4px;width:40px;height:40px;border:1px solid rgba(201,169,110,.15);border-radius:50%;"></div>
+        <div style="position:absolute;top:-10px;right:-10px;width:56px;height:56px;border:1px solid rgba(201,169,110,.08);border-radius:50%;"></div>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+          <span style="font-size:11px;font-weight:800;color:#c9a96e;font-family:Georgia,serif;">${a.sec.replace('s.','')}</span>
+          <span style="font-size:9px;font-weight:700;color:#5c4b28;">${a.title}</span>
+          <span style="font-size:7px;color:#c9a96e;margin-left:auto;">${a.time}</span>
+        </div>
+        <div style="font-size:8px;color:#8b7355;line-height:1.5;">${a.rule}</div>
+      </div>`).join('')}
+    </div>`
+  },
+  { cat: 'Cartographic', id:'c5', num:'15', name:'Aged Parchment',
+    desc:'Weathered paper look, serif titles, wax-seal section markers',
+    html: `<div style="padding:8px;background:linear-gradient(160deg,#faf6ee,#f5f0e4);border-radius:6px;border:1px solid #e0d8c4;">
+      ${[a1,a2].map(a=>`<div style="padding:8px 10px;border-bottom:1px solid #e8e0cc;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+          <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#c9a96e,#a07850);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 1px 3px rgba(139,115,85,.3);">${a.sec.replace('s.','')}</div>
+          <span style="font-size:10px;font-weight:700;color:#3d2b14;font-family:Georgia,serif;">${a.title}</span>
+          <span style="font-size:7px;color:#b8a080;margin-left:auto;font-style:italic;">${a.time}</span>
+        </div>
+        <div style="font-size:9px;color:#6b5a3c;line-height:1.6;padding-left:26px;">${a.rule}</div>
+      </div>`).join('')}
+    </div>`
+  },
+];
+
+// Group by category
+const categories = ['Glassmorphism','Minimalism','Cartographic'];
+let html = '';
+categories.forEach(cat => {
+  html += `<div class="cat-label">${cat}</div>`;
+  designs.filter(d => d.cat === cat).forEach(d => {
+    html += `<div class="sw" onclick="select(this,'${d.id}')">
+      <div class="sh"><span class="tag">${d.num}</span><h2>${d.name}</h2><p>${d.desc}</p></div>
+      <div class="preview">${d.html}</div>
+    </div>`;
+  });
+});
+document.getElementById('grid').innerHTML = html;
+
+const nm={};designs.forEach(d=>nm[d.id]=`${d.num} — ${d.name}`);
+function select(el,id){document.querySelectorAll('.sw').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');document.getElementById('result').style.display='block';document.getElementById('pick-text').textContent=nm[id];}
+</script>
+</body>
+</html>
