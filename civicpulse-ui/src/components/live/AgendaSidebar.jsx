@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { COLORS } from '../../styles/tokens';
-import RuleAlert from './RuleAlert';
 
 const STATUS_STYLES = {
   pending:   { bg: '#f8fafc', color: '#94a3b8', border: '#e2e8f0', label: 'Pending' },
@@ -179,8 +178,6 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, 
         </div>
       )}
 
-      {/* Rule alerts — always visible at bottom */}
-      <RuleAlert topics={topics} transcript={transcript} />
     </div>
   );
 }

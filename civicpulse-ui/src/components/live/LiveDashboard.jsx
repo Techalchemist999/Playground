@@ -9,6 +9,57 @@ import QuickMotion from './QuickMotion';
 import RulesPanel from './RulesPanel';
 import SessionControls from './SessionControls';
 
+// Topics + Clerk Notes in one panel with tabs
+function TopicsNotesTabbed({ topics, status }) {
+  const [tab, setTab] = useState('topics'); // 'topics' | 'notes'
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+      <div style={{
+        display: 'flex', justifyContent: 'center',
+        padding: '6px 10px 0', flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: 6, padding: 2 }}>
+          <button
+            onClick={() => setTab('topics')}
+            style={{
+              padding: '3px 8px', border: 'none', borderRadius: 4, cursor: 'pointer',
+              background: tab === 'topics' ? '#fff' : 'transparent',
+              boxShadow: tab === 'topics' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              fontSize: 9, fontWeight: 600,
+              color: tab === 'topics' ? '#475569' : '#94a3b8',
+              transition: 'all .15s',
+              display: 'flex', alignItems: 'center', gap: 3,
+            }}
+          >
+            <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+            Topics
+          </button>
+          <button
+            onClick={() => setTab('notes')}
+            style={{
+              padding: '3px 8px', border: 'none', borderRadius: 4, cursor: 'pointer',
+              background: tab === 'notes' ? '#fff' : 'transparent',
+              boxShadow: tab === 'notes' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              fontSize: 9, fontWeight: 600,
+              color: tab === 'notes' ? '#475569' : '#94a3b8',
+              transition: 'all .15s',
+              display: 'flex', alignItems: 'center', gap: 3,
+            }}
+          >
+            <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+            Notes
+          </button>
+        </div>
+      </div>
+      {tab === 'topics' && <TopicBubbles topics={topics} status={status} compact />}
+      {tab === 'notes' && <ClerkNotes />}
+    </div>
+  );
+}
+
 // PB History — groups resolved motions by agenda item
 function PBHistory({ topics, agendaItems, accentColor }) {
   const [openGroups, setOpenGroups] = useState(new Set());
@@ -141,11 +192,10 @@ function snapPx(val) {
 // Panels: all values in % so they scale with window size
 const DEFAULT_PANELS = [
   { id: 'agenda',   xPct: 1.5,  yPct: 2,   wPct: 17,  hPct: 96 },
-  { id: 'history',  xPct: 19.5, yPct: 2,   wPct: 36,  hPct: 46 },
-  { id: 'floor',    xPct: 19.5, yPct: 50,  wPct: 36,  hPct: 48 },
-  { id: 'topics',   xPct: 56.5, yPct: 2,   wPct: 21,  hPct: 46 },
-  { id: 'notes',    xPct: 56.5, yPct: 50,  wPct: 21,  hPct: 48 },
-  { id: 'rules',    xPct: 78.5, yPct: 2,   wPct: 20,  hPct: 96 },
+  { id: 'history',  xPct: 19.5, yPct: 2,   wPct: 48,  hPct: 46 },
+  { id: 'floor',    xPct: 19.5, yPct: 50,  wPct: 48,  hPct: 48 },
+  { id: 'rules',    xPct: 68.5, yPct: 2,   wPct: 30,  hPct: 54 },
+  { id: 'topics',   xPct: 68.5, yPct: 58,  wPct: 30,  hPct: 40 },
 ];
 
 // Edge resize zones — no right edge so scrolling isn't blocked
@@ -490,7 +540,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
           </div>
         </div>
 
-        {/* Topics */}
+        {/* Topics + Clerk Notes (tabbed) */}
         <div style={panelStyle('topics')}>
           <div style={{ position: 'relative', display: 'flex', flex: 1, minHeight: 0 }}>
             <BentoPanel
@@ -503,27 +553,9 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                 style: dragHandleStyle,
               }}
             >
-              <TopicBubbles topics={session.topics} status={session.status} compact />
+              <TopicsNotesTabbed topics={session.topics} status={session.status} />
             </BentoPanel>
             <EdgeHandles onEdgeDrag={(edge, e) => startDrag('topics', e, edge)} />
-          </div>
-        </div>
-
-        {/* Clerk Notes */}
-        <div style={panelStyle('notes')}>
-          <div style={{ position: 'relative', display: 'flex', flex: 1, minHeight: 0 }}>
-            <BentoPanel
-              title="Clerk Notes"
-              icon={iconNotes}
-              style={{ flex: 1, minHeight: 0 }}
-              headerProps={{
-                onMouseDown: (e) => startDrag('notes', e, 'move'),
-                style: dragHandleStyle,
-              }}
-            >
-              <ClerkNotes />
-            </BentoPanel>
-            <EdgeHandles onEdgeDrag={(edge, e) => startDrag('notes', e, edge)} />
           </div>
         </div>
 
@@ -542,7 +574,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                 style: dragHandleStyle,
               }}
             >
-              <RulesPanel />
+              <RulesPanel topics={session.topics} transcript={session.transcript} />
             </BentoPanel>
             <EdgeHandles onEdgeDrag={(edge, e) => startDrag('rules', e, edge)} />
           </div>

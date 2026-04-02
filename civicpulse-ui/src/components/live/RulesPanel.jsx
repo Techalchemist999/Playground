@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { COLORS } from '../../styles/tokens';
 import ProcedureRules from './ProcedureRules';
+import RuleAlert from './RuleAlert';
 
 const ROBERTS_RULES = [
   {
@@ -160,7 +161,7 @@ const ROBERTS_RULES = [
   },
 ];
 
-export default function RulesPanel() {
+export default function RulesPanel({ topics, transcript }) {
   const [tab, setTab] = useState('roberts'); // 'procedure' | 'roberts' | 'tab3'
   const [expandedCat, setExpandedCat] = useState(null);
   const [expandedItem, setExpandedItem] = useState(null); // 'cat-item' key
@@ -483,6 +484,9 @@ export default function RulesPanel() {
           ))}
         </div>
       )}
+
+      {/* Procedure alerts — always visible at bottom */}
+      <RuleAlert topics={topics} transcript={transcript} />
     </div>
   );
 }
