@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { COLORS } from '../../styles/tokens';
-import ProcedureRules from './ProcedureRules';
 import RuleAlert from './RuleAlert';
-import TranscriptPanel from './TranscriptPanel';
 
 const STATUS_STYLES = {
   pending:   { bg: '#f8fafc', color: '#94a3b8', border: '#e2e8f0', label: 'Pending' },
@@ -11,7 +9,6 @@ const STATUS_STYLES = {
 };
 
 export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, transcript = [], status, embedded, accentColor }) {
-  const [viewMode, setViewMode] = useState('agenda'); // 'agenda' | 'rules' | 'transcript'
   const [agendaExpanded, setAgendaExpanded] = useState(false);
   const total = agendaItems.length;
   const discussed = agendaItems.filter(i => i.status === 'discussed').length;
@@ -21,72 +18,8 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-      {/* View toggle */}
-      <div style={{
-        display: 'flex', justifyContent: 'flex-end',
-        padding: '6px 10px 0', flexShrink: 0,
-      }}>
-        <div style={{
-          display: 'flex', background: '#f1f5f9', borderRadius: 6, padding: 2,
-        }}>
-          <button
-            onClick={() => setViewMode('agenda')}
-            aria-label="Agenda view"
-            style={{
-              padding: '3px 8px', border: 'none', borderRadius: 4, cursor: 'pointer',
-              background: viewMode === 'agenda' ? '#fff' : 'transparent',
-              boxShadow: viewMode === 'agenda' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-              display: 'flex', alignItems: 'center', gap: 3,
-              fontSize: 9, fontWeight: 600, color: viewMode === 'agenda' ? '#db2777' : COLORS.mutedText,
-              transition: 'all .15s',
-            }}
-          >
-            <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            Agenda
-          </button>
-          <button
-            onClick={() => setViewMode('rules')}
-            aria-label="Procedure rules view"
-            style={{
-              padding: '3px 8px', border: 'none', borderRadius: 4, cursor: 'pointer',
-              background: viewMode === 'rules' ? '#fff' : 'transparent',
-              boxShadow: viewMode === 'rules' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-              display: 'flex', alignItems: 'center', gap: 3,
-              fontSize: 9, fontWeight: 600, color: viewMode === 'rules' ? '#ca8a04' : COLORS.mutedText,
-              transition: 'all .15s',
-            }}
-          >
-            <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-            </svg>
-            Rules
-          </button>
-          <button
-            onClick={() => setViewMode('transcript')}
-            aria-label="Transcript view"
-            style={{
-              padding: '3px 8px', border: 'none', borderRadius: 4, cursor: 'pointer',
-              background: viewMode === 'transcript' ? '#fff' : 'transparent',
-              boxShadow: viewMode === 'transcript' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-              display: 'flex', alignItems: 'center', gap: 3,
-              fontSize: 9, fontWeight: 600, color: viewMode === 'transcript' ? COLORS.primary : COLORS.mutedText,
-              transition: 'all .15s',
-            }}
-          >
-            <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-            Transcript
-          </button>
-        </div>
-      </div>
-
       {/* Agenda view */}
-      {viewMode === 'agenda' && (
+      {(
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
           {agendaItems.length === 0 ? (
             <div style={{
@@ -244,14 +177,6 @@ export default function AgendaSidebar({ agendaItems, currentAgendaItem, topics, 
             </div>
           )}
         </div>
-      )}
-
-      {/* Procedure Rules view */}
-      {viewMode === 'rules' && <ProcedureRules />}
-
-      {/* Transcript view */}
-      {viewMode === 'transcript' && (
-        <TranscriptPanel transcript={transcript} status={status} embedded />
       )}
 
       {/* Rule alerts — always visible at bottom */}

@@ -6,6 +6,7 @@ import AgendaSidebar from './AgendaSidebar';
 import ClerkNotes from './ClerkNotes';
 import BiteCard from './BiteCard';
 import QuickMotion from './QuickMotion';
+import RulesPanel from './RulesPanel';
 import SessionControls from './SessionControls';
 
 // PB History — groups resolved motions by agenda item
@@ -139,11 +140,12 @@ function snapPx(val) {
 
 // Panels: all values in % so they scale with window size
 const DEFAULT_PANELS = [
-  { id: 'agenda',   xPct: 1.5,  yPct: 2,   wPct: 22,  hPct: 96 },
-  { id: 'history',  xPct: 24.5, yPct: 2,   wPct: 42,  hPct: 46 },
-  { id: 'floor',    xPct: 24.5, yPct: 50,  wPct: 42,  hPct: 48 },
-  { id: 'topics',   xPct: 67.5, yPct: 2,   wPct: 31,  hPct: 46 },
-  { id: 'notes',    xPct: 67.5, yPct: 50,  wPct: 31,  hPct: 48 },
+  { id: 'agenda',   xPct: 1.5,  yPct: 2,   wPct: 17,  hPct: 96 },
+  { id: 'history',  xPct: 19.5, yPct: 2,   wPct: 36,  hPct: 46 },
+  { id: 'floor',    xPct: 19.5, yPct: 50,  wPct: 36,  hPct: 48 },
+  { id: 'topics',   xPct: 56.5, yPct: 2,   wPct: 21,  hPct: 46 },
+  { id: 'notes',    xPct: 56.5, yPct: 50,  wPct: 21,  hPct: 48 },
+  { id: 'rules',    xPct: 78.5, yPct: 2,   wPct: 20,  hPct: 96 },
 ];
 
 // Edge resize zones — no right edge so scrolling isn't blocked
@@ -522,6 +524,27 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
               <ClerkNotes />
             </BentoPanel>
             <EdgeHandles onEdgeDrag={(edge, e) => startDrag('notes', e, edge)} />
+          </div>
+        </div>
+
+        {/* Rules & Cheat Sheet */}
+        <div style={panelStyle('rules')}>
+          <div style={{ position: 'relative', display: 'flex', flex: 1, minHeight: 0 }}>
+            <BentoPanel
+              title="Rules"
+              icon={<svg width="13" height="13" fill="none" stroke="#64748b" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>}
+              style={{ flex: 1, minHeight: 0 }}
+              headerProps={{
+                onMouseDown: (e) => startDrag('rules', e, 'move'),
+                style: dragHandleStyle,
+              }}
+            >
+              <RulesPanel />
+            </BentoPanel>
+            <EdgeHandles onEdgeDrag={(edge, e) => startDrag('rules', e, edge)} />
           </div>
         </div>
       </div>

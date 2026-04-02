@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CivicPulse — Rules Panel (6 Refined)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#6366f1,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:28px;line-height:1.6;}
+.tag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+.options{display:flex;flex-direction:column;gap:20px;max-width:380px;margin:0 auto;}
+.sw{background:#fff;border-radius:14px;border:2px solid #e2e8f0;overflow:hidden;cursor:pointer;transition:all .3s;box-shadow:0 2px 10px rgba(0,0,0,.03);}
+.sw:hover{border-color:#a5b4fc;box-shadow:0 6px 24px rgba(99,102,241,.12);transform:translateY(-2px);}
+.sw.selected{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+.sh{padding:10px 16px 8px;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid #f1f5f9;}
+.sh h2{font-size:14px;font-weight:700;color:#0f172a;}
+.sh p{font-size:10px;color:#94a3b8;margin-left:auto;font-style:italic;}
+.preview{padding:6px;background:#f8fafc;}
+
+/* Panel mock */
+.pnl{background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;display:flex;flex-direction:column;}
+.ph{padding:6px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.ph .ic{width:9px;height:9px;border-radius:2px;background:#64748b;}
+.ph .tt{font-size:9px;font-weight:700;color:#0f172a;}
+.pbdy{flex:1;overflow-y:auto;padding:6px 8px;}
+
+#result{display:none;max-width:380px;margin:20px auto 0;background:#fff;border-radius:14px;border:2px solid #6366f1;padding:16px;text-align:center;}
+#result .label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#6366f1;}
+#result .pick{font-size:18px;font-weight:800;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div style="max-width:380px;margin:0 auto;">
+  <div class="tag">DESIGN PICKER</div>
+  <h1>Rules Panel — 6 Refined</h1>
+  <p class="subtitle">Styles #10 and #22 plus 4 more variations in that direction. Grey bar categories, clean items, minimal chrome.</p>
+</div>
+
+<div class="options" id="options"></div>
+
+<div id="result">
+  <div class="label">YOUR SELECTION</div>
+  <div class="pick" id="pick-text"></div>
+</div>
+
+<script>
+const tabLabels = ["Robert's Rules", 'Procedure', 'Precedent'];
+
+// Shared data
+const mainItems = [
+  {n:'Main Motion',t:'THAT Council [action]...',req:'Second · Debatable · Majority',h:'Primary proposal for council.'},
+  {n:'Adopt / Approve',t:'THAT Council adopts [item] as presented.',req:'Second · Debatable · Majority',h:'Agenda, minutes, bylaws.'},
+];
+const amendItems = [
+  {n:'Amend',t:'THAT the main motion be amended by...',req:'Second · Debatable · Majority',h:'Vote on amendment first.'},
+  {n:'Amend the Amendment',t:'THAT the amendment be amended by...',req:'Second · Debatable · Majority',h:'Only one at a time.'},
+];
+const cats = ['Reconsideration','Postpone & Defer','Refer & Committee','Voting & Procedure','Readings & Bylaws'];
+
+const chev = (open) => `<svg width="7" height="7" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24" style="transform:rotate(${open?180:0}deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>`;
+
+const designs = [
+  // A: #10 — Default tabs, grey bar categories, chip items
+  {
+    id:'a', num:'A', name:'#10 — Bar + Chips',
+    desc:'Default tabs, grey bar categories, tappable chip items',
+    render: () => {
+      const tabs = `<div style="display:flex;background:#f1f5f9;border-radius:4px;padding:1px;margin-bottom:6px;">${tabLabels.map((l,i)=>`<span style="padding:3px 7px;font-size:7px;font-weight:${i===0?'700':'500'};border-radius:3px;color:${i===0?'#475569':'#94a3b8'};${i===0?'background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.06);':''}">${l}</span>`).join('')}</div>`;
+      const bar = (name,count,open) => `<div style="display:flex;align-items:center;gap:4px;padding:4px 7px;background:#f1f5f9;border-radius:5px;margin-bottom:3px;">${chev(open)}<span style="font-size:8px;font-weight:700;color:#475569;">${name}</span><span style="font-size:6px;color:#94a3b8;margin-left:auto;">${count}</span></div>`;
+      const chip = (it) => `<span style="display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid #e2e8f0;font-size:7px;font-weight:600;color:#334155;margin:1px;" title="${it.t}">${it.n}</span>`;
+      return `${tabs}${bar('Main Motions',2,true)}<div style="padding:2px 0 4px 8px;">${mainItems.map(chip).join('')}</div>${bar('Amending Motions',2,true)}<div style="padding:2px 0 4px 8px;">${amendItems.map(chip).join('')}</div>${cats.map(c=>bar(c,2,false)).join('')}`;
+    }
+  },
+  // B: #22 — Block tabs, grey bar categories, minimal text
+  {
+    id:'b', num:'B', name:'#22 — Block + Bar + Minimal',
+    desc:'Solid block tabs, grey bar headers, minimal text items',
+    render: () => {
+      const tabs = `<div style="display:flex;gap:2px;margin-bottom:6px;">${tabLabels.map((l,i)=>`<span style="padding:3px 7px;font-size:7px;font-weight:600;color:${i===0?'#fff':'#64748b'};background:${i===0?'#475569':'transparent'};border-radius:4px;">${l}</span>`).join('')}</div>`;
+      const bar = (name,count,open) => `<div style="display:flex;align-items:center;gap:4px;padding:4px 7px;background:#f1f5f9;border-radius:5px;margin-bottom:3px;">${chev(open)}<span style="font-size:8px;font-weight:700;color:#475569;">${name}</span><span style="font-size:6px;color:#94a3b8;margin-left:auto;">${count}</span></div>`;
+      const item = (it) => `<div style="padding:3px 0;border-bottom:1px solid #f8fafc;"><div style="font-size:8px;font-weight:700;color:#0f172a;">${it.n}</div><div style="font-size:6px;color:#94a3b8;">${it.h}</div></div>`;
+      return `${tabs}${bar('Main Motions',2,true)}<div style="padding:2px 0 4px 10px;">${mainItems.map(item).join('')}</div>${bar('Amending Motions',2,true)}<div style="padding:2px 0 4px 10px;">${amendItems.map(item).join('')}</div>${cats.map(c=>bar(c,2,false)).join('')}`;
+    }
+  },
+  // C: Block tabs, bar cats, left-border tag items with template
+  {
+    id:'c', num:'C', name:'Block + Bar + Tag Template',
+    desc:'Solid tabs, grey bars, left-border items showing the motion template',
+    render: () => {
+      const tabs = `<div style="display:flex;gap:2px;margin-bottom:6px;">${tabLabels.map((l,i)=>`<span style="padding:3px 7px;font-size:7px;font-weight:600;color:${i===0?'#fff':'#64748b'};background:${i===0?'#475569':'transparent'};border-radius:4px;">${l}</span>`).join('')}</div>`;
+      const bar = (name,count,open) => `<div style="display:flex;align-items:center;gap:4px;padding:4px 7px;background:#f1f5f9;border-radius:5px;margin-bottom:3px;">${chev(open)}<span style="font-size:8px;font-weight:700;color:#475569;">${name}</span><span style="font-size:6px;color:#94a3b8;margin-left:auto;">${count}</span></div>`;
+      const item = (it) => `<div style="border-left:2px solid #cbd5e1;padding:3px 8px;margin:2px 0 2px 4px;"><div style="font-size:8px;font-weight:700;color:#0f172a;">${it.n}</div><div style="font-size:6px;color:#475569;font-family:'Courier New',monospace;background:#f8fafc;padding:2px 4px;border-radius:2px;margin-top:1px;">${it.t}</div><div style="font-size:5.5px;color:#94a3b8;margin-top:1px;">${it.req}</div></div>`;
+      return `${tabs}${bar('Main Motions',2,true)}<div style="padding:2px 0 4px 6px;">${mainItems.map(item).join('')}</div>${bar('Amending Motions',2,true)}<div style="padding:2px 0 4px 6px;">${amendItems.map(item).join('')}</div>${cats.map(c=>bar(c,2,false)).join('')}`;
+    }
+  },
+  // D: Block tabs, bar cats, card items with all info
+  {
+    id:'d', num:'D', name:'Block + Bar + Full Cards',
+    desc:'Solid tabs, grey bars, bordered cards with template + requirements + hint',
+    render: () => {
+      const tabs = `<div style="display:flex;gap:2px;margin-bottom:6px;">${tabLabels.map((l,i)=>`<span style="padding:3px 7px;font-size:7px;font-weight:600;color:${i===0?'#fff':'#64748b'};background:${i===0?'#475569':'transparent'};border-radius:4px;">${l}</span>`).join('')}</div>`;
+      const bar = (name,count,open) => `<div style="display:flex;align-items:center;gap:4px;padding:4px 7px;background:#f1f5f9;border-radius:5px;margin-bottom:3px;">${chev(open)}<span style="font-size:8px;font-weight:700;color:#475569;">${name}</span><span style="font-size:6px;color:#94a3b8;margin-left:auto;">${count}</span></div>`;
+      const item = (it) => `<div style="border:1px solid #e2e8f0;border-radius:6px;padding:5px 7px;margin:2px 0;background:#fff;"><div style="font-size:8px;font-weight:700;color:#0f172a;margin-bottom:2px;">${it.n}</div><div style="font-size:6.5px;color:#475569;font-family:'Courier New',monospace;background:#f8fafc;padding:2px 4px;border-radius:3px;border-left:2px solid #cbd5e1;margin-bottom:2px;">${it.t}</div><div style="font-size:5.5px;color:#64748b;">${it.req}</div><div style="font-size:5.5px;color:#94a3b8;font-style:italic;">${it.h}</div></div>`;
+      return `${tabs}${bar('Main Motions',2,true)}<div style="padding:2px 0 4px 4px;">${mainItems.map(item).join('')}</div>${bar('Amending Motions',2,true)}<div style="padding:2px 0 4px 4px;">${amendItems.map(item).join('')}</div>${cats.map(c=>bar(c,2,false)).join('')}`;
+    }
+  },
+  // E: Default tabs, bar cats, two-line row (name + req inline)
+  {
+    id:'e', num:'E', name:'Default + Bar + Compact Rows',
+    desc:'Default pill tabs, grey bars, compact rows with name and requirements inline',
+    render: () => {
+      const tabs = `<div style="display:flex;background:#f1f5f9;border-radius:4px;padding:1px;margin-bottom:6px;">${tabLabels.map((l,i)=>`<span style="padding:3px 7px;font-size:7px;font-weight:${i===0?'700':'500'};border-radius:3px;color:${i===0?'#475569':'#94a3b8'};${i===0?'background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.06);':''}">${l}</span>`).join('')}</div>`;
+      const bar = (name,count,open) => `<div style="display:flex;align-items:center;gap:4px;padding:4px 7px;background:#f1f5f9;border-radius:5px;margin-bottom:3px;">${chev(open)}<span style="font-size:8px;font-weight:700;color:#475569;">${name}</span><span style="font-size:6px;color:#94a3b8;margin-left:auto;">${count}</span></div>`;
+      const item = (it) => `<div style="display:flex;align-items:baseline;gap:6px;padding:4px 6px;border-bottom:1px solid #f8fafc;"><span style="font-size:8px;font-weight:700;color:#0f172a;min-width:70px;">${it.n}</span><span style="font-size:6px;color:#94a3b8;flex:1;">${it.req}</span></div>`;
+      return `${tabs}${bar('Main Motions',2,true)}<div style="padding:0 0 4px 4px;">${mainItems.map(item).join('')}</div>${bar('Amending Motions',2,true)}<div style="padding:0 0 4px 4px;">${amendItems.map(item).join('')}</div>${cats.map(c=>bar(c,2,false)).join('')}`;
+    }
+  },
+  // F: Outline tabs, bar cats, chips + expand to card on hover
+  {
+    id:'f', num:'F', name:'Outline + Bar + Chip → Card',
+    desc:'Outlined tabs, grey bars, chips collapse to names — hover reveals full card',
+    render: () => {
+      const tabs = `<div style="display:flex;gap:3px;margin-bottom:6px;">${tabLabels.map((l,i)=>`<span style="padding:3px 7px;font-size:7px;font-weight:600;color:${i===0?'#475569':'#94a3b8'};border:1px solid ${i===0?'#475569':'#e2e8f0'};border-radius:5px;">${l}</span>`).join('')}</div>`;
+      const bar = (name,count,open) => `<div style="display:flex;align-items:center;gap:4px;padding:4px 7px;background:#f1f5f9;border-radius:5px;margin-bottom:3px;">${chev(open)}<span style="font-size:8px;font-weight:700;color:#475569;">${name}</span><span style="font-size:6px;color:#94a3b8;margin-left:auto;">${count}</span></div>`;
+      const item = (it) => `<div style="display:inline-flex;flex-direction:column;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;margin:1px;background:#fff;"><span style="font-size:7px;font-weight:700;color:#0f172a;">${it.n}</span><span style="font-size:5.5px;color:#64748b;font-family:monospace;margin-top:1px;">${it.t.substring(0,30)}...</span></div>`;
+      return `${tabs}${bar('Main Motions',2,true)}<div style="padding:2px 0 4px 4px;display:flex;flex-wrap:wrap;gap:2px;">${mainItems.map(item).join('')}</div>${bar('Amending Motions',2,true)}<div style="padding:2px 0 4px 4px;display:flex;flex-wrap:wrap;gap:2px;">${amendItems.map(item).join('')}</div>${cats.map(c=>bar(c,2,false)).join('')}`;
+    }
+  },
+];
+
+document.getElementById('options').innerHTML = designs.map(d =>
+  `<div class="sw" onclick="select(this,'${d.id}')">
+    <div class="sh"><span class="tag">${d.num}</span><h2>${d.name}</h2><p>${d.desc}</p></div>
+    <div class="preview"><div class="pnl"><div class="ph"><div class="ic"></div><span class="tt">Rules</span></div><div class="pbdy">${d.render()}</div></div></div>
+  </div>`
+).join('');
+
+const nm={};designs.forEach(d=>nm[d.id]=`${d.num} — ${d.name}`);
+function select(el,id){document.querySelectorAll('.sw').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');document.getElementById('result').style.display='block';document.getElementById('pick-text').textContent=nm[id];}
+</script>
+</body>
+</html>
