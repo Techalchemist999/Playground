@@ -122,7 +122,7 @@ export default function SetupView({ session }) {
           {/* Agenda Publisher */}
           <div style={{ borderTop: `1px solid ${COLORS.subtleBorder}`, margin: '16px 0' }} />
           <button
-            onClick={() => window.open('/agendaflow', '_blank')}
+            onClick={() => window.open('http://localhost:5173', '_blank')}
             style={{
               width: '100%', padding: '12px',
               background: 'linear-gradient(135deg, #c3d5e8, #d5dff0)',
