@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(135deg, #c3d5e8, #d5dff0, #e0eafc);
+  min-height: 100vh;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.glass-header {
+  background: rgba(255, 255, 255, 0.35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.04);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #334155;
+  transition: all 0.15s;
+}
+.glass-input:focus {
+  outline: none;
+  border-color: #475569;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.1);
+}
+
+.glass-btn-primary {
+  background: linear-gradient(135deg, #475569, #64748b);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(71, 85, 105, 0.2);
+  transition: all 0.15s;
+}
+.glass-btn-primary:hover {
+  box-shadow: 0 4px 14px rgba(71, 85, 105, 0.3);
+  transform: translateY(-1px);
+}
+
+.glass-btn-secondary {
+  background: rgba(255, 255, 255, 0.5);
+  color: #64748b;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.glass-btn-secondary:hover {
+  border-color: #475569;
+  color: #475569;
+}

@@ -119,6 +119,30 @@ export default function SetupView({ session }) {
             </>
           )}
 
+          {/* Agenda Publisher */}
+          <div style={{ borderTop: `1px solid ${COLORS.subtleBorder}`, margin: '16px 0' }} />
+          <button
+            onClick={() => window.open('/agendaflow', '_blank')}
+            style={{
+              width: '100%', padding: '12px',
+              background: 'linear-gradient(135deg, #c3d5e8, #d5dff0)',
+              border: '1.5px solid rgba(255,255,255,.75)',
+              borderRadius: 10, cursor: 'pointer',
+              fontSize: 13, fontWeight: 700, color: '#1e293b',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              transition: 'all .15s',
+              boxShadow: '0 2px 10px rgba(71,85,105,.1)',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            <svg width="14" height="14" fill="none" stroke="#475569" strokeWidth="2" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <line x1="9" y1="21" x2="9" y2="9" />
+            </svg>
+            Agenda Publisher
+          </button>
+
           {/* Demo / Test buttons */}
           <div style={{ borderTop: `1px solid ${COLORS.subtleBorder}`, margin: '16px 0' }} />
           <div style={{ display: 'flex', gap: 8 }}>
