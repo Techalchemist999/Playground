@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waterworth App Launcher</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#c3d5e8,#d5dff0,#e0eafc);min-height:100vh;color:#334155;padding:40px 24px}
+
+.container{max-width:900px;margin:0 auto}
+.header{text-align:center;margin-bottom:40px}
+.header .lbl{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#64748b}
+.header h1{font-size:28px;font-weight:900;color:#1e293b;margin-top:4px}
+.header p{font-size:13px;color:#94a3b8;margin-top:6px}
+
+.section{margin-bottom:36px}
+.section-title{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#94a3b8;margin-bottom:12px;padding-left:4px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+
+.card{background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.75);border-radius:14px;box-shadow:0 4px 24px rgba(0,0,0,.06);padding:20px;text-decoration:none;color:inherit;transition:all .2s;cursor:pointer;display:block}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.1);border-color:rgba(71,85,105,.2)}
+.card h3{font-size:14px;font-weight:800;color:#1e293b;margin-bottom:4px}
+.card p{font-size:11px;color:#64748b;line-height:1.5}
+.card .tag{display:inline-block;font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-bottom:8px}
+.tag-app{background:rgba(71,85,105,.1);color:#475569}
+.tag-react{background:rgba(99,102,241,.1);color:#6366f1}
+.tag-design{background:rgba(16,185,129,.1);color:#059669}
+
+.card .hint{font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic}
+
+.divider{height:1px;background:rgba(0,0,0,.06);margin:8px 0 20px}
+
+.vibes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.vibe-card{background:rgba(255,255,255,.45);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.6);border-radius:10px;padding:12px 16px;text-decoration:none;color:inherit;transition:all .2s;display:block}
+.vibe-card:hover{background:rgba(255,255,255,.7);transform:translateY(-1px)}
+.vibe-card h4{font-size:11px;font-weight:700;color:#334155}
+.vibe-card p{font-size:9px;color:#94a3b8;margin-top:2px}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="lbl">Waterworth</div>
+    <h1>App Launcher</h1>
+    <p>All your apps and design files in one place</p>
+  </div>
+
+  <!-- APPS -->
+  <div class="section">
+    <div class="section-title">Apps</div>
+    <div class="grid">
+      <a class="card" href="civicpulse-ui/agendaflow-app.html">
+        <span class="tag tag-app">Standalone HTML</span>
+        <h3>AgendaFlow</h3>
+        <p>Municipal agenda management — meetings, agenda builder, bylaws, resolutions, minutes, search</p>
+      </a>
+      <div class="card" onclick="alert('To run CivicPulse:\n\n1. Open terminal in Documents\\civicpulse-ui\n2. Run: npm run dev\n3. Open http://localhost:5173')">
+        <span class="tag tag-react">React App — npm run dev</span>
+        <h3>CivicPulse</h3>
+        <p>Live meeting dashboard — clerk notes, transcript, procedure rules, voting, amendments, minutes</p>
+        <div class="hint">Needs terminal: cd civicpulse-ui && npm run dev</div>
+      </div>
+      <div class="card" onclick="alert('To run AgendaFlow (full):\n\n1. Open terminal in Documents\\agendaflow\n2. Run: npm run dev\n3. Open http://localhost:5173')">
+        <span class="tag tag-react">React App — npm run dev</span>
+        <h3>AgendaFlow (Full)</h3>
+        <p>Full React version with backend — agenda builder, minutes editor, bylaws, resolutions</p>
+        <div class="hint">Needs terminal: cd agendaflow && npm run dev</div>
+      </div>
+      <a class="card" href="celestial-charts/index.html">
+        <span class="tag tag-app">Standalone HTML</span>
+        <h3>Celestial Charts</h3>
+        <p>Astrology / celestial chart viewer</p>
+      </a>
+    </div>
+  </div>
+
+  <!-- DESIGN PICKS -->
+  <div class="section">
+    <div class="section-title">Design Picks &amp; Specs</div>
+    <div class="grid" style="margin-bottom:12px">
+      <a class="card" href="civicpulse-ui/designs/design-picks.html">
+        <span class="tag tag-design">Summary</span>
+        <h3>Design Picks</h3>
+        <p>All selected designs in one page</p>
+      </a>
+      <a class="card" href="civicpulse-ui/designs/design-full-ui-glass-vibes.html">
+        <span class="tag tag-design">Full UI</span>
+        <h3>Full UI Glass Vibes</h3>
+        <p>Complete UI — agenda + live agenda + rules in glass style</p>
+      </a>
+    </div>
+  </div>
+
+  <!-- VIBES FILES -->
+  <div class="section">
+    <div class="section-title">Design Explorations (Vibes &amp; Specs)</div>
+    <div class="vibes-grid">
+      <a class="vibe-card" href="civicpulse-ui/designs/design-layout-vibes.html"><h4>Layout Vibes</h4><p>Layout designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-layout-final.html"><h4>Layout Final</h4><p>Final layout pick</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-layout-picker.html"><h4>Layout Picker</h4><p>Layout picker</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-layout-specs.html"><h4>Layout Specs</h4><p>Layout specifications</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-color-vibes.html"><h4>Color Vibes</h4><p>Color palette designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-bubble-vibes.html"><h4>Bubble Vibes</h4><p>Bubble designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-bubble-tweak-vibes.html"><h4>Bubble Tweak</h4><p>Bubble tweaks</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-topic-vibes.html"><h4>Topic Vibes</h4><p>Topic designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-topic-display-vibes.html"><h4>Topic Display</h4><p>Topic display designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-rule-vibes.html"><h4>Rule Vibes</h4><p>Rule designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-rules-panel-vibes.html"><h4>Rules Panel</h4><p>Rules panel designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-vote-vibes.html"><h4>Vote Vibes</h4><p>Vote designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-vote-tweak-vibes.html"><h4>Vote Tweak</h4><p>Vote tweaks</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-votebox-vibes.html"><h4>Votebox Vibes</h4><p>Vote box designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-amendment-vibes.html"><h4>Amendment Vibes</h4><p>Amendment designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-amendment-spec.html"><h4>Amendment Spec</h4><p>Amendment spec</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-amendment-flow-spec.html"><h4>Amendment Flow</h4><p>Amendment flow spec</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-amendment-3step-spec.html"><h4>Amendment 3-Step</h4><p>3-step amendment spec</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-accordion-amendment-vibes.html"><h4>Accordion Amendment</h4><p>Accordion amendment designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-disposition-vibes.html"><h4>Disposition Vibes</h4><p>Disposition designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-disposition-spec.html"><h4>Disposition Spec</h4><p>Disposition spec</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-agenda-vibes.html"><h4>Agenda Vibes</h4><p>Agenda designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-agenda-number-vibes.html"><h4>Agenda Numbers</h4><p>Agenda numbering designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-agenda-rules-vibes.html"><h4>Agenda Rules</h4><p>Agenda rules designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-agenda-rules-glass-vibes.html"><h4>Agenda Rules Glass</h4><p>Agenda rules glass designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-pb-vibes.html"><h4>PB Vibes</h4><p>Procedure bylaw designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-pb-spec.html"><h4>PB Spec</h4><p>Procedure bylaw spec</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-pb-compact-vibes.html"><h4>PB Compact</h4><p>Compact PB designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-quickmotion-vibes.html"><h4>Quick Motion Vibes</h4><p>Quick motion designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-quickmotion-spec.html"><h4>Quick Motion Spec</h4><p>Quick motion spec</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-transcript-vibes.html"><h4>Transcript Vibes</h4><p>Transcript designs</p></a>
+      <a class="vibe-card" href="civicpulse-ui/designs/design-procedure-alert-vibes.html"><h4>Procedure Alert</h4><p>Procedure alert designs</p></a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
