@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicPulse — All Design Explorations</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);
+  color:#e2e8f0;
+  min-height:100vh;
+}
+
+/* Navigation header */
+.nav-header{
+  position:sticky;top:0;z-index:1000;
+  background:rgba(15,23,42,.85);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(148,163,184,.15);
+  padding:16px 24px;
+  display:flex;align-items:center;gap:16px;
+}
+.nav-header h1{
+  font-size:18px;font-weight:800;
+  background:linear-gradient(135deg,#818cf8,#6366f1);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;
+}
+.nav-header .count{
+  font-size:11px;font-weight:600;color:#64748b;white-space:nowrap;
+}
+.nav-toggle{
+  margin-left:auto;
+  background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);
+  color:#a5b4fc;font-family:inherit;font-size:12px;font-weight:600;
+  padding:6px 14px;border-radius:8px;cursor:pointer;
+  transition:all .2s;
+}
+.nav-toggle:hover{background:rgba(99,102,241,.25);color:#c7d2fe;}
+
+/* TOC overlay */
+.toc-overlay{
+  display:none;
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
+}
+.toc-overlay.open{display:block}
+.toc-panel{
+  position:fixed;top:0;right:0;bottom:0;width:440px;max-width:90vw;z-index:1001;
+  background:rgba(15,23,42,.95);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-left:1px solid rgba(148,163,184,.15);
+  overflow-y:auto;padding:24px;
+  transform:translateX(100%);transition:transform .3s ease;
+}
+.toc-panel.open{transform:translateX(0)}
+.toc-panel h2{
+  font-size:16px;font-weight:800;color:#c7d2fe;margin-bottom:6px;
+}
+.toc-panel .toc-sub{
+  font-size:11px;color:#64748b;margin-bottom:20px;
+}
+.toc-panel .toc-close{
+  position:absolute;top:16px;right:16px;
+  background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;transition:all .2s;
+}
+.toc-panel .toc-close:hover{background:rgba(148,163,184,.15);color:#e2e8f0;}
+
+/* TOC categories */
+.toc-category{margin-bottom:18px}
+.toc-category-title{
+  font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:#6366f1;margin-bottom:8px;padding-left:2px;
+}
+.toc-link{
+  display:block;padding:8px 12px;border-radius:8px;
+  font-size:12px;font-weight:500;color:#94a3b8;
+  text-decoration:none;transition:all .2s;
+  border:1px solid transparent;
+}
+.toc-link:hover{
+  background:rgba(99,102,241,.1);color:#c7d2fe;
+  border-color:rgba(99,102,241,.2);
+}
+.toc-link .toc-num{
+  display:inline-block;width:22px;font-weight:700;color:#4f46e5;font-size:10px;
+}
+
+/* Section container */
+.design-section{
+  margin:32px 24px;
+  background:rgba(30,41,59,.6);
+  border:1px solid rgba(148,163,184,.12);
+  border-radius:16px;
+  overflow:hidden;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.section-header{
+  padding:16px 24px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid rgba(148,163,184,.1);
+  background:rgba(15,23,42,.4);
+  cursor:pointer;
+  user-select:none;
+}
+.section-num{
+  font-size:11px;font-weight:800;color:#6366f1;
+  background:rgba(99,102,241,.12);
+  width:28px;height:28px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.section-title{
+  font-size:14px;font-weight:700;color:#e2e8f0;flex:1;
+}
+.section-file{
+  font-size:10px;color:#475569;font-weight:500;
+}
+.section-toggle{
+  font-size:18px;color:#64748b;transition:transform .3s;
+  flex-shrink:0;
+}
+.section-header:hover .section-title{color:#fff}
+.section-header:hover .section-toggle{color:#a5b4fc}
+
+.section-body{overflow:hidden;transition:max-height .4s ease;}
+.section-body.collapsed{max-height:0 !important;}
+
+.section-body iframe{
+  width:100%;border:none;display:block;
+  background:#f1f5f9;
+  min-height:600px;
+}
+
+/* Back to top */
+.back-top{
+  position:fixed;bottom:24px;right:24px;z-index:500;
+  background:rgba(99,102,241,.9);color:#fff;
+  width:44px;height:44px;border-radius:12px;border:none;
+  font-size:20px;cursor:pointer;
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);
+  box-shadow:0 4px 16px rgba(99,102,241,.4);
+  transition:all .2s;
+}
+.back-top:hover{background:#6366f1;transform:translateY(-2px)}
+.back-top.show{display:flex}
+
+/* Expand/collapse all bar */
+.controls-bar{
+  display:flex;gap:8px;padding:16px 24px 0;justify-content:flex-end;
+}
+.ctrl-btn{
+  background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);
+  color:#a5b4fc;font-family:inherit;font-size:11px;font-weight:600;
+  padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .2s;
+}
+.ctrl-btn:hover{background:rgba(99,102,241,.2);color:#c7d2fe;}
+
+/* Search */
+.toc-search{
+  width:100%;padding:8px 12px;border-radius:8px;
+  background:rgba(30,41,59,.8);border:1px solid rgba(148,163,184,.2);
+  color:#e2e8f0;font-family:inherit;font-size:12px;
+  margin-bottom:16px;outline:none;
+}
+.toc-search:focus{border-color:rgba(99,102,241,.5)}
+.toc-search::placeholder{color:#475569}
+</style>
+</head>
+<body>
+
+<!-- Sticky nav header -->
+<div class="nav-header">
+  <h1>CivicPulse Designs</h1>
+  <span class="count">34 explorations</span>
+  <button class="nav-toggle" onclick="toggleTOC()">Table of Contents</button>
+</div>
+
+<!-- TOC overlay -->
+<div class="toc-overlay" id="tocOverlay" onclick="toggleTOC()"></div>
+<div class="toc-panel" id="tocPanel">
+  <button class="toc-close" onclick="toggleTOC()">&times;</button>
+  <h2>Table of Contents</h2>
+  <p class="toc-sub">Click any design to jump to it</p>
+  <input type="text" class="toc-search" id="tocSearch" placeholder="Search designs..." oninput="filterTOC(this.value)">
+  <div id="tocList"></div>
+</div>
+
+<!-- Controls -->
+<div class="controls-bar">
+  <button class="ctrl-btn" onclick="expandAll()">Expand All</button>
+  <button class="ctrl-btn" onclick="collapseAll()">Collapse All</button>
+</div>
+
+<!-- Design sections -->
+<div id="sections"></div>
+
+<!-- Back to top -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&uarr;</button>
+
+<script>
+const designs = [
+  { file: "design-picks.html", title: "15 Design Picks", category: "Overview" },
+  { file: "design-layout-picker.html", title: "Layout Picker (10 Bento Options)", category: "Layout" },
+  { file: "design-layout-vibes.html", title: "Dashboard Layout Picker", category: "Layout" },
+  { file: "design-layout-specs.html", title: "All 10 Layout Specs", category: "Layout" },
+  { file: "design-layout-final.html", title: "Final Layout", category: "Layout" },
+  { file: "design-full-ui-glass-vibes.html", title: "Full UI — Agenda Creator + Live Agenda + Rules (10 Glass Vibes)", category: "Layout" },
+  { file: "design-color-vibes.html", title: "Color Theme Picker", category: "Theming" },
+  { file: "design-agenda-vibes.html", title: "Agenda Box Design Picker", category: "Agenda" },
+  { file: "design-agenda-number-vibes.html", title: "Agenda Number Design Picker", category: "Agenda" },
+  { file: "design-agenda-rules-vibes.html", title: "Agenda + Rules — 10 Matching Vibes", category: "Agenda" },
+  { file: "design-agenda-rules-glass-vibes.html", title: "Agenda + Rules — 10 Glassmorphism Vibes", category: "Agenda" },
+  { file: "design-topic-vibes.html", title: "Topic Bubble Finals", category: "Topics" },
+  { file: "design-topic-display-vibes.html", title: "Topic Display Picker", category: "Topics" },
+  { file: "design-bubble-vibes.html", title: "Bubble Style Picker (Refined)", category: "Topics" },
+  { file: "design-bubble-tweak-vibes.html", title: "Topic Bubble Tweaks", category: "Topics" },
+  { file: "design-vote-vibes.html", title: "Vote Display Picker", category: "Voting" },
+  { file: "design-vote-tweak-vibes.html", title: "Apple Glass Vote Tweaks", category: "Voting" },
+  { file: "design-votebox-vibes.html", title: "Vote Box Concept (10 Options)", category: "Voting" },
+  { file: "design-amendment-vibes.html", title: "Amendment Flow Design Picker", category: "Amendments" },
+  { file: "design-amendment-spec.html", title: "Amendment #1 Nested Indent (Full Spec)", category: "Amendments" },
+  { file: "design-amendment-flow-spec.html", title: "Amendment Nesting (6 Options)", category: "Amendments" },
+  { file: "design-amendment-3step-spec.html", title: "3-Step Amendment Flow (All Scenarios)", category: "Amendments" },
+  { file: "design-accordion-amendment-vibes.html", title: "Accordion Amendment Options", category: "Amendments" },
+  { file: "design-disposition-vibes.html", title: "Disposition Placement (6 Options)", category: "Motions & Disposition" },
+  { file: "design-disposition-spec.html", title: "Bottom Stripe Disposition (Full Spec)", category: "Motions & Disposition" },
+  { file: "design-quickmotion-vibes.html", title: "Quick Motion (5 Options)", category: "Motions & Disposition" },
+  { file: "design-quickmotion-spec.html", title: "Quick Motion Wizard (Full Flow)", category: "Motions & Disposition" },
+  { file: "design-rule-vibes.html", title: "Procedure Rules Display Picker", category: "Rules & Procedures" },
+  { file: "design-rules-panel-vibes.html", title: "Rules Panel (6 Refined)", category: "Rules & Procedures" },
+  { file: "design-procedure-alert-vibes.html", title: "Procedure Alert (15 Designs)", category: "Rules & Procedures" },
+  { file: "design-pb-vibes.html", title: "Procedural Bites — Card Design Picker", category: "Rules & Procedures" },
+  { file: "design-pb-compact-vibes.html", title: "Procedural Bites Compact (10 Options)", category: "Rules & Procedures" },
+  { file: "design-pb-spec.html", title: "Procedural Bites — Card Spec", category: "Rules & Procedures" },
+  { file: "design-transcript-vibes.html", title: "Transcript Style (10 Options)", category: "Transcript" },
+];
+
+// Build sections
+const sectionsEl = document.getElementById('sections');
+designs.forEach((d, i) => {
+  const section = document.createElement('div');
+  section.className = 'design-section';
+  section.id = 'section-' + i;
+  section.innerHTML = `
+    <div class="section-header" onclick="toggleSection(${i})">
+      <div class="section-num">${i + 1}</div>
+      <div class="section-title">${d.title}</div>
+      <div class="section-file">${d.file}</div>
+      <div class="section-toggle" id="toggle-${i}">&#9662;</div>
+    </div>
+    <div class="section-body collapsed" id="body-${i}">
+      <iframe data-src="${d.file}" title="${d.title}" loading="lazy"></iframe>
+    </div>
+  `;
+  sectionsEl.appendChild(section);
+});
+
+// Build TOC
+function buildTOC(filter = '') {
+  const tocList = document.getElementById('tocList');
+  tocList.innerHTML = '';
+  const lowerFilter = filter.toLowerCase();
+  const categories = {};
+
+  designs.forEach((d, i) => {
+    if (filter && !d.title.toLowerCase().includes(lowerFilter) && !d.file.toLowerCase().includes(lowerFilter) && !d.category.toLowerCase().includes(lowerFilter)) return;
+    if (!categories[d.category]) categories[d.category] = [];
+    categories[d.category].push({ ...d, index: i });
+  });
+
+  for (const [cat, items] of Object.entries(categories)) {
+    const catDiv = document.createElement('div');
+    catDiv.className = 'toc-category';
+    catDiv.innerHTML = `<div class="toc-category-title">${cat}</div>`;
+    items.forEach(item => {
+      const a = document.createElement('a');
+      a.className = 'toc-link';
+      a.href = '#section-' + item.index;
+      a.innerHTML = `<span class="toc-num">${item.index + 1}</span>${item.title}`;
+      a.onclick = (e) => {
+        e.preventDefault();
+        toggleTOC();
+        const el = document.getElementById('section-' + item.index);
+        // Expand if collapsed
+        const body = document.getElementById('body-' + item.index);
+        if (body.classList.contains('collapsed')) toggleSection(item.index);
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350);
+      };
+      catDiv.appendChild(a);
+    });
+    tocList.appendChild(catDiv);
+  }
+}
+buildTOC();
+
+function filterTOC(val) { buildTOC(val); }
+
+// Toggle TOC panel
+function toggleTOC() {
+  const panel = document.getElementById('tocPanel');
+  const overlay = document.getElementById('tocOverlay');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  overlay.classList.toggle('open');
+  if (!isOpen) document.getElementById('tocSearch').focus();
+}
+
+// Toggle section expand/collapse
+function toggleSection(i) {
+  const body = document.getElementById('body-' + i);
+  const toggle = document.getElementById('toggle-' + i);
+  const isCollapsed = body.classList.contains('collapsed');
+
+  if (isCollapsed) {
+    // Load iframe if not loaded yet
+    const iframe = body.querySelector('iframe');
+    if (iframe && iframe.dataset.src && !iframe.src) {
+      iframe.src = iframe.dataset.src;
+      // Auto-resize iframe once content loads
+      iframe.onload = () => resizeIframe(iframe);
+    }
+    body.classList.remove('collapsed');
+    body.style.maxHeight = 'none';
+    toggle.innerHTML = '&#9652;';
+  } else {
+    body.classList.add('collapsed');
+    toggle.innerHTML = '&#9662;';
+  }
+}
+
+function resizeIframe(iframe) {
+  try {
+    const h = iframe.contentDocument.documentElement.scrollHeight;
+    iframe.style.height = Math.max(h + 40, 400) + 'px';
+  } catch (e) {
+    // Cross-origin fallback
+    iframe.style.height = '800px';
+  }
+}
+
+function expandAll() {
+  designs.forEach((_, i) => {
+    const body = document.getElementById('body-' + i);
+    if (body.classList.contains('collapsed')) toggleSection(i);
+  });
+}
+
+function collapseAll() {
+  designs.forEach((_, i) => {
+    const body = document.getElementById('body-' + i);
+    if (!body.classList.contains('collapsed')) toggleSection(i);
+  });
+}
+
+// Back to top button
+window.addEventListener('scroll', () => {
+  document.getElementById('backTop').classList.toggle('show', window.scrollY > 400);
+});
+
+// Keyboard shortcut: Escape closes TOC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const panel = document.getElementById('tocPanel');
+    if (panel.classList.contains('open')) toggleTOC();
+  }
+});
+</script>
+</body>
+</html>
