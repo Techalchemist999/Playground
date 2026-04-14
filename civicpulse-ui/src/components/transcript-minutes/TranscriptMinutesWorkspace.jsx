@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { COLORS, SPACING, CATEGORY_COLORS } from '../../styles/tokens';
 import { gradientButtonStyle, outlineButtonStyle, cardStyle } from '../../styles/shared';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, convertInchesToTwip } from 'docx';
 import { saveAs } from 'file-saver';
 
 function stripHtml(html) {
@@ -13,43 +13,70 @@ function stripHtml(html) {
 // ─── Metadata Header ─────────────────────────────
 function MetadataHeader({ metadata, isEditing, onUpdate }) {
   const meetingTypes = ['Regular Meeting', 'In Camera Meeting', 'Committee Meeting', 'Special Meeting', 'Public Hearing'];
-  const fields = [
-    { key: 'municipality', label: 'Local Government' },
-    { key: 'meetingType', label: 'Meeting Type', options: meetingTypes },
-    { key: 'date', label: 'Date', type: 'date' },
-    { key: 'time', label: 'Time' },
-    { key: 'location', label: 'Location' },
-    { key: 'chair', label: 'Chair' },
-  ];
+
+  // Format date for display: "Wednesday, November 26, 2025"
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    } catch { return dateStr; }
+  };
+
+  // Build title from meeting type: "REGULAR COUNCIL MEETING MINUTES"
+  const meetingTitle = (metadata.meetingType || 'Regular Meeting')
+    .replace(/meeting/i, '').trim().toUpperCase() + ' COUNCIL MEETING MINUTES';
 
   return (
-    <div style={{
-      ...cardStyle,
-      padding: 0, overflow: 'hidden',
-    }}>
+    <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+      {/* Centered header block — matches PDF style */}
       <div style={{
-        background: 'linear-gradient(135deg, #eef2ff 0%, #f5f3ff 55%, #f0fdf4 100%)',
-        padding: '20px 24px 16px',
-        borderBottom: '1px solid #e8eaf0',
+        padding: '28px 24px 20px', textAlign: 'center',
+        borderBottom: `1px solid ${COLORS.subtleBorder}`,
       }}>
-        <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.headingText, letterSpacing: '-0.3px' }}>
-          Meeting Minutes
+        <img
+          src="/pouce-coupe-logo.jpg"
+          alt="Village of Pouce Coupe"
+          style={{ width: 80, height: 'auto', marginBottom: 12 }}
+          onError={e => { e.target.style.display = 'none'; }}
+        />
+        <div style={{
+          fontSize: 18, fontWeight: 800, letterSpacing: '0.5px',
+          color: COLORS.headingText, marginBottom: 4,
+        }}>
+          {meetingTitle}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.headingText }}>
+          {formatDate(metadata.date)}
+        </div>
+        <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+          {metadata.time || '—'} — {metadata.location || 'Council Chambers'}
         </div>
       </div>
-      <div style={{ padding: '16px 24px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-        {fields.map(({ key, label, type, options }) => (
-          <div key={key}>
-            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>
-              {label}
-            </div>
-            {isEditing ? (
-              options ? (
+
+      {/* Editable fields (shown in edit mode) */}
+      {isEditing && (
+        <div style={{ padding: '14px 24px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, background: '#fafbfc' }}>
+          {[
+            { key: 'municipality', label: 'Local Government' },
+            { key: 'meetingType', label: 'Meeting Type', options: meetingTypes },
+            { key: 'date', label: 'Date', type: 'date' },
+            { key: 'time', label: 'Time' },
+            { key: 'location', label: 'Location' },
+            { key: 'chair', label: 'Chair' },
+            { key: 'clerk', label: 'Clerk / Corporate Officer' },
+          ].map(({ key, label, type, options }) => (
+            <div key={key}>
+              <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>
+                {label}
+              </div>
+              {options ? (
                 <select
                   value={metadata[key] || options[0]}
                   onChange={e => onUpdate(key, e.target.value)}
                   style={{
                     width: '100%', padding: '6px 10px', fontSize: 13, fontWeight: 600,
-                    color: COLORS.headingText, background: '#f8fafc',
+                    color: COLORS.headingText, background: '#fff',
                     border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
                     fontFamily: 'inherit', cursor: 'pointer',
                   }}
@@ -63,20 +90,16 @@ function MetadataHeader({ metadata, isEditing, onUpdate }) {
                   onChange={e => onUpdate(key, e.target.value)}
                   style={{
                     width: '100%', padding: '6px 10px', fontSize: 13, fontWeight: 600,
-                    color: COLORS.headingText, background: '#f8fafc',
+                    color: COLORS.headingText, background: '#fff',
                     border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
                     fontFamily: 'inherit',
                   }}
                 />
-              )
-            ) : (
-              <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.headingText }}>
-                {metadata[key] || '—'}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -84,7 +107,79 @@ function MetadataHeader({ metadata, isEditing, onUpdate }) {
 // ─── Roll Call Section ─────────────────────────────
 function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
   const [isOpen, setIsOpen] = useState(true);
-  const presentCount = rollCall.filter(a => a.present).length;
+
+  // Group attendees: Present (non-staff, present), Absent (non-staff, absent), Staff
+  const staffRoles = ['Staff', 'CAO', 'Clerk'];
+  const present = rollCall.map((a, i) => ({ ...a, _i: i })).filter(a => a.present && !staffRoles.includes(a.role));
+  const absent = rollCall.map((a, i) => ({ ...a, _i: i })).filter(a => !a.present && !staffRoles.includes(a.role));
+  const staff = rollCall.map((a, i) => ({ ...a, _i: i })).filter(a => staffRoles.includes(a.role));
+
+  const renderAttendee = (attendee) => {
+    const i = attendee._i;
+    return (
+      <div key={i} style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: isEditing ? '6px 12px' : '2px 0',
+        background: isEditing ? '#f8fafc' : 'transparent',
+        border: isEditing ? `1px solid ${COLORS.subtleBorder}` : 'none',
+        borderRadius: 8,
+      }}>
+        {isEditing && (
+          <button
+            onClick={() => onUpdate(i, { present: !attendee.present })}
+            style={{
+              width: 20, height: 20, borderRadius: '50%',
+              background: attendee.present
+                ? 'linear-gradient(135deg, #dcfce7, #bbf7d0)'
+                : 'linear-gradient(135deg, #fee2e2, #fecaca)',
+              border: attendee.present ? '1.5px solid #86efac' : '1.5px solid #fca5a5',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 9, fontWeight: 700,
+              color: attendee.present ? '#16a34a' : '#dc2626',
+            }}
+          >
+            {attendee.present ? '✓' : '✗'}
+          </button>
+        )}
+        {isEditing ? (
+          <>
+            <input
+              value={attendee.name}
+              onChange={e => onUpdate(i, { name: e.target.value })}
+              style={{
+                flex: 1, padding: '4px 8px', fontSize: 12, fontWeight: 600,
+                border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4,
+                fontFamily: 'inherit', background: '#fff',
+              }}
+            />
+            <select
+              value={attendee.role}
+              onChange={e => onUpdate(i, { role: e.target.value })}
+              style={{
+                padding: '4px 8px', fontSize: 11, border: `1px solid ${COLORS.primaryBorder}`,
+                borderRadius: 4, fontFamily: 'inherit', background: '#fff',
+              }}
+            >
+              {['Mayor', 'Councillor', 'CAO', 'Clerk', 'Delegation', 'Staff'].map(r =>
+                <option key={r} value={r}>{r}</option>
+              )}
+            </select>
+            <button onClick={() => onRemove(i)} style={{
+              background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: 14,
+            }}>×</button>
+          </>
+        ) : (
+          <span style={{ fontSize: 13, color: COLORS.headingText }}>{attendee.name}</span>
+        )}
+      </div>
+    );
+  };
+
+  const groupLabelStyle = {
+    fontSize: 11, fontWeight: 700, color: '#475569',
+    marginBottom: 4, marginTop: 10,
+  };
 
   return (
     <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
@@ -100,84 +195,37 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
         <span style={{ fontWeight: 700, fontSize: 13, color: COLORS.headingText, flex: 1, textAlign: 'left' }}>
           Roll Call
         </span>
-        <span style={{
-          fontSize: 10, fontWeight: 700, color: COLORS.primary,
-          background: '#eef2ff', borderRadius: 999, padding: '2px 8px',
-        }}>
-          {presentCount}/{rollCall.length} present
-        </span>
         <svg width="12" height="12" fill="none" stroke={COLORS.mutedText} strokeWidth="2" viewBox="0 0 24 24"
           style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
       {isOpen && (
-        <div style={{ padding: '12px 16px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {rollCall.map((attendee, i) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '8px 12px', background: '#f8fafc',
-                border: `1px solid ${COLORS.subtleBorder}`, borderRadius: 8,
-              }}>
-                <button
-                  onClick={() => onUpdate(i, { present: !attendee.present })}
-                  disabled={!isEditing}
-                  style={{
-                    width: 22, height: 22, borderRadius: '50%',
-                    background: attendee.present
-                      ? 'linear-gradient(135deg, #dcfce7, #bbf7d0)'
-                      : 'linear-gradient(135deg, #fee2e2, #fecaca)',
-                    border: attendee.present ? '1.5px solid #86efac' : '1.5px solid #fca5a5',
-                    cursor: isEditing ? 'pointer' : 'default',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 10, fontWeight: 700,
-                    color: attendee.present ? '#16a34a' : '#dc2626',
-                  }}
-                >
-                  {attendee.present ? '✓' : '✗'}
-                </button>
-                {isEditing ? (
-                  <>
-                    <input
-                      value={attendee.name}
-                      onChange={e => onUpdate(i, { name: e.target.value })}
-                      style={{
-                        flex: 1, padding: '4px 8px', fontSize: 12, fontWeight: 600,
-                        border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4,
-                        fontFamily: 'inherit', background: '#fff',
-                      }}
-                    />
-                    <select
-                      value={attendee.role}
-                      onChange={e => onUpdate(i, { role: e.target.value })}
-                      style={{
-                        padding: '4px 8px', fontSize: 11, border: `1px solid ${COLORS.primaryBorder}`,
-                        borderRadius: 4, fontFamily: 'inherit', background: '#fff',
-                      }}
-                    >
-                      {['Mayor', 'Councillor', 'CAO', 'Clerk', 'Delegation', 'Staff'].map(r =>
-                        <option key={r} value={r}>{r}</option>
-                      )}
-                    </select>
-                    <button onClick={() => onRemove(i)} style={{
-                      background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: 14,
-                    }}>×</button>
-                  </>
-                ) : (
-                  <>
-                    <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: COLORS.headingText }}>
-                      {attendee.name}
-                    </span>
-                    <span style={{ fontSize: 10, color: COLORS.mutedText }}>{attendee.role}</span>
-                  </>
-                )}
-              </div>
-            ))}
+        <div style={{ padding: '8px 20px 16px' }}>
+          {/* Present */}
+          <div style={groupLabelStyle}>Present:</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: isEditing ? 6 : 2 }}>
+            {present.map(renderAttendee)}
+            {present.length === 0 && <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>None</div>}
           </div>
+
+          {/* Absent */}
+          <div style={groupLabelStyle}>Absent:</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: isEditing ? 6 : 2 }}>
+            {absent.map(renderAttendee)}
+            {absent.length === 0 && !isEditing && <div style={{ fontSize: 12, color: '#94a3b8' }}>—</div>}
+          </div>
+
+          {/* Staff */}
+          <div style={groupLabelStyle}>Staff:</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: isEditing ? 6 : 2 }}>
+            {staff.map(renderAttendee)}
+            {staff.length === 0 && <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>None</div>}
+          </div>
+
           {isEditing && (
             <button onClick={onAdd} style={{
-              ...outlineButtonStyle, marginTop: 8, padding: '6px 12px', fontSize: 11, width: '100%',
+              ...outlineButtonStyle, marginTop: 10, padding: '6px 12px', fontSize: 11, width: '100%',
             }}>
               + Add Attendee
             </button>
@@ -188,163 +236,161 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
   );
 }
 
-// ─── Motion Card ─────────────────────────────
+// ─── Motion Card — PC Minutes Standard ─────────────────────────────
 function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
-  const resultColors = {
-    carried: { bg: '#f0fdf4', border: '#dcfce7', color: '#22c55e', label: 'CARRIED' },
-    defeated: { bg: '#fef2f2', border: '#fee2e2', color: '#dc2626', label: 'DEFEATED' },
-    tabled: { bg: '#fffbeb', border: '#fef3c7', color: '#d97706', label: 'TABLED' },
-    pending: { bg: '#f8fafc', border: '#e2e8f0', color: '#64748b', label: 'PENDING' },
-  };
-  const r = resultColors[motion.result] || resultColors.pending;
-  const resultOptions = ['carried', 'defeated', 'tabled', 'pending'];
+  const resultOptions = ['carried', 'carried unanimously', 'defeated', 'tabled', 'pending'];
+  const resultLabel = (motion.result || 'pending').toUpperCase();
+
+  const displayResult = motion.amendment?.status === 'carried'
+    ? `${resultLabel} (AS AMENDED)` : resultLabel;
 
   return (
-    <div style={{
-      background: '#fff',
-      border: `1px solid ${COLORS.cardBorder}`,
-      borderLeft: `4px solid ${CATEGORY_COLORS.motion.color}`,
-      borderRadius: '0 10px 10px 0',
-      overflow: 'hidden', marginTop: 8,
-    }}>
-      {/* Resolution number + Motion text */}
+    <div style={{ marginTop: 10, marginBottom: 6 }}>
+      <div>
+      {/* Resolution number */}
       {resolutionNumber && (
-        <div style={{
-          padding: '6px 16px 0', display: 'flex', alignItems: 'center', gap: 6,
-        }}>
-          <span style={{
-            fontSize: 9, fontWeight: 700, letterSpacing: .8,
-            color: '#475569', background: '#f1f5f9',
-            border: '1px solid #cbd5e1', borderRadius: 4,
-            padding: '2px 8px',
-          }}>
-            {resolutionNumber}
-          </span>
+        <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
+          {resolutionNumber}
         </div>
       )}
-      <div style={{ padding: `${resolutionNumber ? '6px' : '12px'} 16px 8px` }}>
-        <div style={{
-          fontSize: 8, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
-          color: CATEGORY_COLORS.motion.color, marginBottom: 6,
-        }}>
-          Motion
-        </div>
-        {isEditing ? (
-          <textarea
-            value={motion.text}
-            onChange={e => onUpdate('text', e.target.value)}
-            style={{
-              width: '100%', fontSize: 12, lineHeight: 1.75, color: COLORS.bodyText,
-              border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
-              padding: '8px 10px', fontFamily: 'inherit', background: '#f8fafc',
-              resize: 'vertical', minHeight: 50,
-            }}
-          />
-        ) : (
-          <div style={{ fontSize: 12, lineHeight: 1.75, color: COLORS.bodyText }}>
-            {motion.text}
-          </div>
-        )}
+
+      {/* MOTION: label */}
+      <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.headingText, marginBottom: 4 }}>
+        MOTION:
       </div>
 
-      {/* Mover / Seconder */}
-      <div style={{ display: 'flex', gap: 6, padding: '0 16px 10px' }}>
-        <div style={{ flex: 1, background: '#f1f5f9', border: '1.5px solid #cbd5e1', borderRadius: 7, padding: '6px 8px' }}>
-          <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 2 }}>Moved By</div>
-          {isEditing ? (
-            <input value={motion.mover} onChange={e => onUpdate('mover', e.target.value)}
-              style={{ fontSize: 12, fontWeight: 700, border: '1px solid #cbd5e1', borderRadius: 4, padding: '2px 6px', width: '100%', fontFamily: 'inherit', background: '#fff' }} />
-          ) : (
-            <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.headingText }}>{motion.mover}</div>
-          )}
+      {/* Motion text */}
+      {isEditing ? (
+        <textarea
+          value={motion.text}
+          onChange={e => onUpdate('text', e.target.value)}
+          style={{
+            width: '100%', fontSize: 13, lineHeight: 1.7, color: COLORS.bodyText,
+            border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+            padding: '8px 10px', fontFamily: 'inherit', background: '#f8fafc',
+            resize: 'vertical', minHeight: 50,
+          }}
+        />
+      ) : (
+        <div style={{ fontSize: 13, lineHeight: 1.7, color: COLORS.bodyText, marginBottom: 6 }}>
+          {motion.text}
         </div>
-        <div style={{ flex: 1, background: '#f1f5f9', border: '1.5px solid #cbd5e1', borderRadius: 7, padding: '6px 8px' }}>
-          <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 2 }}>Seconded By</div>
-          {isEditing ? (
-            <input value={motion.seconder} onChange={e => onUpdate('seconder', e.target.value)}
-              style={{ fontSize: 12, fontWeight: 700, border: '1px solid #cbd5e1', borderRadius: 4, padding: '2px 6px', width: '100%', fontFamily: 'inherit', background: '#fff' }} />
-          ) : (
-            <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.headingText }}>{motion.seconder}</div>
-          )}
-        </div>
+      )}
+
+      {/* MOVED BY / SECONDED BY */}
+      <div style={{ marginTop: 6 }}>
+        {isEditing ? (
+          <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>MOVED BY: </span>
+              <input value={motion.mover} onChange={e => onUpdate('mover', e.target.value)}
+                style={{ fontSize: 12, fontWeight: 600, border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4, padding: '2px 6px', fontFamily: 'inherit', background: '#fff' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>SECONDED BY: </span>
+              <input value={motion.seconder} onChange={e => onUpdate('seconder', e.target.value)}
+                style={{ fontSize: 12, fontWeight: 600, border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4, padding: '2px 6px', fontFamily: 'inherit', background: '#fff' }} />
+            </div>
+          </div>
+        ) : (
+          <>
+            <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+              <span style={{ fontWeight: 700 }}>MOVED BY:</span> {motion.mover}
+            </div>
+            <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+              <span style={{ fontWeight: 700 }}>SECONDED BY:</span> {motion.seconder}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Amendment block */}
       {motion.amendment && (() => {
         const a = motion.amendment;
-        const aColors = {
-          carried: { bg: '#f0fdf4', border: '#dcfce7', color: '#22c55e', label: 'AMENDMENT CARRIED' },
-          defeated: { bg: '#fef2f2', border: '#fee2e2', color: '#dc2626', label: 'AMENDMENT DEFEATED' },
-        };
-        const ac = aColors[a.status || a.result] || { bg: '#f8fafc', border: '#e2e8f0', color: '#64748b', label: 'AMENDMENT' };
-
+        const aResult = (a.status || a.result || '').toUpperCase();
         return (
           <div style={{
-            margin: '0 16px 8px',
-            background: ac.bg,
-            border: `1px solid ${ac.border}`,
-            borderLeft: `3px solid ${ac.color}`,
-            borderRadius: '0 8px 8px 0',
-            padding: '10px 14px',
+            margin: '8px 0', padding: '8px 14px',
+            background: a.status === 'defeated' ? '#fef2f2' : '#f0fdf4',
+            border: `1px solid ${a.status === 'defeated' ? '#fee2e2' : '#dcfce7'}`,
+            borderRadius: 6,
           }}>
-            <div style={{
-              fontSize: 8, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
-              color: ac.color, marginBottom: 6,
-            }}>
-              {ac.label}
+            <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.headingText, marginBottom: 4 }}>
+              AMENDMENT:
             </div>
             <div style={{
-              fontSize: 11, lineHeight: 1.7, color: COLORS.bodyText, marginBottom: 8,
+              fontSize: 13, lineHeight: 1.7, color: COLORS.bodyText, marginBottom: 4,
               textDecoration: a.status === 'defeated' ? 'line-through' : 'none',
             }}>
               THAT the main motion be amended by {a.text}
             </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <div style={{ flex: 1, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 5, padding: '3px 6px' }}>
-                <div style={{ fontSize: 6, fontWeight: 700, letterSpacing: .6, textTransform: 'uppercase', color: '#64748b' }}>Moved By</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#0f172a' }}>{a.mover}</div>
-              </div>
-              <div style={{ flex: 1, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 5, padding: '3px 6px' }}>
-                <div style={{ fontSize: 6, fontWeight: 700, letterSpacing: .6, textTransform: 'uppercase', color: '#64748b' }}>Seconded By</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#0f172a' }}>{a.seconder}</div>
-              </div>
+            <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+              <span style={{ fontWeight: 700 }}>MOVED BY:</span> {a.mover}
+            </div>
+            <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+              <span style={{ fontWeight: 700 }}>SECONDED BY:</span> {a.seconder}
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: a.status === 'defeated' ? '#dc2626' : '#16a34a', marginTop: 4 }}>
+              AMENDMENT {aResult}
             </div>
           </div>
         );
       })()}
 
       {/* Result */}
-      <div style={{
-        padding: '8px 16px',
-        background: r.bg,
-        borderTop: `1px solid ${r.border}`,
-        display: 'flex', alignItems: 'center', gap: 8,
-      }}>
+      <div style={{ marginTop: 4 }}>
         {isEditing ? (
           <select
             value={motion.result}
             onChange={e => onUpdate('result', e.target.value)}
             style={{
-              padding: '4px 10px', fontSize: 11, fontWeight: 700, color: r.color,
-              background: '#fff', border: `1.5px solid ${r.border}`, borderRadius: 6,
-              fontFamily: 'inherit',
+              padding: '4px 10px', fontSize: 12, fontWeight: 700,
+              background: '#fff', border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+              fontFamily: 'inherit', color: COLORS.headingText,
             }}
           >
             {resultOptions.map(opt => <option key={opt} value={opt}>{opt.toUpperCase()}</option>)}
           </select>
         ) : (
-          <span style={{ fontSize: 11, fontWeight: 700, color: r.color }}>
-            {motion.amendment?.status === 'carried' ? `${r.label} (AS AMENDED)` : r.label}
-          </span>
+          <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.headingText }}>
+            {displayResult}
+          </div>
         )}
+      </div>
+      {/* OPPOSED line (if not unanimous and carried) */}
+      {motion.opposed && !isEditing && (
+        <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+          <span style={{ fontWeight: 700 }}>OPPOSED:</span> {motion.opposed}
+        </div>
+      )}
       </div>
     </div>
   );
 }
 
 // ─── Minutes Section ─────────────────────────────
-function MinutesSection({ section, isEditing, onUpdateContent, onUpdateMotion, resolutionMap }) {
+function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onUpdateSubItem, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
+
+  const numberedTitle = sectionIndex != null
+    ? `${sectionIndex}. ${(section.title || '').toUpperCase()}`
+    : (section.title || '').toUpperCase();
+
+  // Count all motions (direct + in sub-items)
+  const totalMotions = (section.motions?.length || 0)
+    + (section.subItems || []).reduce((sum, si) => sum + (si.motions?.length || 0), 0);
+
+  // Render a list of motions (used for both direct motions and sub-item motions)
+  const renderMotions = (motions, onUpdate, keyPrefix) =>
+    motions.map((motion, mi) => (
+      <MotionCard
+        key={`${keyPrefix}-${motion.id}`}
+        motion={motion}
+        isEditing={isEditing}
+        onUpdate={(field, value) => onUpdate(mi, field, value)}
+        resolutionNumber={resolutionMap?.[motion.id]}
+      />
+    ));
 
   return (
     <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
@@ -358,15 +404,15 @@ function MinutesSection({ section, isEditing, onUpdateContent, onUpdateMotion, r
         }}
       >
         <span style={{ fontWeight: 700, fontSize: 13, color: COLORS.headingText, flex: 1, textAlign: 'left' }}>
-          {section.title}
+          {numberedTitle}
         </span>
-        {section.motions.length > 0 && (
+        {totalMotions > 0 && (
           <span style={{
             fontSize: 9, fontWeight: 700, color: CATEGORY_COLORS.motion.color,
             background: CATEGORY_COLORS.motion.light, border: `1px solid ${CATEGORY_COLORS.motion.border}`,
             borderRadius: 999, padding: '2px 8px',
           }}>
-            {section.motions.length} motion{section.motions.length > 1 ? 's' : ''}
+            {totalMotions} motion{totalMotions > 1 ? 's' : ''}
           </span>
         )}
         <svg width="12" height="12" fill="none" stroke={COLORS.mutedText} strokeWidth="2" viewBox="0 0 24 24"
@@ -376,32 +422,55 @@ function MinutesSection({ section, isEditing, onUpdateContent, onUpdateMotion, r
       </button>
       {isOpen && (
         <div style={{ padding: '16px 20px' }}>
-          {isEditing ? (
-            <div
-              contentEditable
-              suppressContentEditableWarning
-              onBlur={e => onUpdateContent(e.currentTarget.innerHTML)}
-              dangerouslySetInnerHTML={{ __html: section.content || '<p><em>No content.</em></p>' }}
-              style={{
-                fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, outline: 'none',
-                minHeight: 40, padding: 8, borderRadius: 6,
-                border: `1px dashed ${COLORS.primaryBorder}`, background: '#fafbfc',
-              }}
-            />
-          ) : (
-            <div
-              dangerouslySetInnerHTML={{ __html: section.content || '<p><em>No content.</em></p>' }}
-              style={{ fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8 }}
-            />
+          {/* Section-level discussion text (italicized) */}
+          {section.content && stripHtml(section.content).trim() && (
+            isEditing ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={e => onUpdateContent(e.currentTarget.innerHTML)}
+                dangerouslySetInnerHTML={{ __html: section.content }}
+                style={{
+                  fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, outline: 'none',
+                  minHeight: 30, padding: 8, borderRadius: 6,
+                  border: `1px dashed ${COLORS.primaryBorder}`, background: '#fafbfc',
+                  marginBottom: 8,
+                }}
+              />
+            ) : (
+              <div
+                dangerouslySetInnerHTML={{ __html: section.content }}
+                style={{ fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, fontStyle: 'italic', marginBottom: 8 }}
+              />
+            )
           )}
-          {section.motions.map((motion, mi) => (
-            <MotionCard
-              key={motion.id}
-              motion={motion}
-              isEditing={isEditing}
-              onUpdate={(field, value) => onUpdateMotion(mi, field, value)}
-              resolutionNumber={resolutionMap?.[motion.id]}
-            />
+
+          {/* Direct motions (no sub-item, e.g. "3. ADOPTION OF AGENDA" → MOTION:) */}
+          {renderMotions(section.motions || [], (mi, field, value) => onUpdateMotion(mi, field, value), 'direct')}
+
+          {/* Sub-items (e.g. "4.1 November 12, 2025 Special Council Meeting Minutes") */}
+          {(section.subItems || []).map((sub, si) => (
+            <div key={sub.id} style={{ marginTop: 12 }}>
+              {/* Sub-item heading: "4.1 Title" */}
+              <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.headingText, paddingLeft: 10, marginBottom: 4 }}>
+                {sectionIndex}.{si + 1} {sub.title}
+              </div>
+
+              {/* Sub-item discussion text (italicized) */}
+              {sub.content && sub.content.trim() && (
+                <div style={{
+                  fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, fontStyle: 'italic',
+                  paddingLeft: 30, marginBottom: 4,
+                }}>
+                  {sub.content}
+                </div>
+              )}
+
+              {/* Sub-item motions (indented further) */}
+              <div style={{ paddingLeft: 20 }}>
+                {renderMotions(sub.motions || [], (mi, field, value) => onUpdateSubItem(si, mi, field, value), `sub-${si}`)}
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -409,15 +478,25 @@ function MinutesSection({ section, isEditing, onUpdateContent, onUpdateMotion, r
   );
 }
 
-// ─── Sign-Off Block (name + title only) ─────────────────────────────
-function ApprovalSignOff({ approval, isEditing, onUpdate }) {
+// ─── Sign-Off Block — PC Minutes Standard ─────────────────────────────
+function ApprovalSignOff({ approval, isEditing, onUpdate, metadata }) {
   const isApproved = !!approval.approvedAt;
 
+  // Format date for footer
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch { return dateStr; }
+  };
+
+  const meetingDate = formatDate(metadata?.date);
+  const municipality = metadata?.municipality || 'Village of Pouce Coupe';
+
   return (
-    <div style={{
-      ...cardStyle, padding: 0, overflow: 'hidden',
-      border: isApproved ? '1.5px solid #dcfce7' : `1px solid ${COLORS.cardBorder}`,
-    }}>
+    <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+      {/* Header */}
       <div style={{
         padding: '14px 20px 10px',
         background: isApproved ? '#f0fdf4' : '#fafbfc',
@@ -426,162 +505,272 @@ function ApprovalSignOff({ approval, isEditing, onUpdate }) {
         borderLeft: `4px solid ${isApproved ? '#22c55e' : COLORS.primary}`,
       }}>
         <span style={{ fontWeight: 700, fontSize: 13, color: isApproved ? '#16a34a' : COLORS.headingText }}>
-          {isApproved ? 'Approved By' : 'Sign-Off'}
+          Sign-Off
         </span>
         {isApproved && (
           <span style={{
             fontSize: 9, fontWeight: 700, color: '#22c55e',
             background: '#dcfce7', borderRadius: 999, padding: '2px 8px', marginLeft: 'auto',
           }}>
-            {new Date(approval.approvedAt).toLocaleDateString()}
+            Approved {new Date(approval.approvedAt).toLocaleDateString()}
           </span>
         )}
       </div>
 
-      <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <div>
-          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>
-            Name
-          </div>
+      <div style={{ padding: '20px 24px' }}>
+        {/* Signature lines */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ borderBottom: '1px solid #cbd5e1', width: '60%', marginBottom: 4, paddingTop: 30 }} />
           {isEditing && !isApproved ? (
-            <input
-              value={approval.name || ''}
-              onChange={e => onUpdate('name', e.target.value)}
-              placeholder="e.g. Jane Smith"
-              style={{
-                width: '100%', padding: '6px 10px', fontSize: 13, fontWeight: 600,
-                color: COLORS.headingText, background: '#f8fafc',
-                border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
-                fontFamily: 'inherit',
-              }}
-            />
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{ fontSize: 12, color: '#64748b' }}>Chairperson,</span>
+              <input
+                value={approval.chairperson || ''}
+                onChange={e => onUpdate('chairperson', e.target.value)}
+                placeholder="e.g. Mayor Danielle Veach"
+                style={{
+                  flex: 1, padding: '4px 8px', fontSize: 13, fontWeight: 600,
+                  color: COLORS.headingText, background: '#f8fafc',
+                  border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 4,
+                  fontFamily: 'inherit',
+                }}
+              />
+            </div>
           ) : (
-            <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.headingText }}>
-              {approval.name || '—'}
+            <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+              Chairperson, {approval.chairperson || '—'}
             </div>
           )}
         </div>
-        <div>
-          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>
-            Title
-          </div>
+
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ borderBottom: '1px solid #cbd5e1', width: '60%', marginBottom: 4, paddingTop: 30 }} />
           {isEditing && !isApproved ? (
-            <input
-              value={approval.title || ''}
-              onChange={e => onUpdate('title', e.target.value)}
-              placeholder="e.g. Corporate Officer"
-              style={{
-                width: '100%', padding: '6px 10px', fontSize: 13, fontWeight: 600,
-                color: COLORS.headingText, background: '#f8fafc',
-                border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
-                fontFamily: 'inherit',
-              }}
-            />
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap' }}>Chief Administrative & Corporate Officer,</span>
+              <input
+                value={approval.officer || ''}
+                onChange={e => onUpdate('officer', e.target.value)}
+                placeholder="e.g. Duncan Malkinson"
+                style={{
+                  flex: 1, padding: '4px 8px', fontSize: 13, fontWeight: 600,
+                  color: COLORS.headingText, background: '#f8fafc',
+                  border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 4,
+                  fontFamily: 'inherit',
+                }}
+              />
+            </div>
           ) : (
-            <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.headingText }}>
-              {approval.title || '—'}
+            <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+              Chief Administrative & Corporate Officer, {approval.officer || '—'}
             </div>
           )}
+        </div>
+
+        {/* Certified true copy footer */}
+        <div style={{
+          marginTop: 20, paddingTop: 16,
+          borderTop: `1px solid ${COLORS.subtleBorder}`,
+          textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 11, fontStyle: 'italic', color: '#64748b', lineHeight: 1.6 }}>
+            Certified True Copy of the {metadata?.meetingType || 'Regular Meeting'} of Council Minutes — {meetingDate}
+          </div>
+          <div style={{ fontSize: 11, fontStyle: 'italic', color: '#64748b' }}>
+            {metadata?.location || 'Council Chambers'}, {municipality.replace(/^(Village of |Town of |City of |District of )/i, '')}, BC
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── DOCX Export ─────────────────────────────
-function exportToDocx(data, approval) {
+// ─── DOCX Export — Exact PC Minutes Standard ─────────────────────────────
+async function exportToDocx(data, approval) {
+  const staffRoles = ['Staff', 'CAO', 'Clerk'];
+  const FONT = 'Calibri';
+  const SZ = 22;                          // 11pt body (half-points)
+  const SZ_TITLE = 28;                    // 14pt title
+  const SZ_FOOTER = 20;                   // 10pt footer
+  const INDENT_1 = convertInchesToTwip(0.5);   // Motion indent under section
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    } catch { return dateStr; }
+  };
+
+  const meetingType = (data.metadata.meetingType || 'Regular Meeting')
+    .replace(/meeting/i, '').trim().toUpperCase();
+
+  const meetingDate = formatDate(data.metadata.date);
   const children = [];
 
-  // Title
-  children.push(new Paragraph({
-    children: [new TextRun({ text: 'MEETING MINUTES', bold: true, size: 32 })],
-    alignment: AlignmentType.CENTER,
-    spacing: { after: 200 },
-  }));
-  children.push(new Paragraph({
-    children: [new TextRun({ text: data.metadata.municipality || 'Council Meeting', bold: true, size: 28 })],
-    alignment: AlignmentType.CENTER,
-    spacing: { after: 100 },
-  }));
+  // Helper: add paragraph with Calibri font
+  const addPara = (text, opts = {}) => {
+    const runs = typeof text === 'string'
+      ? [new TextRun({ text, font: FONT, size: opts.sz || SZ, bold: !!opts.bold, italics: !!opts.italics })]
+      : text;
+    children.push(new Paragraph({
+      children: runs,
+      alignment: opts.align,
+      indent: opts.indent != null ? { left: opts.indent } : undefined,
+      spacing: opts.spacing,
+    }));
+  };
 
-  // Metadata
-  const metaFields = [
-    ['Date', data.metadata.date],
-    ['Time', data.metadata.time],
-    ['Location', data.metadata.location],
-    ['Chair', data.metadata.chair],
-    ['Clerk', data.metadata.clerk],
-  ];
-  metaFields.forEach(([label, val]) => {
+  // Helper: bold label + normal value on one line
+  const addLabelValue = (label, value, indent) => {
     children.push(new Paragraph({
       children: [
-        new TextRun({ text: `${label}: `, bold: true }),
-        new TextRun(val || '—'),
+        new TextRun({ text: label, font: FONT, size: SZ, bold: true }),
+        new TextRun({ text: value || '', font: FONT, size: SZ }),
       ],
+      indent: indent != null ? { left: indent } : undefined,
     }));
-  });
-  children.push(new Paragraph({ text: '', spacing: { after: 200 } }));
+  };
 
-  // Roll Call
-  children.push(new Paragraph({ text: 'Roll Call', heading: HeadingLevel.HEADING_1 }));
-  data.rollCall.forEach(a => {
+  // ── Logo ──
+  try {
+    const logoResp = await fetch('/pouce-coupe-logo.jpg');
+    const logoBlob = await logoResp.blob();
+    const logoBuf = await logoBlob.arrayBuffer();
     children.push(new Paragraph({
-      text: `${a.present ? '✓' : '✗'} ${a.name} (${a.role}) — ${a.present ? 'Present' : 'Absent'}`,
+      children: [new ImageRun({ data: logoBuf, transformation: { width: 120, height: 109 }, type: 'jpg' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
     }));
-  });
-  children.push(new Paragraph({ text: '', spacing: { after: 200 } }));
+  } catch { /* skip logo if unavailable */ }
 
-  // Sections
-  data.sections.forEach(section => {
-    children.push(new Paragraph({ text: section.title, heading: HeadingLevel.HEADING_1, spacing: { before: 300 } }));
+  // In DOCX, spacing is in twentieths of a point (twips). 240 twips = one line (~12pt).
+  const LINE = 240;  // one blank line equivalent
+
+  // ── Centered header — no gaps between title/date/time, one blank line after ──
+  addPara(`${meetingType} COUNCIL MEETING MINUTES`, { sz: SZ_TITLE, bold: true, align: AlignmentType.CENTER });
+  addPara(meetingDate, { align: AlignmentType.CENTER });
+  addPara(`${data.metadata.time || ''} - ${data.metadata.location || 'Council Chambers'}`, { align: AlignmentType.CENTER, spacing: { after: LINE } });
+
+  // ── Roll Call — no extra spacing between groups ──
+  const present = data.rollCall.filter(a => a.present && !staffRoles.includes(a.role));
+  const absent = data.rollCall.filter(a => !a.present && !staffRoles.includes(a.role));
+  const staff = data.rollCall.filter(a => staffRoles.includes(a.role));
+
+  addPara('Present:', { bold: true });
+  present.forEach(a => addPara(a.name));
+  addPara('Absent:', { bold: true });
+  if (absent.length > 0) absent.forEach(a => addPara(a.name));
+  addPara('Staff:', { bold: true });
+  staff.forEach(a => addPara(a.name));
+  // One blank line before first section
+  addPara('', { spacing: { after: LINE } });
+
+  // Helper: render a motion block at a given indent
+  const renderMotionDocx = (m, indent) => {
+    addPara('MOTION:', { bold: true, indent });
+    addPara(m.text, { indent });
+    addLabelValue('MOVED BY: ', m.mover, indent);
+    addLabelValue('SECONDED BY: ', m.seconder, indent);
+
+    const resultText = m.amendment?.status === 'carried'
+      ? `${(m.result || 'CARRIED').toUpperCase()} (AS AMENDED)`
+      : (m.result || 'CARRIED').toUpperCase();
+    addPara(resultText, { bold: true, indent });
+
+    if (m.opposed) addLabelValue('OPPOSED: ', m.opposed, indent);
+
+    if (m.amendment) {
+      const aStatus = (m.amendment.status || m.amendment.result || '').toUpperCase();
+      addPara('AMENDMENT:', { bold: true, indent });
+      addPara(`THAT the main motion be amended by ${m.amendment.text}`, { indent });
+      addLabelValue('MOVED BY: ', m.amendment.mover, indent);
+      addLabelValue('SECONDED BY: ', m.amendment.seconder, indent);
+      addPara(`AMENDMENT ${aStatus}`, { bold: true, indent });
+    }
+  };
+
+  // ── Sections ──
+  data.sections.forEach((section, idx) => {
+    const sectionNum = idx + 1;
+    const sectionTitle = `${sectionNum}. ${(section.title || '').toUpperCase()}`;
+
+    // Section heading
+    addPara(sectionTitle, { bold: true });
+
+    // Section-level discussion text (italicized, indented)
     const text = stripHtml(section.content);
-    if (text) children.push(new Paragraph({ text, spacing: { after: 100 } }));
+    if (text && text.trim()) {
+      addPara(text.trim(), { indent: INDENT_1, italics: true });
+    }
 
-    section.motions.forEach(m => {
-      children.push(new Paragraph({
-        children: [new TextRun({ text: 'MOTION: ', bold: true }), new TextRun(m.text)],
-        spacing: { before: 200 },
-      }));
-      children.push(new Paragraph({
-        text: `Moved by: ${m.mover}    Seconded by: ${m.seconder}`,
-      }));
-      children.push(new Paragraph({
-        children: [new TextRun({ text: m.result.toUpperCase(), bold: true })],
-        spacing: { after: 200 },
-      }));
+    // Direct motions (no sub-item, e.g. "3. ADOPTION OF AGENDA" → MOTION:)
+    (section.motions || []).forEach(m => {
+      renderMotionDocx(m, INDENT_1);
     });
+
+    // Sub-items (e.g. "4.1 November 12, 2025 Special Council Meeting Minutes")
+    (section.subItems || []).forEach((sub, si) => {
+      // Sub-item heading (indented)
+      addPara(`${sectionNum}.${si + 1} ${sub.title}`, { indent: INDENT_1 });
+
+      // Sub-item discussion text (italicized, further indented)
+      if (sub.content && sub.content.trim()) {
+        addPara(sub.content.trim(), { indent: INDENT_1 * 2, italics: true });
+      }
+
+      // Sub-item motions (further indented)
+      (sub.motions || []).forEach(m => {
+        renderMotionDocx(m, INDENT_1 * 2);
+      });
+    });
+
+    // One blank line after section
+    addPara('');
   });
 
-  // Sign-off
-  children.push(new Paragraph({ text: '', spacing: { after: 400 } }));
-  children.push(new Paragraph({ text: 'Approved By:', heading: HeadingLevel.HEADING_1 }));
-  if (approval?.name) {
-    children.push(new Paragraph({
-      children: [new TextRun({ text: 'Name: ', bold: true }), new TextRun(approval.name)],
-    }));
-  }
-  if (approval?.title) {
-    children.push(new Paragraph({
-      children: [new TextRun({ text: 'Title: ', bold: true }), new TextRun(approval.title)],
-    }));
-  }
-  if (approval?.email) {
-    children.push(new Paragraph({
-      children: [new TextRun({ text: 'Email: ', bold: true }), new TextRun(approval.email)],
-    }));
-  }
-  if (approval?.approvedAt) {
-    children.push(new Paragraph({
-      children: [new TextRun({ text: `Approved on ${new Date(approval.approvedAt).toLocaleString()}`, bold: true, italics: true })],
-      spacing: { before: 200 },
-    }));
-  }
+  // ── Sign-off — blank space before signatures ──
+  addPara('');
+  addPara(`Chairperson, ${approval?.chairperson || ''}`, { spacing: { before: LINE * 2 } });
+  addPara('');
+  addPara(`Chief Administrative & Corporate Officer, ${approval?.officer || ''}`, { spacing: { before: LINE * 2 } });
 
-  const doc = new Document({ sections: [{ children }] });
-  Packer.toBlob(doc).then(blob => {
-    const filename = `minutes-${data.metadata.date || 'draft'}.docx`;
-    saveAs(blob, filename);
+  // ── Certified True Copy footer ──
+  const municipality = data.metadata.municipality || 'Village of Pouce Coupe';
+  const location = data.metadata.location || 'Council Chambers';
+  const shortMuni = municipality.replace(/^(Village of |Town of |City of |District of )/i, '');
+
+  addPara('');
+  addPara(
+    `Certified True Copy of the ${data.metadata.meetingType || 'Regular Meeting'} of Council Minutes \u2014 ${meetingDate}`,
+    { sz: SZ_FOOTER, italics: true, align: AlignmentType.CENTER }
+  );
+  addPara(
+    `${location}, ${shortMuni}, BC`,
+    { sz: SZ_FOOTER, italics: true, align: AlignmentType.CENTER }
+  );
+
+  const doc = new Document({
+    styles: { default: { document: { run: { font: FONT, size: SZ } } } },
+    sections: [{
+      properties: {
+        page: {
+          margin: {
+            top: convertInchesToTwip(1),
+            bottom: convertInchesToTwip(1),
+            left: convertInchesToTwip(1),
+            right: convertInchesToTwip(1),
+          },
+        },
+      },
+      children,
+    }],
   });
+
+  const blob = await Packer.toBlob(doc);
+  const meetingTypeShort = (data.metadata.meetingType || 'RCM').split(' ').map(w => w[0]).join('');
+  const filename = `${meetingTypeShort} Minutes - ${meetingDate || data.metadata.date || 'draft'}.docx`;
+  saveAs(blob, filename);
 }
 
 // ─── Main Workspace ─────────────────────────────
@@ -607,23 +796,22 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
       })()
     : resolutionPrefix;
 
-  if (resolutionMode !== 'none') {
-    (data?.sections || []).forEach(section => {
-      (section.motions || []).forEach(motion => {
-        resCount++;
-        const parts = effectivePrefix.split('-');
-        const prefix = parts.slice(0, -1).join('-');
-        const startNum = parseInt(parts[parts.length - 1], 10) || 1;
-        const num = String(startNum + resCount - 1).padStart(2, '0');
-        resolutionMap[motion.id] = `${prefix}-${num}`;
-      });
+  const assignResNum = (motion) => {
+    resCount++;
+    if (resolutionMode !== 'none') {
+      const parts = effectivePrefix.split('-');
+      const prefix = parts.slice(0, -1).join('-');
+      const startNum = parseInt(parts[parts.length - 1], 10) || 1;
+      const num = String(startNum + resCount - 1).padStart(2, '0');
+      resolutionMap[motion.id] = `${prefix}-${num}`;
+    }
+  };
+  (data?.sections || []).forEach(section => {
+    (section.motions || []).forEach(assignResNum);
+    (section.subItems || []).forEach(sub => {
+      (sub.motions || []).forEach(assignResNum);
     });
-  } else {
-    // Count motions but don't assign numbers
-    (data?.sections || []).forEach(section => {
-      (section.motions || []).forEach(() => { resCount++; });
-    });
-  }
+  });
 
   const updateMetadata = useCallback((field, value) => {
     setData(prev => ({ ...prev, metadata: { ...prev.metadata, [field]: value } }));
@@ -676,10 +864,29 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
     setIsDirty(true);
   }, []);
 
+  const updateSubItemMotion = useCallback((sectionId, subIndex, motionIndex, field, value) => {
+    setData(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => {
+        if (s.id !== sectionId) return s;
+        return {
+          ...s,
+          subItems: (s.subItems || []).map((sub, si) => {
+            if (si !== subIndex) return sub;
+            return {
+              ...sub,
+              motions: sub.motions.map((m, mi) => mi === motionIndex ? { ...m, [field]: value } : m),
+            };
+          }),
+        };
+      }),
+    }));
+    setIsDirty(true);
+  }, []);
+
   const [approval, setApproval] = useState({
-    name: data?.metadata?.clerk || '',
-    title: 'Corporate Officer',
-    email: '',
+    chairperson: data?.metadata?.chair || 'Mayor Danielle Veach',
+    officer: 'Duncan Malkinson',
     approvedAt: data?.approvedAt || null,
   });
 
@@ -850,24 +1057,25 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
               onAdd={addAttendee}
               onRemove={removeAttendee}
             />
-            {data.sections.map(section => (
+            {data.sections.map((section, idx) => (
               <MinutesSection
                 key={section.id}
                 section={section}
+                sectionIndex={idx + 1}
                 isEditing={isEditing}
                 onUpdateContent={html => updateSectionContent(section.id, html)}
                 onUpdateMotion={(mi, field, value) => updateMotion(section.id, mi, field, value)}
+                onUpdateSubItem={(si, mi, field, value) => updateSubItemMotion(section.id, si, mi, field, value)}
                 resolutionMap={resolutionMap}
               />
             ))}
 
-            {/* Sign-off block — name and title only */}
+            {/* Sign-off block — PC Minutes standard */}
             <ApprovalSignOff
               approval={approval}
               isEditing={isEditing}
               onUpdate={updateApproval}
-              onApprove={approveMinutes}
-              onUnapprove={unapprove}
+              metadata={data.metadata}
             />
           </div>
         </div>
@@ -1055,11 +1263,11 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
                 </>
               ) : (
                 <>
-                  <button onClick={() => { approveMinutes(); setShowApprovalPanel(false); }} disabled={!approval.name?.trim()} style={{
+                  <button onClick={() => { approveMinutes(); setShowApprovalPanel(false); }} disabled={!approval.chairperson?.trim()} style={{
                     width: '100%', padding: '8px', marginBottom: 8,
-                    background: approval.name?.trim() ? 'linear-gradient(135deg, #22c55e, #16a34a)' : '#e2e8f0',
+                    background: approval.chairperson?.trim() ? 'linear-gradient(135deg, #22c55e, #16a34a)' : '#e2e8f0',
                     border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 700,
-                    color: approval.name?.trim() ? '#fff' : '#94a3b8', cursor: approval.name?.trim() ? 'pointer' : 'default',
+                    color: approval.chairperson?.trim() ? '#fff' : '#94a3b8', cursor: approval.chairperson?.trim() ? 'pointer' : 'default',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                   }}>
                     <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -1067,9 +1275,9 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
                     </svg>
                     Approve Now
                   </button>
-                  {!approval.name?.trim() && (
+                  {!approval.chairperson?.trim() && (
                     <div style={{ fontSize: 9, color: '#94a3b8', textAlign: 'center', marginBottom: 8 }}>
-                      Fill in the sign-off name at the bottom first
+                      Fill in the sign-off names at the bottom first
                     </div>
                   )}
                   <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 8 }}>

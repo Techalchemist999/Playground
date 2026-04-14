@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { COLORS } from '../../styles/tokens';
 
-const COUNCILLORS = ['Mayor Veach', 'Cllr Rabel', 'Cllr Wall', 'Cllr Johnston', 'Cllr Woodill'];
+const COUNCILLORS = ['Mayor Veach', 'Councillor Rabel', 'Councillor Wall', 'Councillor Johnston', 'Councillor Woodill'];
 const MOTION_TYPES = ['Main Motion', 'Amending Motion', 'Reconsideration'];
 
 function shortName(name) {
-  return name.replace('Cllr ', '').replace('Mayor ', '');
+  return name.replace('Councillor ', '').replace('Mayor ', '');
 }
 
 export default function QuickMotion({ onRecord, onCancel, onFloorMotion, resolvedMotions = [], startOpen = false }) {

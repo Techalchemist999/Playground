@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { COLORS, CATEGORY_COLORS } from '../../styles/tokens';
 
-const COUNCILLORS = ['Mayor Veach', 'Cllr Rabel', 'Cllr Wall', 'Cllr Johnston', 'Cllr Woodill'];
+const COUNCILLORS = ['Mayor Veach', 'Councillor Rabel', 'Councillor Wall', 'Councillor Johnston', 'Councillor Woodill'];
 
 // Vote states: null = not voted, 'yes', 'no'
 const VOTE_CYCLE = [null, 'yes', 'no']; // click cycles through
@@ -14,7 +14,7 @@ function getStage(topic) {
 }
 
 function shortName(name) {
-  return name.replace('Cllr ', '').replace('Mayor ', '');
+  return name.replace('Councillor ', '').replace('Mayor ', '');
 }
 
 export default function BiteCard({ topic, index, isNewest, accentColor, cardMode = 'simple' }) {

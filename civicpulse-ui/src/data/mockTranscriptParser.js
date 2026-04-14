@@ -8,12 +8,17 @@ const MOTION_RE = /(?:I move|moved? that|motion that|THAT\s+Council)\s+(.+?)(?:\
 const SECOND_RE = /(?:I second|seconded? by|seconded)\s*(?:by\s+)?((?:Mayor|Cllr|Councillor)\s+\w+)?/gi;
 const CARRIED_RE = /\b(carried|carried unanimously|defeated|tabled)\b/gi;
 
+// Normalize "Cllr" → "Councillor" for formal minutes output
+function normalizeName(name) {
+  return name.replace(/\bCllr\b/gi, 'Councillor');
+}
+
 function extractSpeakers(text) {
   const speakers = new Set();
   let match;
   const re = new RegExp(SPEAKER_RE.source, 'gm');
   while ((match = re.exec(text)) !== null) {
-    speakers.add(match[1].trim());
+    speakers.add(normalizeName(match[1].trim()));
   }
   return [...speakers];
 }
@@ -26,6 +31,16 @@ function guessRole(name) {
   if (/delegation/i.test(name)) return 'Delegation';
   return 'Councillor';
 }
+
+const DEFAULT_ROLL_CALL = [
+  { name: 'Mayor Danielle Veach', role: 'Mayor', present: true },
+  { name: 'Councillor Kurtis Rabel', role: 'Councillor', present: true },
+  { name: 'Councillor James Wall', role: 'Councillor', present: true },
+  { name: 'Councillor Raymond Johnston', role: 'Councillor', present: true },
+  { name: 'Councillor Marcel Woodill', role: 'Councillor', present: true },
+  { name: 'CAO/CO Duncan Malkinson', role: 'Staff', present: true },
+  { name: 'NDIT Intern Jimmy Ho', role: 'Staff', present: true },
+];
 
 function extractMotions(text) {
   const motions = [];
@@ -44,13 +59,13 @@ function extractMotions(text) {
     // Look back for speaker (mover)
     for (let j = i; j >= Math.max(0, i - 3); j--) {
       const speakerMatch = /^((?:Mayor|Cllr|Councillor)\s+\w+)\s*[:—–-]/i.exec(lines[j]);
-      if (speakerMatch) { mover = speakerMatch[1]; break; }
+      if (speakerMatch) { mover = normalizeName(speakerMatch[1]); break; }
     }
 
     // Look forward for seconder and result
     for (let j = i + 1; j < Math.min(lines.length, i + 5); j++) {
       const secMatch = /(?:seconded? by|I second)\s*((?:Mayor|Cllr|Councillor)\s+\w+)?/i.exec(lines[j]);
-      if (secMatch) seconder = secMatch[1] || 'Unknown';
+      if (secMatch) seconder = secMatch[1] ? normalizeName(secMatch[1]) : 'Unknown';
 
       const resMatch = /\b(carried|carried unanimously|defeated|tabled)\b/i.exec(lines[j]);
       if (resMatch) result = resMatch[1].toLowerCase();
@@ -61,7 +76,10 @@ function extractMotions(text) {
       text: `THAT Council ${motionText}`,
       mover,
       seconder,
-      result: result.includes('defeated') ? 'defeated' : result.includes('tabled') ? 'tabled' : 'carried',
+      result: result.includes('defeated') ? 'defeated'
+        : result.includes('tabled') ? 'tabled'
+        : result.includes('unanimously') ? 'carried unanimously'
+        : 'carried',
       amendment: null,
     });
   }
@@ -74,15 +92,21 @@ function splitIntoSections(text) {
   const sectionHeaders = [
     'Call to Order',
     'Land Acknowledgement',
-    'Approval of Agenda',
+    'Adoption of Agenda',
     'Adoption of Minutes',
+    'Introduction of Late Items',
+    'Public Hearing',
     'Delegations',
-    'Reports',
-    'Bylaws',
+    'Unfinished Business and Business Arising from the Minutes',
     'New Business',
-    'Unfinished Business',
-    'Notices of Motion',
+    'Resolutions',
+    'Correspondence',
+    'Bylaws',
+    'Administration Reports',
+    'Reports',
     'Question Period',
+    'In-Camera',
+    'Rise and Report',
     'Adjournment',
   ];
 
@@ -95,7 +119,6 @@ function splitIntoSections(text) {
   }
 
   if (numbered.length >= 3) {
-    // Use numbered sections
     const sections = [];
     for (let i = 0; i < numbered.length; i++) {
       const start = numbered[i].index;
@@ -106,6 +129,7 @@ function splitIntoSections(text) {
         title: numbered[i].title,
         content: `<p>${content.replace(/\n\n/g, '</p><p>').replace(/\n/g, ' ')}</p>`,
         motions: [],
+        subItems: [],
       });
     }
     return sections;
@@ -123,6 +147,7 @@ function splitIntoSections(text) {
       title: sectionHeaders[i],
       content: chunk.map(p => `<p>${p.trim()}</p>`).join('\n'),
       motions: [],
+      subItems: [],
     });
   }
 
@@ -133,6 +158,7 @@ function splitIntoSections(text) {
       title: 'Meeting Minutes',
       content: `<p>${text.trim()}</p>`,
       motions: [],
+      subItems: [],
     });
   }
 
@@ -144,108 +170,136 @@ function enrichWithDemoMotions(sections, speakers) {
   sections.forEach(s => { s.motions = []; });
 
   const m = (id) => speakers[0] || 'Mayor Veach';
-  const s1 = speakers[1] || 'Cllr Rabel';
-  const s2 = speakers[2] || 'Cllr Wall';
-  const s3 = speakers[3] || 'Cllr Johnston';
-  const s4 = speakers[4] || 'Cllr Woodill';
+  const s1 = speakers[1] || 'Councillor Rabel';
+  const s2 = speakers[2] || 'Councillor Wall';
+  const s3 = speakers[3] || 'Councillor Johnston';
+  const s4 = speakers[4] || 'Councillor Woodill';
 
   // Find sections by keyword match
   const find = (keyword) => sections.find(s => s.title.toLowerCase().includes(keyword.toLowerCase()));
 
-  // 1. Approval of Agenda — simple carried
-  const agendaSec = find('Agenda') || sections[2];
+  // Helper to create a motion object
+  const mot = (id, text, mover, seconder, result, amendment) => ({
+    id, text, mover, seconder, result: result || 'carried unanimously', amendment: amendment || null,
+  });
+
+  // --- Sections with DIRECT motions (no sub-items) ---
+
+  // Adoption of Agenda — direct motion
+  const agendaSec = find('Adoption of Agenda') || find('Agenda') || sections[2];
   if (agendaSec) {
-    agendaSec.motions.push({
-      id: 'motion-agenda',
-      text: 'THAT Council approves the agenda as presented.',
-      mover: s1, seconder: s2, result: 'carried', amendment: null,
-    });
+    agendaSec.motions.push(mot('motion-agenda',
+      'THAT Council adopt the March 25, 2026 Regular Council Meeting Agenda, as presented.',
+      m(), s3));
   }
 
-  // 2. Adoption of Minutes — simple carried unanimously
-  const minutesSec = find('Minutes') || find('Adoption');
-  if (minutesSec) {
-    minutesSec.motions.push({
-      id: 'motion-minutes',
-      text: 'THAT Council adopts the minutes of the March 11, 2026 regular meeting as presented.',
-      mover: s2, seconder: s4, result: 'carried', amendment: null,
-    });
-  }
-
-  // 3. Reports — receive for information
-  const reportsSec = find('Report');
-  if (reportsSec) {
-    reportsSec.motions.push({
-      id: 'motion-report',
-      text: 'THAT Council receives the CAO\'s monthly report for information.',
-      mover: s3, seconder: s1, result: 'carried', amendment: null,
-    });
-  }
-
-  // 4. Bylaws — carried unanimously
-  const bylawSec = find('Bylaw');
-  if (bylawSec) {
-    bylawSec.motions.push({
-      id: 'motion-bylaw',
-      text: 'THAT Council gives Bylaw 1021, the Noise Control Amendment Bylaw, third and final reading.',
-      mover: s4, seconder: s2, result: 'carried', amendment: null,
-    });
-  }
-
-  // 5. New Business — AMENDED motion (Main Street Beautification)
-  const newBizSec = find('New Business');
-  if (newBizSec) {
-    newBizSec.motions.push({
-      id: 'motion-beautification',
-      text: 'THAT Council awards the Main Street Beautification Project contract to Northern Landscapes in the amount of $78,500.',
-      mover: s1, seconder: s3, result: 'carried',
-      amendment: {
-        text: 'adding "and that the project include a public art component with a budget allocation of up to $5,000 from the community enhancement reserve."',
-        mover: s2,
-        seconder: s4,
-        result: 'carried',
-        status: 'carried',
-      },
-    });
-
-    // 6. Canada Day — AMENDMENT DEFEATED, original carried
-    newBizSec.motions.push({
-      id: 'motion-canadaday',
-      text: 'THAT Council approves a contribution of $3,000 from the events reserve to the Pouce Coupe Recreation Commission for the 2026 Canada Day celebration.',
-      mover: s3, seconder: s4, result: 'carried',
-      amendment: {
-        text: 'reducing the contribution from $3,000 to $1,500 and directing the remaining $1,500 to the sidewalk repair reserve.',
-        mover: s2,
-        seconder: s1,
-        result: 'defeated',
-        status: 'defeated',
-      },
-    });
-
-    // 7. DEFEATED motion — rezoning request
-    newBizSec.motions.push({
-      id: 'motion-rezoning',
-      text: 'THAT Council directs staff to initiate a rezoning of the parcel at 102 Railway Avenue from R-1 to C-2 Commercial.',
-      mover: s2, seconder: s1, result: 'defeated', amendment: null,
-    });
-
-    // 8. RECONSIDERATION — defeated rezoning brought back and tabled
-    newBizSec.motions.push({
-      id: 'motion-reconsideration',
-      text: 'THAT Council reconsiders the motion regarding the rezoning of 102 Railway Avenue, and THAT the matter be tabled to the next regular meeting pending a public consultation report.',
-      mover: s3, seconder: s4, result: 'carried',
-      amendment: null,
-    });
-  }
-
-  // 9. Adjournment
+  // Adjournment — direct motion
   const adjSec = find('Adjourn');
   if (adjSec) {
-    adjSec.motions.push({
-      id: 'motion-adjourn',
-      text: 'THAT Council adjourns the meeting.',
-      mover: s2, seconder: s1, result: 'carried', amendment: null,
-    });
+    adjSec.content = '<p>The Regular Council Meeting on March 25, 2026 was adjourned at 9:15 PM.</p>';
+    adjSec.motions.push(mot('motion-adjourn',
+      'THAT Council adjourn the meeting.', s2, s1));
+  }
+
+  // --- Sections with SUB-ITEMS ---
+
+  // Adoption of Minutes — sub-items
+  const minutesSec = find('Adoption of Minutes') || find('Minutes');
+  if (minutesSec) {
+    minutesSec.subItems = [
+      {
+        id: 'sub-min-1', title: 'March 11, 2026 Regular Council Meeting Minutes',
+        content: '', motions: [mot('motion-min-1',
+          'THAT Council adopt the March 11, 2026 Regular Council Meeting Minutes, as presented.',
+          m(), s2)],
+      },
+      {
+        id: 'sub-min-2', title: 'February 25, 2026 Committee of the Whole Meeting Minutes',
+        content: '', motions: [mot('motion-min-2',
+          'THAT Council adopt the February 25, 2026 Committee of the Whole Minutes, as presented.',
+          m(), s4)],
+      },
+    ];
+  }
+
+  // Unfinished Business — sub-items
+  const unfBizSec = find('Unfinished') || find('Business Arising');
+  if (unfBizSec) {
+    unfBizSec.subItems = [
+      {
+        id: 'sub-cao', title: 'CAO Monthly Report',
+        content: '', motions: [mot('motion-report',
+          "THAT Council receive the CAO's monthly report for information.",
+          s3, s1)],
+      },
+    ];
+  }
+
+  // New Business — sub-items
+  const newBizSec = find('New Business');
+  if (newBizSec) {
+    newBizSec.subItems = [
+      {
+        id: 'sub-beautification', title: 'Main Street Beautification Project',
+        content: '', motions: [mot('motion-beautification',
+          'THAT Council award the Main Street Beautification Project contract to Northern Landscapes in the amount of $78,500.',
+          s1, s3, 'carried unanimously', {
+            text: 'adding "and that the project include a public art component with a budget allocation of up to $5,000 from the community enhancement reserve."',
+            mover: s2, seconder: s4, result: 'carried', status: 'carried',
+          })],
+      },
+      {
+        id: 'sub-canadaday', title: 'Canada Day Celebration Funding',
+        content: '', motions: [mot('motion-canadaday',
+          'THAT Council approve a contribution of $3,000 from the events reserve to the Pouce Coupe Recreation Commission for the 2026 Canada Day celebration.',
+          s3, s4, 'carried unanimously', {
+            text: 'reducing the contribution from $3,000 to $1,500 and directing the remaining $1,500 to the sidewalk repair reserve.',
+            mover: s2, seconder: s1, result: 'defeated', status: 'defeated',
+          })],
+      },
+      {
+        id: 'sub-rezoning', title: 'Rezoning \u2014 102 Railway Avenue',
+        content: '', motions: [mot('motion-rezoning',
+          'THAT Council direct staff to initiate a rezoning of the parcel at 102 Railway Avenue from R-1 to C-2 Commercial.',
+          s2, s1, 'defeated')],
+      },
+      {
+        id: 'sub-reconsider', title: 'Reconsideration \u2014 102 Railway Avenue Rezoning',
+        content: '', motions: [mot('motion-reconsideration',
+          'THAT Council reconsider the motion regarding the rezoning of 102 Railway Avenue, and THAT the matter be tabled to the next regular meeting pending a public consultation report.',
+          s3, s4)],
+      },
+    ];
+  }
+
+  // Correspondence — direct motion + sub-items
+  const corrSec = find('Correspondence');
+  if (corrSec) {
+    corrSec.motions.push(mot('motion-correspondence',
+      'THAT Council receive the correspondence items for information.', m(), s4));
+  }
+
+  // Bylaws — sub-items
+  const bylawSec = find('Bylaw');
+  if (bylawSec) {
+    bylawSec.subItems = [
+      {
+        id: 'sub-bylaw', title: 'Noise Control Amendment Bylaw No. 1021, 2026',
+        content: '', motions: [mot('motion-bylaw',
+          'THAT Council adopt the "Noise Control Amendment Bylaw No. 1021, 2026," as presented.',
+          s4, s2)],
+      },
+    ];
+  }
+
+  // Reports — sub-items with discussion only (no motions)
+  const reportsSec = find('Reports');
+  if (reportsSec) {
+    reportsSec.subItems = [
+      { id: 'sub-rpt-1', title: 'Councillor Johnston Report', content: 'Reported attending the community event and noted good turnout.', motions: [] },
+      { id: 'sub-rpt-2', title: 'Councillor Rabel Report', content: 'Reported reviewing Bill M216 in detail.', motions: [] },
+      { id: 'sub-rpt-3', title: 'Mayor Veach Report', content: 'Reported meeting with staff to review preliminary 2026 budget figures.', motions: [] },
+    ];
   }
 }
 
@@ -278,8 +332,8 @@ export function parseTranscriptToMinutes(text) {
     sections[Math.min(2, sections.length - 1)].motions.push({
       id: 'motion-1',
       text: 'THAT Council approves the agenda as presented.',
-      mover: speakers[0] || 'Cllr Smith',
-      seconder: speakers[1] || 'Cllr Jones',
+      mover: speakers[0] || 'Councillor Smith',
+      seconder: speakers[1] || 'Councillor Jones',
       result: 'carried',
       amendment: null,
     });
@@ -302,11 +356,7 @@ export function parseTranscriptToMinutes(text) {
       clerk,
       municipality: 'Village of Pouce Coupe',
     },
-    rollCall: speakers.map(name => ({
-      name,
-      role: guessRole(name),
-      present: true,
-    })),
+    rollCall: DEFAULT_ROLL_CALL.map(entry => ({ ...entry })),
     sections,
     approvedAt: null,
   };
