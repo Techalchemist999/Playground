@@ -542,29 +542,10 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                             {linkedAgendaItem.title}
                           </div>
                         </div>
-                        {/* Quick Motion button */}
-                        <button
-                          onClick={() => setQuickMotionOpen(true)}
-                          title="Quick Motion"
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 3,
-                            padding: '5px 10px', border: '1.5px solid #e2e8f0', borderRadius: 6,
-                            background: '#fff', cursor: 'pointer', fontSize: 9, fontWeight: 700,
-                            color: '#64748b', transition: 'all .15s', flexShrink: 0,
-                          }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.color = '#475569'; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
-                        >
-                          <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                            <path d="M12 5v14M5 12h14" />
-                          </svg>
-                          Motion
-                        </button>
                       </div>
                     ) : (
                       <div style={{
-                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        padding: '6px 10px 0', gap: 8, flexShrink: 0,
+                        padding: '6px 14px 0', flexShrink: 0,
                       }}>
                         <div style={{
                           fontSize: 9, fontWeight: 700, letterSpacing: 1.1, textTransform: 'uppercase',
@@ -572,25 +553,42 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                         }}>
                           Floor Motion
                         </div>
-                        <button
-                          onClick={() => setQuickMotionOpen(true)}
-                          title="Quick Motion"
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 3,
-                            padding: '3px 8px', border: '1.5px solid #e2e8f0', borderRadius: 6,
-                            background: '#fff', cursor: 'pointer', fontSize: 9, fontWeight: 700,
-                            color: '#64748b', transition: 'all .15s', flexShrink: 0,
-                          }}
-                        >
-                          <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                            <path d="M12 5v14M5 12h14" />
-                          </svg>
-                          Motion
-                        </button>
                       </div>
                     )}
                     <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '4px 10px 8px' }}>
                       {motionCard}
+                    </div>
+                    {/* Footer — + Motion button, bottom right */}
+                    <div style={{
+                      display: 'flex', justifyContent: 'flex-end',
+                      padding: '10px 14px 12px',
+                      borderTop: '1px solid #f1f5f9',
+                      flexShrink: 0,
+                    }}>
+                      <button
+                        onClick={() => setQuickMotionOpen(true)}
+                        title="Start a new motion"
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 7,
+                          padding: '10px 18px',
+                          background: accentColor,
+                          border: 'none',
+                          borderRadius: 10,
+                          cursor: 'pointer',
+                          fontSize: 13, fontWeight: 800,
+                          color: '#fff',
+                          letterSpacing: '.3px',
+                          boxShadow: `0 4px 14px ${accentColor}55`,
+                          transition: 'all .15s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 6px 20px ${accentColor}77`; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 14px ${accentColor}55`; }}
+                      >
+                        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                          <path d="M12 5v14M5 12h14" />
+                        </svg>
+                        Motion
+                      </button>
                     </div>
                   </div>
                 );
