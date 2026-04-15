@@ -30,6 +30,14 @@ export default function App() {
   const [elapsed, setElapsed] = useState(0);
   const [bgTheme, setBgTheme] = useState(BG_THEMES[0]);
 
+  // Auto-launch demo when URL has ?demo=all — used by launcher "In-Meeting Clerk Support" link
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('demo') === 'all' && session.view === 'setup') {
+      session.startDemo();
+    }
+  }, [session.view, session.startDemo]);
+
   useEffect(() => {
     if (session.status !== 'ACTIVE' || !session.startTime) return;
     const interval = setInterval(() => {
