@@ -483,6 +483,11 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                 const amendment = topic.amendment;
                 const i = allMotions.indexOf(topic);
 
+                // Agenda item context — what is being discussed?
+                const linkedAgendaItem = topic.agendaItemNumber
+                  ? session.agendaItems.find(a => a.number === topic.agendaItemNumber)
+                  : null;
+
                 const motionCard = !amendment
                   ? <BiteCard topic={topic} index={i} isNewest={true} accentColor={accentColor} cardMode="simple" />
                   : (
@@ -497,8 +502,43 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
 
                 return (
                   <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-                    {/* + button top right */}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 10px 0', flexShrink: 0 }}>
+                    {/* Agenda item banner + quick motion button row */}
+                    <div style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '6px 10px 0', gap: 8, flexShrink: 0,
+                    }}>
+                      {/* Agenda context */}
+                      {linkedAgendaItem ? (
+                        <div style={{
+                          display: 'flex', alignItems: 'center', gap: 6,
+                          padding: '4px 10px',
+                          background: `linear-gradient(90deg, ${accentColor}15, transparent)`,
+                          borderLeft: `3px solid ${accentColor}`,
+                          borderRadius: 4,
+                          flex: 1,
+                          minWidth: 0,
+                        }} title={`Discussing agenda item ${linkedAgendaItem.number}: ${linkedAgendaItem.title}`}>
+                          <span style={{
+                            fontSize: 8, fontWeight: 800, letterSpacing: 1.1, textTransform: 'uppercase',
+                            color: '#64748b', flexShrink: 0,
+                          }}>
+                            Item {linkedAgendaItem.number}
+                          </span>
+                          <span style={{
+                            fontSize: 11, fontWeight: 600, color: '#1e293b',
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                          }}>
+                            {linkedAgendaItem.title}
+                          </span>
+                        </div>
+                      ) : (
+                        <div style={{
+                          fontSize: 9, fontWeight: 700, letterSpacing: 1.1, textTransform: 'uppercase',
+                          color: '#94a3b8', fontStyle: 'italic',
+                        }}>
+                          Floor Motion
+                        </div>
+                      )}
                       <button
                         onClick={() => setQuickMotionOpen(true)}
                         title="Quick Motion"
@@ -506,7 +546,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                           display: 'flex', alignItems: 'center', gap: 3,
                           padding: '3px 8px', border: '1.5px solid #e2e8f0', borderRadius: 6,
                           background: '#fff', cursor: 'pointer', fontSize: 9, fontWeight: 700,
-                          color: '#64748b', transition: 'all .15s',
+                          color: '#64748b', transition: 'all .15s', flexShrink: 0,
                         }}
                         onMouseEnter={e => { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.color = '#475569'; }}
                         onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
