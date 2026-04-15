@@ -125,6 +125,22 @@ export const DEMO_TOPICS = [
     votes: ['yes','yes','yes','yes','yes'],
     amendment: null,
   },
+
+  // Motion 6: Park Improvement Grant — ON THE FLOOR (demo showcase)
+  {
+    normalized_id: 'motion-park-grant',
+    label: 'Park Improvement Grant Application',
+    agendaItemNumber: 8,
+    category: 'motion',
+    state: 'ACTIVE',
+    mention_count: 2,
+    decay_score: 0.95,
+    mover: 'Councillor Johnston',
+    seconder: 'Councillor Wall',
+    motionText: 'THAT Council authorizes staff to submit the NDIT Park Improvement grant application for $75,000 for playground equipment replacement at Centennial Park.',
+    votes: [null, null, null, null, null],
+    amendment: null,
+  },
 ];
 
 export const DEMO_TRANSCRIPT = [

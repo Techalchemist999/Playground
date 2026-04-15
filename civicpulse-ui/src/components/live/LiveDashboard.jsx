@@ -502,61 +502,93 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
 
                 return (
                   <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-                    {/* Agenda item banner + quick motion button row */}
-                    <div style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      padding: '6px 10px 0', gap: 8, flexShrink: 0,
-                    }}>
-                      {/* Agenda context */}
-                      {linkedAgendaItem ? (
+                    {/* Agenda item banner — big item number at top */}
+                    {linkedAgendaItem ? (
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '10px 14px',
+                        background: `linear-gradient(90deg, ${accentColor}22, ${accentColor}08 60%, transparent)`,
+                        borderBottom: `1px solid ${accentColor}33`,
+                        flexShrink: 0,
+                      }} title={`Discussing agenda item ${linkedAgendaItem.number}: ${linkedAgendaItem.title}`}>
+                        {/* Big item number */}
                         <div style={{
-                          display: 'flex', alignItems: 'center', gap: 6,
-                          padding: '4px 10px',
-                          background: `linear-gradient(90deg, ${accentColor}15, transparent)`,
-                          borderLeft: `3px solid ${accentColor}`,
-                          borderRadius: 4,
-                          flex: 1,
-                          minWidth: 0,
-                        }} title={`Discussing agenda item ${linkedAgendaItem.number}: ${linkedAgendaItem.title}`}>
-                          <span style={{
-                            fontSize: 8, fontWeight: 800, letterSpacing: 1.1, textTransform: 'uppercase',
-                            color: '#64748b', flexShrink: 0,
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                          minWidth: 42, padding: '4px 8px',
+                          background: accentColor, color: '#fff',
+                          borderRadius: 8,
+                          boxShadow: `0 2px 8px ${accentColor}55`,
+                          flexShrink: 0,
+                        }}>
+                          <div style={{ fontSize: 7, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85, lineHeight: 1 }}>
+                            Item
+                          </div>
+                          <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1.1, letterSpacing: '-0.5px' }}>
+                            {linkedAgendaItem.number}
+                          </div>
+                        </div>
+                        {/* Title */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontSize: 8, fontWeight: 800, letterSpacing: 1.2, textTransform: 'uppercase',
+                            color: '#64748b', marginBottom: 2,
                           }}>
-                            Item {linkedAgendaItem.number}
-                          </span>
-                          <span style={{
-                            fontSize: 11, fontWeight: 600, color: '#1e293b',
+                            On The Floor
+                          </div>
+                          <div style={{
+                            fontSize: 14, fontWeight: 700, color: '#1e293b', lineHeight: 1.25,
                             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                           }}>
                             {linkedAgendaItem.title}
-                          </span>
+                          </div>
                         </div>
-                      ) : (
+                        {/* Quick Motion button */}
+                        <button
+                          onClick={() => setQuickMotionOpen(true)}
+                          title="Quick Motion"
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 3,
+                            padding: '5px 10px', border: '1.5px solid #e2e8f0', borderRadius: 6,
+                            background: '#fff', cursor: 'pointer', fontSize: 9, fontWeight: 700,
+                            color: '#64748b', transition: 'all .15s', flexShrink: 0,
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.color = '#475569'; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
+                        >
+                          <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path d="M12 5v14M5 12h14" />
+                          </svg>
+                          Motion
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        padding: '6px 10px 0', gap: 8, flexShrink: 0,
+                      }}>
                         <div style={{
                           fontSize: 9, fontWeight: 700, letterSpacing: 1.1, textTransform: 'uppercase',
                           color: '#94a3b8', fontStyle: 'italic',
                         }}>
                           Floor Motion
                         </div>
-                      )}
-                      <button
-                        onClick={() => setQuickMotionOpen(true)}
-                        title="Quick Motion"
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 3,
-                          padding: '3px 8px', border: '1.5px solid #e2e8f0', borderRadius: 6,
-                          background: '#fff', cursor: 'pointer', fontSize: 9, fontWeight: 700,
-                          color: '#64748b', transition: 'all .15s', flexShrink: 0,
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.color = '#475569'; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
-                      >
-                        <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                          <path d="M12 5v14M5 12h14" />
-                        </svg>
-                        Motion
-                      </button>
-                    </div>
+                        <button
+                          onClick={() => setQuickMotionOpen(true)}
+                          title="Quick Motion"
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 3,
+                            padding: '3px 8px', border: '1.5px solid #e2e8f0', borderRadius: 6,
+                            background: '#fff', cursor: 'pointer', fontSize: 9, fontWeight: 700,
+                            color: '#64748b', transition: 'all .15s', flexShrink: 0,
+                          }}
+                        >
+                          <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path d="M12 5v14M5 12h14" />
+                          </svg>
+                          Motion
+                        </button>
+                      </div>
+                    )}
                     <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '4px 10px 8px' }}>
                       {motionCard}
                     </div>
