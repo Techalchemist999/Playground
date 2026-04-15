@@ -1,0 +1,40 @@
+// Robert's Rules "deck" — 21 procedural action cards based on
+// Roberts Rules The Game reference (see /SEE HERE/ folder on desktop).
+// category: 'M' = needs motion/second, 'C' = no second needed, '2/3' = two-thirds vote
+
+export const CARD_COLORS = {
+  yellow: { bg: '#FADC52', border: '#D4B62E' }, // main motions (MOVE, SECOND)
+  orange: { bg: '#F5A441', border: '#CC7A18' }, // withdraw
+  purple: { bg: '#BCA6E3', border: '#876FB2' }, // subsidiary motions
+  blue:   { bg: '#97B8E8', border: '#5E86C4' }, // incidental / privileged
+};
+
+export const ROBERTS_RULES_DECK = [
+  { id: 'move',          number: 1,  title: 'MOVE',                       description: 'Initiate a motion',                                                                                                phrase: 'I move that…',                                                       category: 'M',   color: 'yellow' },
+  { id: 'second',        number: 2,  title: 'SECOND',                     description: 'Another member supports the motion',                                                                               phrase: 'I second the motion.',                                               category: 'M',   color: 'yellow' },
+  { id: 'postpone-indef',number: 3,  title: 'POSTPONE INDEFINITELY',      description: 'Kills the motion without directly voting on it.',                                                                  phrase: 'I move to postpone the motion indefinitely.',                        category: 'M',   color: 'purple' },
+  { id: 'amend',         number: 4,  title: 'AMEND',                      description: 'Changes the main motion by adding, striking, or substituting words.',                                              phrase: 'I move to amend the motion by [insert change].',                     category: 'M',   color: 'purple' },
+  { id: 'refer',         number: 5,  title: 'REFER',                      description: 'Sends the motion to a committee or staff for more review.',                                                        phrase: 'I move to refer the motion to [committee/staff].',                   category: 'M',   color: 'purple' },
+  { id: 'defer',         number: 6,  title: 'DEFER',                      description: 'Delays discussion and decision',                                                                                   phrase: 'I move to postpone/defer the motion to [specific time/date].',       category: 'M',   color: 'purple' },
+  { id: 'limit-debate',  number: 7,  title: 'LIMIT/EXTEND DEBATE',        description: 'Controls how much time is allowed for debate.',                                                                    phrase: 'I move to [limit/extend] debate to [time/speakers].',                category: '2/3', color: 'purple' },
+  { id: 'call-question', number: 8,  title: 'CALL THE QUESTION',          description: 'Ends debate and forces an immediate vote.',                                                                        phrase: 'I move the previous question.',                                      category: '2/3', color: 'purple' },
+  { id: 'table',         number: 9,  title: 'TABLE',                      description: 'Temporarily sets the motion aside.',                                                                               phrase: 'I move to lay the motion on the table.',                             category: 'M',   color: 'purple' },
+  { id: 'orders-day',    number: 10, title: 'CALL FOR THE ORDERS OF THE DAY', description: 'Requires the group to return to the approved agenda.',                                                          phrase: 'I call for the orders of the day.',                                  category: 'C',   color: 'purple' },
+  { id: 'privilege',     number: 11, title: 'POINT OF PRIVILEGE',         description: 'Raises an issue about comfort, safety, or rights.',                                                                phrase: 'Point of privilege.',                                                category: 'C',   color: 'purple' },
+  { id: 'recess',        number: 12, title: 'RECESS',                     description: 'Pauses the meeting for a short time.',                                                                             phrase: 'I move to recess until [time or condition].',                        category: 'M',   color: 'purple' },
+  { id: 'adjourn',       number: 13, title: 'ADJOURN',                    description: 'Ends the meeting.',                                                                                                phrase: 'I move to adjourn.',                                                 category: 'M',   color: 'purple' },
+  { id: 'withdraw',      number: 14, title: 'WITHDRAW',                   description: 'Removes a motion before it is debated.',                                                                           phrase: 'I withdraw my motion.',                                              category: 'C',   color: 'orange' },
+  { id: 'appeal',        number: 15, title: 'APPEAL THE DECISION OF THE CHAIR', description: 'Challenges a ruling made by the chair — puts the decision to a vote by the members.',                        phrase: 'I appeal the decision of the chair.',                                category: 'M',   color: 'blue' },
+  { id: 'seriatim',      number: 16, title: 'CONSIDER BY PARAGRAPH (SERIATIM)', description: 'Considers a long or complex motion one section at a time.',                                                   phrase: 'I request that the motion be considered by paragraph/seriatim.',     category: 'M',   color: 'blue' },
+  { id: 'inquiry',       number: 17, title: 'PARLIAMENTARY INQUIRY',      description: 'Asks the chair how to correctly follow procedure.',                                                                 phrase: 'Parliamentary inquiry.',                                             category: 'C',   color: 'blue' },
+  { id: 'reconsider',    number: 18, title: 'RECONSIDER',                 description: 'Reopens a previously decided motion for a new vote.',                                                               phrase: 'I move to reconsider the motion [previous motion].',                 category: 'M',   color: 'blue', note: 'Only prevailing member, subject to rules / legislation.' },
+  { id: 'suspend-rules', number: 19, title: 'SUSPEND THE RULES',          description: 'Temporarily sets aside a rule of procedure.',                                                                      phrase: 'I move to suspend the rules.',                                       category: '2/3', color: 'blue' },
+  { id: 'info',          number: 20, title: 'POINT OF INFORMATION',       description: 'Requests facts or clarification about the topic being discussed.',                                                  phrase: 'Point of information.',                                              category: 'C',   color: 'blue' },
+  { id: 'take-table',    number: 21, title: 'TAKE FROM THE TABLE',        description: 'Brings back a motion that was previously tabled.',                                                                  phrase: 'I move to take from the table [motion].',                            category: 'M',   color: 'blue' },
+  { id: 'order',         number: 22, title: 'POINT OF ORDER',             description: 'Enforces the rules when a member believes a rule has been broken.',                                                 phrase: 'Point of order.',                                                    category: 'C',   color: 'blue' },
+  { id: 'division',      number: 23, title: 'DIVISION OF THE QUESTION',   description: 'Splits a motion into separate parts so each can be debated/voted on individually.',                                 phrase: 'I move for a division of the question.',                             category: 'M',   color: 'blue' },
+];
+
+export function getCardById(id) {
+  return ROBERTS_RULES_DECK.find(c => c.id === id) || ROBERTS_RULES_DECK[0];
+}

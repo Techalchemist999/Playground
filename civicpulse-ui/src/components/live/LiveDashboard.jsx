@@ -7,6 +7,7 @@ import ClerkNotes from './ClerkNotes';
 import BiteCard from './BiteCard';
 import QuickMotion from './QuickMotion';
 import RulesPanel from './RulesPanel';
+import RobertsRulesCardPanel from './RobertsRulesCardPanel';
 import SessionControls from './SessionControls';
 
 // Topics + Clerk Notes in one panel with tabs
@@ -191,10 +192,11 @@ function snapPx(val) {
 
 // Panels: all values in % so they scale with window size
 const DEFAULT_PANELS = [
-  { id: 'agenda',   xPct: 1.5,  yPct: 2,   wPct: 25,  hPct: 96 },
-  { id: 'floor',    xPct: 27.5, yPct: 2,   wPct: 40,  hPct: 96 },
-  { id: 'rules',    xPct: 68.5, yPct: 2,   wPct: 30,  hPct: 54 },
-  { id: 'topics',   xPct: 68.5, yPct: 58,  wPct: 30,  hPct: 40 },
+  { id: 'agenda',    xPct: 1.5,  yPct: 2,   wPct: 25,  hPct: 96 },
+  { id: 'floor',     xPct: 27.5, yPct: 2,   wPct: 40,  hPct: 96 },
+  { id: 'rules',     xPct: 68.5, yPct: 2,   wPct: 30,  hPct: 30 },
+  { id: 'procedure', xPct: 68.5, yPct: 34,  wPct: 30,  hPct: 30 },
+  { id: 'topics',    xPct: 68.5, yPct: 66,  wPct: 30,  hPct: 32 },
 ];
 
 // Edge resize zones — no right edge so scrolling isn't blocked
@@ -239,8 +241,10 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
       const saved = localStorage.getItem(PANELS_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length === DEFAULT_PANELS.length) {
-          setPanels(parsed);
+        if (Array.isArray(parsed)) {
+          // Merge saved positions with DEFAULT_PANELS so newly added panels get their defaults
+          const merged = DEFAULT_PANELS.map(def => parsed.find(p => p.id === def.id) || def);
+          setPanels(merged);
         }
       }
     } catch {}
@@ -353,7 +357,9 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
   }, [panels, panelsLocked]);
 
   const panelStyle = (id) => {
-    const p = panels.find(pp => pp.id === id);
+    // Fallback to DEFAULT_PANELS if panel not in state yet (handles HMR + new panels being added)
+    const p = panels.find(pp => pp.id === id) || DEFAULT_PANELS.find(pp => pp.id === id);
+    if (!p) return { display: 'none' };
     return {
       position: 'absolute',
       left: `${p.xPct}%`,
@@ -559,6 +565,27 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
               <RulesPanel topics={session.topics} transcript={session.transcript} />
             </BentoPanel>
             <EdgeHandles onEdgeDrag={(edge, e) => startDrag('rules', e, edge)} />
+          </div>
+        </div>
+
+        {/* Procedure Card — Robert's Rules deck, active card = what's happening on the floor */}
+        <div style={panelStyle('procedure')}>
+          <div style={{ position: 'relative', display: 'flex', flex: 1, minHeight: 0 }}>
+            <BentoPanel
+              title="Now On The Floor"
+              icon={<svg width="13" height="13" fill="none" stroke="#64748b" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M7 8h10M7 12h6" />
+              </svg>}
+              style={{ flex: 1, minHeight: 0 }}
+              headerProps={{
+                onMouseDown: (e) => startDrag('procedure', e, 'move'),
+                style: dragHandleStyle,
+              }}
+            >
+              <RobertsRulesCardPanel initialCardId={session.sessionId === 'demo' ? 'amend' : 'move'} />
+            </BentoPanel>
+            <EdgeHandles onEdgeDrag={(edge, e) => startDrag('procedure', e, edge)} />
           </div>
         </div>
       </div>
