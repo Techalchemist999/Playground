@@ -138,7 +138,8 @@ function TopicBubble({ topic, compact, locked, isNew, colorOn, onToggleLock }) {
 export default function TopicBubbles({ topics, status, compact }) {
   const [lockedIds, setLockedIds] = useState(new Set());
   const [newIds, setNewIds] = useState(new Set());
-  const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' | 'timeline'
+  const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' | 'timeline' | 'tabs'
+  const [tabsActive, setTabsActive] = useState(null); // which category tab is open
   const [colorOn, setColorOn] = useState(false);
   const seenRef = useRef(new Set());
   const fadeTimers = useRef(new Map());
@@ -224,6 +225,21 @@ export default function TopicBubbles({ topics, status, compact }) {
           >
             <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="3" y1="4" x2="21" y2="4"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="20" x2="21" y2="20"/></svg>
           </button>
+          <button
+            onClick={() => setViewMode('tabs')}
+            aria-label="Tabs view"
+            title="Tabs — grouped by category"
+            style={{
+              padding: '3px 8px', border: 'none', borderRadius: 4, cursor: 'pointer',
+              background: viewMode === 'tabs' ? '#fff' : 'transparent',
+              boxShadow: viewMode === 'tabs' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              display: 'flex', alignItems: 'center', gap: 3,
+              fontSize: 9, fontWeight: 600, color: viewMode === 'tabs' ? COLORS.primary : COLORS.mutedText,
+              transition: 'all .15s',
+            }}
+          >
+            <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8V5a1 1 0 0 1 1-1h3M3 16v3a1 1 0 0 0 1 1h3M21 8V5a1 1 0 0 0-1-1h-3M21 16v3a1 1 0 0 1-1 1h-3"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+          </button>
           <div style={{ width: 1, background: '#e2e8f0', margin: '2px 2px' }} />
           <button
             onClick={() => setColorOn(!colorOn)}
@@ -261,12 +277,12 @@ export default function TopicBubbles({ topics, status, compact }) {
           flex: 1,
           display: 'flex',
           flexWrap: viewMode === 'bubbles' ? 'wrap' : 'nowrap',
-          flexDirection: viewMode === 'timeline' ? 'column' : 'row',
-          gap: viewMode === 'timeline' ? 5 : (compact ? 16 : 22),
-          padding: viewMode === 'timeline' ? '6px 8px' : (compact ? '8px 14px' : '16px 20px'),
+          flexDirection: (viewMode === 'timeline' || viewMode === 'tabs') ? 'column' : 'row',
+          gap: viewMode === 'timeline' ? 5 : viewMode === 'tabs' ? 0 : (compact ? 16 : 22),
+          padding: viewMode === 'timeline' ? '6px 8px' : viewMode === 'tabs' ? 0 : (compact ? '8px 14px' : '16px 20px'),
           alignContent: viewMode === 'bubbles' ? 'flex-start' : undefined,
           justifyContent: viewMode === 'bubbles' ? 'center' : undefined,
-          overflowY: 'auto',
+          overflowY: viewMode === 'tabs' ? 'hidden' : 'auto',
         }}
       >
         {isConnecting && (
@@ -340,6 +356,117 @@ export default function TopicBubbles({ topics, status, compact }) {
         {viewMode === 'timeline' && topicsArray.length > 0 && (
           <TopicTimeline topics={topicsArray} />
         )}
+
+        {/* Tabs view — classic tabs grouped by category */}
+        {viewMode === 'tabs' && topicsArray.length > 0 && (() => {
+          const groups = {};
+          topicsArray.forEach(t => {
+            const cat = t.category || 'topic';
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(t);
+          });
+          const categories = Object.keys(groups);
+          const active = tabsActive && groups[tabsActive] ? tabsActive : categories[0];
+          const activeTopics = groups[active] || [];
+          const bs = BUBBLE_STYLES[active] || BUBBLE_STYLES.topic;
+
+          return (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              {/* Tab bar */}
+              <div style={{
+                display: 'flex',
+                background: '#f8fafc',
+                borderBottom: '1px solid #e2e8f0',
+                overflowX: 'auto',
+                flexShrink: 0,
+              }}>
+                {categories.map(cat => {
+                  const cs = BUBBLE_STYLES[cat] || BUBBLE_STYLES.topic;
+                  const isOn = cat === active;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setTabsActive(cat)}
+                      style={{
+                        padding: '8px 12px',
+                        fontSize: 10, fontWeight: 700,
+                        color: isOn ? cs.text : '#64748b',
+                        background: isOn ? '#fff' : 'transparent',
+                        border: 'none',
+                        borderBottom: `2px solid ${isOn ? cs.ring : 'transparent'}`,
+                        cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        flexShrink: 0,
+                        textTransform: 'capitalize',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      <span style={{
+                        width: 7, height: 7, borderRadius: '50%',
+                        background: cs.ring,
+                      }} />
+                      {cat}
+                      <span style={{
+                        fontSize: 8.5, fontWeight: 800, padding: '1px 5px',
+                        borderRadius: 999,
+                        background: isOn ? cs.ring : '#e2e8f0',
+                        color: isOn ? '#fff' : '#64748b',
+                      }}>
+                        {groups[cat].length}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {/* Active tab's topics */}
+              <div style={{
+                flex: 1, overflowY: 'auto',
+                padding: '8px 10px',
+                display: 'flex', flexDirection: 'column', gap: 5,
+                background: '#fff',
+              }}>
+                {activeTopics.map((topic) => {
+                  const id = topic.normalized_id || topic.label;
+                  return (
+                    <div key={id} style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '7px 9px',
+                      background: '#fff',
+                      border: '1px solid #e2e8f0',
+                      borderLeft: `3px solid ${bs.ring}`,
+                      borderRadius: 6,
+                      fontSize: 11,
+                    }}>
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, color: '#0f172a',
+                        flex: 1, minWidth: 0,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {topic.label}
+                      </span>
+                      {topic.mention_count > 1 && (
+                        <span style={{
+                          fontSize: 8.5, fontWeight: 800,
+                          background: bs.glow, color: bs.text,
+                          padding: '1px 6px', borderRadius: 999,
+                          flexShrink: 0,
+                        }}>
+                          ×{topic.mention_count}
+                        </span>
+                      )}
+                      <span style={{
+                        fontSize: 8, fontWeight: 700, letterSpacing: .8,
+                        textTransform: 'uppercase', color: '#94a3b8', flexShrink: 0,
+                      }}>
+                        {topic.state}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {topicsArray.length > 0 && (
