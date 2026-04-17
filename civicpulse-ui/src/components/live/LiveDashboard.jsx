@@ -449,32 +449,164 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                 const resolved = allMotions.filter(t => t.state === 'EXPIRED');
                 const onFloorMotion = nonExpired.length > 0 ? nonExpired[nonExpired.length - 1] : null;
 
-                // Quick Motion form open
-                if (quickMotionOpen) {
-                  return (
-                    <QuickMotion
-                      startOpen={true}
-                      onFloorMotion={onFloorMotion}
-                      resolvedMotions={resolved}
-                      onCancel={() => setQuickMotionOpen(false)}
-                      onRecord={(data) => {
-                        if (session.addMotion) session.addMotion(data);
-                        setQuickMotionOpen(false);
-                      }}
-                    />
-                  );
-                }
+                // Agenda items not yet voted on (active + pending)
+                const pendingItems = session.agendaItems.filter(i => i.status !== 'discussed');
 
-                // No motion on the floor — show empty + Quick Motion
+                // Bottom sheet overlay — rendered alongside main content
+                const bottomSheet = quickMotionOpen && (
+                  <div style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0,
+                    maxHeight: '92%',
+                    background: '#fff',
+                    borderTop: `1px solid ${accentColor}44`,
+                    borderRadius: '14px 14px 0 0',
+                    boxShadow: '0 -10px 40px rgba(15,23,42,0.22)',
+                    display: 'flex', flexDirection: 'column',
+                    animation: 'slideUp .25s cubic-bezier(.22,1,.36,1)',
+                    zIndex: 20,
+                    overflow: 'hidden',
+                  }}>
+                    {/* Sheet header — drag handle + title + close */}
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '10px 14px 8px', flexShrink: 0,
+                      borderBottom: '1px solid #f1f5f9',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{
+                          width: 36, height: 4, borderRadius: 2, background: '#cbd5e1',
+                        }} />
+                        <div style={{
+                          fontSize: 13, fontWeight: 800, color: '#1e293b',
+                        }}>
+                          New Motion
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setQuickMotionOpen(false)}
+                        style={{
+                          background: 'transparent', border: 'none', color: '#94a3b8',
+                          fontSize: 11, fontWeight: 700, cursor: 'pointer', padding: '4px 8px',
+                          display: 'flex', alignItems: 'center', gap: 4,
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.color = '#475569'}
+                        onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}
+                      >
+                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                        Close
+                      </button>
+                    </div>
+
+                    {/* Pending agenda items */}
+                    {pendingItems.length > 0 && (
+                      <div style={{
+                        padding: '8px 14px', flexShrink: 0,
+                        background: '#f8fafc',
+                        borderBottom: '1px solid #f1f5f9',
+                      }}>
+                        <div style={{
+                          fontSize: 8, fontWeight: 800, letterSpacing: 1.2, textTransform: 'uppercase',
+                          color: '#64748b', marginBottom: 6,
+                        }}>
+                          Items not yet voted on ({pendingItems.length})
+                        </div>
+                        <div style={{ display: 'flex', gap: 5, overflowX: 'auto', paddingBottom: 3 }}>
+                          {pendingItems.map(item => {
+                            const isCurrent = onFloorMotion?.agendaItemNumber === item.number;
+                            return (
+                              <div
+                                key={item.number}
+                                title={item.title}
+                                style={{
+                                  display: 'flex', alignItems: 'center', gap: 6,
+                                  padding: '5px 10px',
+                                  background: isCurrent ? accentColor : '#fff',
+                                  border: `1.5px solid ${isCurrent ? accentColor : '#e2e8f0'}`,
+                                  color: isCurrent ? '#fff' : '#334155',
+                                  borderRadius: 999, fontSize: 10, fontWeight: 700,
+                                  whiteSpace: 'nowrap', flexShrink: 0,
+                                  opacity: item.status === 'active' || isCurrent ? 1 : 0.7,
+                                }}
+                              >
+                                <span style={{
+                                  fontSize: 9, fontWeight: 900,
+                                  background: isCurrent ? 'rgba(255,255,255,.25)' : '#f1f5f9',
+                                  color: isCurrent ? '#fff' : '#475569',
+                                  padding: '1px 6px', borderRadius: 999,
+                                }}>
+                                  {item.number}
+                                </span>
+                                <span style={{
+                                  maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis',
+                                }}>
+                                  {item.title}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quick Motion form */}
+                    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                      <QuickMotion
+                        startOpen={true}
+                        onFloorMotion={onFloorMotion}
+                        resolvedMotions={resolved}
+                        onCancel={() => setQuickMotionOpen(false)}
+                        onRecord={(data) => {
+                          if (session.addMotion) session.addMotion(data);
+                          setQuickMotionOpen(false);
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+
+                // No motion on the floor — show empty placeholder (+ the bottom sheet if open)
                 if (!onFloorMotion) {
                   return (
-                    <QuickMotion
-                      onFloorMotion={null}
-                      resolvedMotions={resolved}
-                      onRecord={(data) => {
-                        if (session.addMotion) session.addMotion(data);
-                      }}
-                    />
+                    <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                      <div style={{
+                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: 20, flexDirection: 'column', gap: 10,
+                      }}>
+                        <svg width="32" height="32" fill="none" stroke="#e2e8f0" strokeWidth="1.5" viewBox="0 0 24 24">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <span style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
+                          No motion on the floor
+                        </span>
+                      </div>
+                      <div style={{
+                        display: 'flex', justifyContent: 'flex-end',
+                        padding: '10px 14px 12px',
+                        borderTop: '1px solid #f1f5f9',
+                        flexShrink: 0,
+                      }}>
+                        <button
+                          onClick={() => setQuickMotionOpen(true)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 7,
+                            padding: '10px 18px',
+                            background: accentColor, border: 'none', borderRadius: 10,
+                            cursor: 'pointer', fontSize: 13, fontWeight: 800, color: '#fff',
+                            letterSpacing: '.3px',
+                            boxShadow: `0 4px 14px ${accentColor}55`,
+                          }}
+                        >
+                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                            <path d="M12 5v14M5 12h14" />
+                          </svg>
+                          Motion
+                        </button>
+                      </div>
+                      {bottomSheet}
+                    </div>
                   );
                 }
 
@@ -501,7 +633,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                   );
 
                 return (
-                  <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                  <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
                     {/* Agenda item banner — big item number at top */}
                     {linkedAgendaItem ? (
                       <div style={{
@@ -590,6 +722,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                         Motion
                       </button>
                     </div>
+                    {bottomSheet}
                   </div>
                 );
               })()}
