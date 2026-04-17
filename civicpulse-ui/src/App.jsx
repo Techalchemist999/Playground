@@ -38,6 +38,14 @@ export default function App() {
     }
   }, [session.view, session.startDemo]);
 
+  // Demo sessions get a surprise grid theme each time
+  useEffect(() => {
+    if (session.sessionId === 'demo') {
+      const pool = BG_THEMES.filter(t => t.id !== 'default');
+      setBgTheme(pool[Math.floor(Math.random() * pool.length)]);
+    }
+  }, [session.sessionId]);
+
   useEffect(() => {
     if (session.status !== 'ACTIVE' || !session.startTime) return;
     const interval = setInterval(() => {
