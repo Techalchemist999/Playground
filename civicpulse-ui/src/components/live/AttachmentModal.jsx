@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-function MapView({ attachment }) {
+function MapView({ attachment, zoom }) {
   const isZoning = attachment.id === 'att-9-map';
   return (
     <div style={{
-      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flex: 1, display: 'flex', alignItems: zoom > 1 ? 'flex-start' : 'center', justifyContent: zoom > 1 ? 'flex-start' : 'center',
       background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
       padding: 20, overflow: 'auto',
     }}>
+      <div style={{ zoom }}>
       {isZoning ? (
         <svg viewBox="0 0 600 400" style={{ width: '100%', maxWidth: 640, height: 'auto', background: '#f8fafc', borderRadius: 10, border: '1px solid #cbd5e1' }}>
           <rect x="0" y="0" width="600" height="400" fill="#f8fafc" />
@@ -85,11 +86,12 @@ function MapView({ attachment }) {
           </g>
         </svg>
       )}
+      </div>
     </div>
   );
 }
 
-function ReportView({ attachment }) {
+function ReportView({ attachment, zoom }) {
   const r = attachment.report;
   if (!r) return <div style={{ padding: 40, color: '#94a3b8' }}>No report data.</div>;
 
@@ -104,8 +106,12 @@ function ReportView({ attachment }) {
 
   return (
     <div style={{
-      flex: 1, overflowY: 'auto',
-      background: '#e2e8f0', padding: '24px 24px 40px',
+      flex: 1, overflow: 'auto',
+      background: '#e2e8f0',
+    }}>
+    <div style={{
+      zoom,
+      padding: '24px 24px 40px',
       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
     }}>
       {pageGroups.map((sections, pi) => (
@@ -175,18 +181,19 @@ function ReportView({ attachment }) {
         </div>
       ))}
     </div>
+    </div>
   );
 }
 
-function BudgetView({ attachment }) {
+function BudgetView({ attachment, zoom }) {
   const b = attachment.budget;
   if (!b) return <div style={{ padding: 40, color: '#94a3b8' }}>No budget data.</div>;
   const fmt = (n) => '$' + n.toLocaleString('en-CA');
   return (
     <div style={{
-      flex: 1, overflowY: 'auto', background: '#f1f5f9', padding: 24,
-      display: 'flex', justifyContent: 'center',
+      flex: 1, overflow: 'auto', background: '#f1f5f9',
     }}>
+    <div style={{ zoom, padding: 24, display: 'flex', justifyContent: 'center' }}>
       <div style={{
         width: '100%', maxWidth: 760, background: '#fff', borderRadius: 8,
         padding: 28, boxShadow: '0 4px 20px rgba(15,23,42,0.08)',
@@ -229,6 +236,7 @@ function BudgetView({ attachment }) {
         )}
       </div>
     </div>
+    </div>
   );
 }
 
@@ -240,9 +248,19 @@ const TYPE_META = {
 
 export default function AttachmentModal({ attachment, agendaItem, onClose }) {
   const [fullscreen, setFullscreen] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const ZOOM_MIN = 0.5, ZOOM_MAX = 3, ZOOM_STEP = 0.25;
+  const zoomIn = () => setZoom(z => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 100) / 100));
+  const zoomOut = () => setZoom(z => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 100) / 100));
+  const resetZoom = () => setZoom(1);
 
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+      if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) { e.preventDefault(); zoomIn(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === '-') { e.preventDefault(); zoomOut(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); resetZoom(); }
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -323,6 +341,60 @@ export default function AttachmentModal({ attachment, agendaItem, onClose }) {
               </div>
             )}
           </div>
+          {/* Zoom controls */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 0,
+            background: '#f1f5f9', border: '1px solid #e2e8f0',
+            borderRadius: 8, overflow: 'hidden', flexShrink: 0, height: 36,
+          }}>
+            <button
+              onClick={zoomOut}
+              disabled={zoom <= ZOOM_MIN}
+              title="Zoom out (Ctrl+−)"
+              style={{
+                width: 32, height: 34,
+                background: 'transparent', border: 'none',
+                color: zoom <= ZOOM_MIN ? '#cbd5e1' : '#475569',
+                cursor: zoom <= ZOOM_MIN ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+            <button
+              onClick={resetZoom}
+              title="Reset zoom (Ctrl+0)"
+              style={{
+                minWidth: 46, height: 34, padding: '0 6px',
+                background: 'transparent', border: 'none',
+                borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0',
+                color: '#475569', cursor: 'pointer',
+                fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {Math.round(zoom * 100)}%
+            </button>
+            <button
+              onClick={zoomIn}
+              disabled={zoom >= ZOOM_MAX}
+              title="Zoom in (Ctrl+=)"
+              style={{
+                width: 32, height: 34,
+                background: 'transparent', border: 'none',
+                color: zoom >= ZOOM_MAX ? '#cbd5e1' : '#475569',
+                cursor: zoom >= ZOOM_MAX ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          </div>
           <button
             onClick={() => setFullscreen(f => !f)}
             title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
@@ -366,9 +438,9 @@ export default function AttachmentModal({ attachment, agendaItem, onClose }) {
         </div>
 
         {/* Body */}
-        {attachment.type === 'map' && <MapView attachment={attachment} />}
-        {attachment.type === 'report' && <ReportView attachment={attachment} />}
-        {attachment.type === 'budget' && <BudgetView attachment={attachment} />}
+        {attachment.type === 'map' && <MapView attachment={attachment} zoom={zoom} />}
+        {attachment.type === 'report' && <ReportView attachment={attachment} zoom={zoom} />}
+        {attachment.type === 'budget' && <BudgetView attachment={attachment} zoom={zoom} />}
       </div>
 
       <style>{`
