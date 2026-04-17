@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Rules Box — Robert's · Bylaw · Precedent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Caveat:wght@500;700&family=Cinzel:wght@700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f1f5f9; font-family: 'Inter', sans-serif; color: #0f172a; }
+  body { padding: 24px 20px 80px; }
+
+  /* Source color system (used everywhere) */
+  :root {
+    --rr-bg: #fef3c7;    --rr-bd: #b45309;    --rr-tx: #78350f;    /* Robert's Rules */
+    --by-bg: #dbeafe;    --by-bd: #1e40af;    --by-tx: #1e3a8a;    /* Procedure Bylaw */
+    --pc-bg: #d1fae5;    --pc-bd: #065f46;    --pc-tx: #064e3b;    /* Past Precedent */
+  }
+
+  .page-header { max-width: 1280px; margin: 0 auto 28px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .page-header h1 {
+    font-size: 28px; font-weight: 900; letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #78350f, #1e40af, #065f46);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .page-header p { color: #64748b; font-size: 13px; margin-top: 4px; max-width: 720px; line-height: 1.5; }
+  .categories { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .cat-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+  }
+  .cat-chip.rr { background: var(--rr-bg); color: var(--rr-tx); }
+  .cat-chip.by { background: var(--by-bg); color: var(--by-tx); }
+  .cat-chip.pc { background: var(--pc-bg); color: var(--pc-tx); }
+  .cat-chip .d { width: 8px; height: 8px; border-radius: 50%; }
+  .cat-chip.rr .d { background: var(--rr-bd); }
+  .cat-chip.by .d { background: var(--by-bd); }
+  .cat-chip.pc .d { background: var(--pc-bd); }
+
+  .nav {
+    display: flex; gap: 6px; flex-wrap: wrap; max-width: 1280px;
+    margin: 0 auto 28px; padding: 10px 12px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+  }
+  .nav a {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 10px; font-size: 11px; font-weight: 700; color: #475569;
+    text-decoration: none; border-radius: 999px; background: #f1f5f9;
+    transition: all .15s;
+  }
+  .nav a:hover { background: #0f172a; color: #fff; transform: translateY(-1px); }
+  .nav a span { font-size: 9px; opacity: .7; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    gap: 24px; max-width: 1280px; margin: 0 auto;
+  }
+
+  .design {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+    overflow: hidden; box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+    display: flex; flex-direction: column;
+  }
+  .design-header { padding: 14px 18px; border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; gap: 10px; }
+  .design-header .num {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: #0f172a; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }
+  .design-header h2 { font-size: 15px; font-weight: 800; color: #0f172a; flex: 1; }
+  .design-header .mini {
+    font-size: 8px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 3px; background: #f1f5f9; color: #475569;
+  }
+  .design-note { padding: 10px 18px; font-size: 11px; color: #64748b; line-height: 1.5; border-bottom: 1px solid #f1f5f9; background: #fafbfc; }
+  .design-stage {
+    padding: 22px; min-height: 340px;
+    display: flex; align-items: stretch; justify-content: stretch;
+    position: relative; overflow: hidden;
+  }
+
+  /* Source dot helper */
+  .dot-rr, .dot-by, .dot-pc {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0;
+  }
+  .dot-rr { background: var(--rr-bd); }
+  .dot-by { background: var(--by-bd); }
+  .dot-pc { background: var(--pc-bd); }
+
+  /* ============= 01 — Three-Column Compare ============= */
+  .d01-bg { padding: 0 !important; background: #f8fafc; }
+  .d01 { flex: 1; display: grid; grid-template-columns: 1fr 1fr 1fr; background: #f8fafc; }
+  .d01 .col { padding: 10px 12px; overflow-y: auto; }
+  .d01 .col + .col { border-left: 1px dashed #cbd5e1; }
+  .d01 .col h3 {
+    font-size: 10px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 5px; margin-bottom: 8px;
+    padding-bottom: 6px; border-bottom: 2px solid currentColor;
+  }
+  .d01 .col.rr h3 { color: var(--rr-tx); }
+  .d01 .col.by h3 { color: var(--by-tx); }
+  .d01 .col.pc h3 { color: var(--pc-tx); }
+  .d01 .col .card {
+    background: #fff; border-radius: 6px; padding: 6px 8px; margin-bottom: 5px;
+    font-size: 10px; color: #334155; line-height: 1.45;
+    border-left: 3px solid;
+  }
+  .d01 .col.rr .card { border-left-color: var(--rr-bd); }
+  .d01 .col.by .card { border-left-color: var(--by-bd); }
+  .d01 .col.pc .card { border-left-color: var(--pc-bd); }
+  .d01 .col .card b { display: block; color: #0f172a; font-size: 10.5px; margin-bottom: 2px; }
+
+  /* ============= 02 — Source-Tagged Unified Feed ============= */
+  .d02-bg { padding: 0 !important; }
+  .d02 { flex: 1; display: flex; flex-direction: column; background: #fff; }
+  .d02-head { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #64748b; }
+  .d02-feed { flex: 1; padding: 10px 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .d02-entry { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; }
+  .d02-entry .tt { font-size: 11px; font-weight: 800; color: #0f172a; }
+  .d02-entry .dd { font-size: 10px; color: #64748b; margin-top: 3px; line-height: 1.4; }
+  .d02-entry .src { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+  .d02-entry .src span {
+    font-size: 8px; font-weight: 800; letter-spacing: .5px; padding: 2px 6px; border-radius: 3px;
+    text-transform: uppercase; display: inline-flex; align-items: center; gap: 3px;
+  }
+  .d02-entry .src .s-rr { background: var(--rr-bg); color: var(--rr-tx); }
+  .d02-entry .src .s-by { background: var(--by-bg); color: var(--by-tx); }
+  .d02-entry .src .s-pc { background: var(--pc-bg); color: var(--pc-tx); }
+
+  /* ============= 03 — Authority Stack ============= */
+  .d03-bg { padding: 24px !important; background: linear-gradient(180deg, #fffbeb, #eff6ff, #ecfdf5); }
+  .d03 { flex: 1; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .d03-motion {
+    width: 100%; padding: 10px 14px;
+    background: #0f172a; color: #fff; border-radius: 8px;
+    font-size: 12px; font-weight: 800;
+  }
+  .d03-layer {
+    width: 100%; padding: 10px 14px; border-radius: 8px; font-size: 11px;
+    display: flex; gap: 8px; align-items: flex-start;
+    position: relative;
+  }
+  .d03-layer .lbl {
+    font-size: 8px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    padding: 3px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+  }
+  .d03-layer .body { font-size: 11px; color: #334155; line-height: 1.45; }
+  .d03-layer .body b { color: #0f172a; }
+  .d03-layer.rr { background: rgba(254,243,199,0.9); border: 1px solid var(--rr-bd); }
+  .d03-layer.by { background: rgba(219,234,254,0.9); border: 1px solid var(--by-bd); }
+  .d03-layer.pc { background: rgba(209,250,229,0.9); border: 1px solid var(--pc-bd); }
+  .d03-layer.rr .lbl { background: var(--rr-bd); color: #fff; }
+  .d03-layer.by .lbl { background: var(--by-bd); color: #fff; }
+  .d03-layer.pc .lbl { background: var(--pc-bd); color: #fff; }
+
+  /* ============= 04 — Source Tabs (classic) ============= */
+  .d04-bg { padding: 0 !important; }
+  .d04 { flex: 1; display: flex; flex-direction: column; background: #fff; }
+  .d04-tabs { display: flex; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+  .d04-tab {
+    flex: 1; padding: 12px 14px; font-size: 11px; font-weight: 700; color: #64748b;
+    cursor: pointer; border-bottom: 2px solid transparent;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .d04-tab.active.rr { color: var(--rr-tx); border-bottom-color: var(--rr-bd); background: #fff; }
+  .d04-tab.active.by { color: var(--by-tx); border-bottom-color: var(--by-bd); background: #fff; }
+  .d04-tab.active.pc { color: var(--pc-tx); border-bottom-color: var(--pc-bd); background: #fff; }
+  .d04-body { flex: 1; padding: 14px; overflow-y: auto; }
+  .d04-body .head { font-size: 14px; font-weight: 900; color: var(--by-tx); margin-bottom: 6px; }
+  .d04-body .ref { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; }
+  .d04-body p { font-size: 11.5px; color: #475569; line-height: 1.55; margin-top: 6px; }
+
+  /* ============= 05 — Legal Case Brief ============= */
+  .d05-bg { padding: 0 !important; background: #f5f5f4; }
+  .d05 { flex: 1; padding: 20px 22px; background: #fffef8; font-family: 'Playfair Display', Georgia, serif; color: #1c1917; overflow-y: auto; }
+  .d05 .hd { text-align: center; font-weight: 900; font-size: 12px; letter-spacing: 3px; margin-bottom: 3px; }
+  .d05 .sub { text-align: center; font-family: 'Inter'; font-size: 9px; letter-spacing: 2px; color: #78716c; text-transform: uppercase; margin-bottom: 16px; }
+  .d05 h4 { font-family: 'Inter'; font-size: 9.5px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #44403c; margin-top: 12px; margin-bottom: 4px; border-bottom: 1px solid #d6d3d1; padding-bottom: 2px; }
+  .d05 p { font-family: 'Inter'; font-size: 11px; color: #292524; line-height: 1.55; }
+  .d05 .cite { font-family: 'Inter'; font-size: 10.5px; color: #44403c; line-height: 1.55; }
+  .d05 .cite em { font-weight: 700; font-style: normal; }
+  .d05 .authority {
+    display: inline-block; font-family: 'Inter'; font-size: 8px; font-weight: 900;
+    letter-spacing: 1px; padding: 2px 7px; border-radius: 3px; margin-right: 4px; vertical-align: middle;
+  }
+  .d05 .authority.rr { background: var(--rr-bg); color: var(--rr-tx); }
+  .d05 .authority.by { background: var(--by-bg); color: var(--by-tx); }
+  .d05 .authority.pc { background: var(--pc-bg); color: var(--pc-tx); }
+
+  /* ============= 06 — Library Bookshelf ============= */
+  .d06-bg { padding: 0 !important; background: linear-gradient(180deg, #451a03 0%, #78350f 100%); }
+  .d06 { flex: 1; display: flex; align-items: flex-end; justify-content: center; padding: 20px 10px 24px; gap: 8px; position: relative; }
+  .d06::after { content: ''; position: absolute; bottom: 14px; left: 0; right: 0; height: 10px; background: linear-gradient(180deg, #292524, #44403c); border-top: 2px solid #57534e; }
+  .d06-book {
+    width: 60px; height: 220px; border-radius: 3px 6px 6px 3px;
+    writing-mode: vertical-rl; transform: rotate(180deg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif; font-weight: 900; font-size: 12px; letter-spacing: 2px;
+    box-shadow: inset -6px 0 12px rgba(0,0,0,0.3), 2px 2px 6px rgba(0,0,0,0.3);
+    cursor: pointer; transition: transform .2s;
+    color: #fffbeb; border-left: 3px solid rgba(255,255,255,0.3);
+    position: relative;
+    padding: 12px 8px;
+  }
+  .d06-book:hover { transform: translateY(-8px) rotate(180deg); }
+  .d06-book.rr { background: linear-gradient(90deg, #92400e, #b45309); }
+  .d06-book.by { background: linear-gradient(90deg, #1e3a8a, #1e40af); }
+  .d06-book.pc { background: linear-gradient(90deg, #064e3b, #065f46); }
+  .d06-book .yr { font-size: 8px; letter-spacing: 1px; opacity: .7; }
+  .d06-book.selected { transform: translateY(-16px) rotate(180deg); box-shadow: 0 14px 30px rgba(0,0,0,0.5); }
+
+  /* ============= 07 — Precedent Timeline ============= */
+  .d07-bg { padding: 0 !important; background: #fafafa; }
+  .d07 { flex: 1; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
+  .d07 h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #64748b; margin-bottom: 12px; }
+  .d07-tl { flex: 1; position: relative; padding-top: 14px; }
+  .d07-tl::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: #cbd5e1; }
+  .d07-tl .pt { position: absolute; top: 50%; transform: translate(-50%, -50%); text-align: center; font-size: 9px; }
+  .d07-tl .pt .mk { width: 14px; height: 14px; border-radius: 50%; margin: 0 auto 4px; border: 3px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+  .d07-tl .pt.pc .mk { background: var(--pc-bd); }
+  .d07-tl .pt.by .mk { background: var(--by-bd); }
+  .d07-tl .pt.rr .mk { background: var(--rr-bd); }
+  .d07-tl .pt .yr { font-weight: 800; color: #1e293b; }
+  .d07-tl .pt .ev { font-size: 8px; color: #64748b; margin-top: 1px; width: 80px; margin-left: -40px; }
+  .d07-tl .pt .ev b { color: #0f172a; }
+
+  /* ============= 08 — Venn Diagram ============= */
+  .d08-bg { padding: 0 !important; background: #fff; }
+  .d08 { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+  .d08-wrap { position: relative; width: 320px; height: 280px; }
+  .d08-circ {
+    position: absolute; width: 180px; height: 180px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-family: 'Cinzel', serif; font-weight: 900; font-size: 13px;
+    color: #fff; mix-blend-mode: multiply;
+  }
+  .d08-circ.rr { background: rgba(180,83,9,0.75); top: 0; left: 50%; transform: translateX(-50%); }
+  .d08-circ.by { background: rgba(30,64,175,0.75); bottom: 10px; left: 0; }
+  .d08-circ.pc { background: rgba(6,95,70,0.75); bottom: 10px; right: 0; }
+  .d08-wrap .ctr {
+    position: absolute; top: 54%; left: 50%; transform: translate(-50%, -50%);
+    background: #0f172a; color: #fff;
+    font-size: 9px; font-weight: 800; letter-spacing: 1px;
+    padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+  }
+
+  /* ============= 09 — Three-Ring Binder ============= */
+  .d09-bg { padding: 0 !important; background: #d6d3d1; }
+  .d09 { flex: 1; position: relative; display: flex; margin: 10px 18px 16px; background: #fff; box-shadow: 0 6px 14px rgba(0,0,0,0.1); border-radius: 0 6px 6px 0; }
+  .d09-rings { position: absolute; left: -10px; top: 0; bottom: 0; width: 20px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; }
+  .d09-rings .ring { width: 20px; height: 20px; background: #78716c; border-radius: 50%; border: 3px solid #44403c; box-shadow: inset 0 -2px 3px rgba(0,0,0,0.2); }
+  .d09-tabs { position: absolute; right: -26px; top: 16px; display: flex; flex-direction: column; gap: 5px; }
+  .d09-tab {
+    width: 66px; padding: 6px 8px; border-radius: 0 6px 6px 0;
+    font-size: 8.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    color: #fff; writing-mode: horizontal-tb; text-align: center;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  }
+  .d09-tab.rr { background: var(--rr-bd); }
+  .d09-tab.by { background: var(--by-bd); }
+  .d09-tab.pc { background: var(--pc-bd); }
+  .d09-tab.active { transform: translateX(-4px); box-shadow: 4px 4px 8px rgba(0,0,0,0.15); }
+  .d09-page { flex: 1; padding: 20px 22px; font-family: 'Inter'; background-image: repeating-linear-gradient(180deg, transparent 0, transparent 22px, #e7e5e4 22px, #e7e5e4 23px); }
+  .d09-page h4 { font-size: 12px; color: var(--by-tx); margin-bottom: 5px; font-weight: 800; }
+  .d09-page p { font-size: 11px; color: #44403c; line-height: 1.55; margin-bottom: 6px; }
+
+  /* ============= 10 — Scale of Authority ============= */
+  .d10-bg { padding: 20px !important; background: linear-gradient(135deg, #f5f5f4, #e7e5e4); }
+  .d10 { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+  .d10-row { display: flex; align-items: center; gap: 10px; }
+  .d10-row .label {
+    width: 130px; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+  .d10-row.rr .label { color: var(--rr-tx); }
+  .d10-row.by .label { color: var(--by-tx); }
+  .d10-row.pc .label { color: var(--pc-tx); }
+  .d10-row .bar {
+    flex: 1; height: 24px; background: #e7e5e4; border-radius: 12px; overflow: hidden; position: relative;
+  }
+  .d10-row .fill { height: 100%; border-radius: 12px; display: flex; align-items: center; padding: 0 10px; font-size: 10px; font-weight: 700; color: #fff; }
+  .d10-row.rr .fill { background: var(--rr-bd); }
+  .d10-row.by .fill { background: var(--by-bd); }
+  .d10-row.pc .fill { background: var(--pc-bd); }
+  .d10-row .pct { width: 42px; text-align: right; font-size: 11px; font-weight: 800; color: #0f172a; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .d10-note {
+    margin-top: 8px; font-size: 10px; color: #64748b; text-align: center; font-style: italic;
+  }
+
+  /* ============= 11 — Footnoted Rule ============= */
+  .d11-bg { padding: 0 !important; background: #fafafa; }
+  .d11 { flex: 1; padding: 20px 24px; overflow-y: auto; font-family: Georgia, serif; }
+  .d11 h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; color: #64748b; font-family: 'Inter'; margin-bottom: 8px; }
+  .d11 .main { font-size: 13px; color: #1c1917; line-height: 1.7; }
+  .d11 sup {
+    color: var(--by-bd); font-size: 9px; font-weight: 900; vertical-align: super;
+    padding: 0 2px; cursor: pointer;
+  }
+  .d11 sup.rr { color: var(--rr-bd); }
+  .d11 sup.pc { color: var(--pc-bd); }
+  .d11 .footnotes {
+    margin-top: 20px; padding-top: 12px; border-top: 1px solid #e7e5e4;
+    font-family: 'Inter'; font-size: 10.5px; color: #44403c;
+  }
+  .d11 .fn { padding: 5px 0; line-height: 1.5; display: flex; gap: 8px; }
+  .d11 .fn .mk {
+    font-weight: 900; min-width: 18px; text-align: right;
+  }
+  .d11 .fn.rr .mk { color: var(--rr-bd); }
+  .d11 .fn.by .mk { color: var(--by-bd); }
+  .d11 .fn.pc .mk { color: var(--pc-bd); }
+
+  /* ============= 12 — Gavel Dashboard ============= */
+  .d12-bg { padding: 0 !important; background: linear-gradient(180deg, #1c1917, #292524); color: #fafaf9; }
+  .d12 { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .d12-seal {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+  }
+  .d12-seal .emb {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fde68a, #b45309);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: inset 0 -4px 6px rgba(0,0,0,0.3), 0 4px 10px rgba(180,83,9,0.4);
+  }
+  .d12-seal .tt { font-family: 'Cinzel'; font-weight: 900; font-size: 14px; color: #fde68a; }
+  .d12-seal .sb { font-size: 10px; color: #a8a29e; margin-top: 2px; letter-spacing: 1px; }
+  .d12-rows { display: flex; flex-direction: column; gap: 6px; }
+  .d12-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .d12-row .src {
+    font-size: 8px; font-weight: 900; padding: 2px 8px; border-radius: 3px; letter-spacing: 1px;
+  }
+  .d12-row.rr .src { background: var(--rr-bd); color: #fff; }
+  .d12-row.by .src { background: var(--by-bd); color: #fff; }
+  .d12-row.pc .src { background: var(--pc-bd); color: #fff; }
+  .d12-row .tt { font-size: 11px; font-weight: 700; color: #fafaf9; flex: 1; }
+  .d12-row .dd { font-size: 9.5px; color: #a8a29e; }
+
+  /* ============= 13 — Field Guide / Trail ============= */
+  .d13-bg { padding: 0 !important; background: linear-gradient(180deg, #fef3c7 0%, #d1fae5 50%, #dbeafe 100%); }
+  .d13 { flex: 1; padding: 18px; display: flex; flex-direction: column; gap: 10px; font-family: Georgia, serif; }
+  .d13-head { display: flex; align-items: center; gap: 8px; }
+  .d13-head h3 { font-family: 'Cinzel'; font-size: 14px; color: #44403c; }
+  .d13-entry {
+    background: rgba(255,255,255,0.78); border-radius: 10px; padding: 10px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex; gap: 10px; align-items: flex-start;
+    border-left: 5px solid;
+  }
+  .d13-entry.rr { border-left-color: var(--rr-bd); }
+  .d13-entry.by { border-left-color: var(--by-bd); }
+  .d13-entry.pc { border-left-color: var(--pc-bd); }
+  .d13-entry .ic {
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; color: #fff;
+  }
+  .d13-entry.rr .ic { background: var(--rr-bd); }
+  .d13-entry.by .ic { background: var(--by-bd); }
+  .d13-entry.pc .ic { background: var(--pc-bd); }
+  .d13-entry .body .t { font-family: 'Inter'; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #44403c; }
+  .d13-entry .body .h { font-family: 'Cinzel'; font-size: 13px; font-weight: 700; color: #1c1917; margin-top: 1px; }
+  .d13-entry .body .p { font-family: 'Inter'; font-size: 10.5px; color: #44403c; line-height: 1.5; margin-top: 3px; }
+
+  /* ============= 14 — Matrix ============= */
+  .d14-bg { padding: 0 !important; background: #fff; }
+  .d14 { flex: 1; padding: 14px; overflow: auto; }
+  .d14 h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #64748b; margin-bottom: 8px; }
+  .d14-grid {
+    display: grid; grid-template-columns: 92px 1fr 1fr 1fr; gap: 2px;
+    background: #e2e8f0; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;
+  }
+  .d14-grid > div { background: #fff; padding: 7px 9px; font-size: 10px; }
+  .d14-grid .hdr { font-weight: 800; font-size: 9px; letter-spacing: .8px; text-transform: uppercase; }
+  .d14-grid .hdr.rr { background: var(--rr-bg); color: var(--rr-tx); text-align: center; }
+  .d14-grid .hdr.by { background: var(--by-bg); color: var(--by-tx); text-align: center; }
+  .d14-grid .hdr.pc { background: var(--pc-bg); color: var(--pc-tx); text-align: center; }
+  .d14-grid .row-h { background: #f8fafc; font-weight: 700; color: #0f172a; }
+  .d14-grid .cell { color: #334155; line-height: 1.4; font-size: 9.5px; }
+  .d14-grid .cell .ref { font-size: 8px; font-weight: 800; color: #94a3b8; display: block; margin-top: 2px; }
+
+  /* ============= 15 — Citation Stack ============= */
+  .d15-bg { padding: 0 !important; background: #fafaf9; }
+  .d15 { flex: 1; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+  .d15 h3 {
+    font-family: 'Cinzel'; font-size: 13px; font-weight: 900; color: #0f172a;
+    border-bottom: 3px double #0f172a; padding-bottom: 4px;
+  }
+  .d15 .q {
+    font-family: Georgia, serif; font-size: 13px; font-style: italic; color: #292524;
+    padding: 10px 14px; background: #fef3c7; border-radius: 6px;
+    border-left: 4px solid var(--rr-bd);
+  }
+  .d15 .cites { display: flex; flex-direction: column; gap: 6px; }
+  .d15 .cite {
+    display: flex; gap: 10px; padding: 8px 10px; border-radius: 6px;
+    background: #fff; border: 1px solid #e7e5e4;
+  }
+  .d15 .cite .label {
+    font-family: 'JetBrains Mono'; font-size: 9px; font-weight: 800;
+    padding: 2px 6px; border-radius: 3px; align-self: flex-start;
+    letter-spacing: 0.5px; flex-shrink: 0;
+  }
+  .d15 .cite.rr .label { background: var(--rr-bg); color: var(--rr-tx); }
+  .d15 .cite.by .label { background: var(--by-bg); color: var(--by-tx); }
+  .d15 .cite.pc .label { background: var(--pc-bg); color: var(--pc-tx); }
+  .d15 .cite .text { font-size: 10.5px; color: #44403c; line-height: 1.5; }
+  .d15 .cite .text b { color: #1c1917; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <h1>Rules Box — By Source</h1>
+    <p>15 ways to organise the Rules panel around <b>three sources of authority</b>: Robert's Rules, the Procedure Bylaw, and Past Precedent. Some designs keep them strictly separate, others merge them and tag each rule with its origin.</p>
+    <div class="categories">
+      <span class="cat-chip rr"><span class="d"></span>Robert's Rules — universal parliamentary procedure</span>
+      <span class="cat-chip by"><span class="d"></span>Procedure Bylaw — local municipal rules</span>
+      <span class="cat-chip pc"><span class="d"></span>Past Precedent — how Council actually did it</span>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#d01"><span>01</span> Three-Column Compare</a>
+  <a href="#d02"><span>02</span> Tagged Feed</a>
+  <a href="#d03"><span>03</span> Authority Stack</a>
+  <a href="#d04"><span>04</span> Source Tabs</a>
+  <a href="#d05"><span>05</span> Legal Brief</a>
+  <a href="#d06"><span>06</span> Bookshelf</a>
+  <a href="#d07"><span>07</span> Precedent Timeline</a>
+  <a href="#d08"><span>08</span> Venn</a>
+  <a href="#d09"><span>09</span> Binder Tabs</a>
+  <a href="#d10"><span>10</span> Authority Scale</a>
+  <a href="#d11"><span>11</span> Footnoted</a>
+  <a href="#d12"><span>12</span> Gavel Dashboard</a>
+  <a href="#d13"><span>13</span> Field Guide</a>
+  <a href="#d14"><span>14</span> Matrix</a>
+  <a href="#d15"><span>15</span> Citation Stack</a>
+</nav>
+
+<div class="grid">
+
+  <!-- 01 Three-Column Compare -->
+  <section class="design" id="d01">
+    <div class="design-header"><div class="num">1</div><h2>Three-Column Compare</h2><span class="mini">Split</span></div>
+    <div class="design-note">Side-by-side columns, one per source. See at a glance what each authority says on the same issue — like a diff view for rules.</div>
+    <div class="design-stage d01-bg">
+      <div class="d01">
+        <div class="col rr"><h3><span class="dot-rr"></span>Robert's</h3>
+          <div class="card"><b>§12: Amend</b>Any motion may be amended by adding, striking, or substituting words.</div>
+          <div class="card"><b>§14: Seconds</b>Motion needs a second before debate.</div>
+        </div>
+        <div class="col by"><h3><span class="dot-by"></span>Bylaw</h3>
+          <div class="card"><b>s.11 · Amendments</b>Must be relevant. One amendment to an amendment at a time.</div>
+          <div class="card"><b>s.11 · Motion Proc.</b>Seconded + debated + voted, in that order.</div>
+        </div>
+        <div class="col pc"><h3><span class="dot-pc"></span>Precedent</h3>
+          <div class="card"><b>2024-09-10</b>Amendment substituted wholesale → defeated; chair noted scope concern.</div>
+          <div class="card"><b>2023-06-12</b>Chair let a 2nd-level amendment stand for brevity.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 Tagged Feed -->
+  <section class="design" id="d02">
+    <div class="design-header"><div class="num">2</div><h2>Source-Tagged Feed</h2><span class="mini">Merged</span></div>
+    <div class="design-note">One feed, each entry tagged with chips showing which sources cover it. Entries with multiple chips are "well-supported".</div>
+    <div class="design-stage d02-bg">
+      <div class="d02">
+        <div class="d02-head">Rules applicable · 5</div>
+        <div class="d02-feed">
+          <div class="d02-entry">
+            <div class="tt">Amendments — relevance + one at a time</div>
+            <div class="dd">A motion to amend must relate to the original. Only one amendment to an amendment at a time.</div>
+            <div class="src">
+              <span class="s-rr"><span class="dot-rr"></span>RR §12</span>
+              <span class="s-by"><span class="dot-by"></span>Bylaw s.11</span>
+              <span class="s-pc"><span class="dot-pc"></span>Precedent 2024-09</span>
+            </div>
+          </div>
+          <div class="d02-entry">
+            <div class="tt">Motion requires a second</div>
+            <div class="dd">Motions do not enter debate until seconded.</div>
+            <div class="src"><span class="s-rr"><span class="dot-rr"></span>RR §14</span><span class="s-by"><span class="dot-by"></span>Bylaw s.11</span></div>
+          </div>
+          <div class="d02-entry">
+            <div class="tt">Late items by unanimous consent</div>
+            <div class="dd">Late items may be added with unanimous consent of Council members present.</div>
+            <div class="src"><span class="s-by"><span class="dot-by"></span>Bylaw s.10</span><span class="s-pc"><span class="dot-pc"></span>Precedent 2025-01</span></div>
+          </div>
+          <div class="d02-entry">
+            <div class="tt">Friendly amendment convention</div>
+            <div class="dd">Chair may accept a friendly amendment with mover's consent (not in Robert's).</div>
+            <div class="src"><span class="s-pc"><span class="dot-pc"></span>Precedent 2023-11, 2024-03</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 Authority Stack -->
+  <section class="design" id="d03">
+    <div class="design-header"><div class="num">3</div><h2>Authority Stack</h2><span class="mini">Hierarchy</span></div>
+    <div class="design-note">For the current motion, show all three sources layered top-down. Reinforces the hierarchy: bylaw can override Robert's; precedent is advisory.</div>
+    <div class="design-stage d03-bg">
+      <div class="d03">
+        <div class="d03-motion">On The Floor: Amendment to Park Grant</div>
+        <div class="d03-layer rr">
+          <span class="lbl">Robert's</span>
+          <div class="body"><b>§12.</b> Amendments must be relevant; may add, strike, or substitute words.</div>
+        </div>
+        <div class="d03-layer by">
+          <span class="lbl">Bylaw</span>
+          <div class="body"><b>s.11 (modifies):</b> Only one amendment to an amendment at a time. Friendly amendments not permitted without a vote.</div>
+        </div>
+        <div class="d03-layer pc">
+          <span class="lbl">Precedent</span>
+          <div class="body"><b>2024-09-10:</b> Chair ruled a substantive substitution "not an amendment" — substitute motion required.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 Source Tabs -->
+  <section class="design" id="d04">
+    <div class="design-header"><div class="num">4</div><h2>Source Tabs (classic)</h2><span class="mini">Split</span></div>
+    <div class="design-note">Simple. Three tabs, one body. Tab colour matches its source. Boring in a safe, usable way.</div>
+    <div class="design-stage d04-bg">
+      <div class="d04">
+        <div class="d04-tabs">
+          <div class="d04-tab rr"><span class="dot-rr"></span>Robert's</div>
+          <div class="d04-tab by active"><span class="dot-by"></span>Bylaw</div>
+          <div class="d04-tab pc"><span class="dot-pc"></span>Precedent</div>
+        </div>
+        <div class="d04-body">
+          <div class="ref">Procedure Bylaw 1021 · s.11</div>
+          <div class="head">Amendments</div>
+          <p>A motion to amend must be relevant to the original motion. Only one amendment to an amendment at a time. Friendly amendments require a formal vote. The mover may withdraw prior to debate.</p>
+          <p style="margin-top:10px;padding:8px 10px;background:#dbeafe;border-radius:6px;font-size:10.5px;color:#1e3a8a"><b>Modifies Robert's §12</b> — adds the "one at a time" rule which Robert's leaves to the chair's discretion.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 Legal Brief -->
+  <section class="design" id="d05">
+    <div class="design-header"><div class="num">5</div><h2>Legal Brief</h2><span class="mini">Formal</span></div>
+    <div class="design-note">Formatted like a lawyer's memo. Every claim has a citation. For councils that take procedure seriously — courtrooms in miniature.</div>
+    <div class="design-stage d05-bg">
+      <div class="d05">
+        <div class="hd">MEMORANDUM</div>
+        <div class="sub">Re: Amendment to Item 8 — Park Grant</div>
+        <h4>Issue</h4>
+        <p>Whether the proposed amendment — requiring public consultation — is in order.</p>
+        <h4>Applicable Authority</h4>
+        <p class="cite">
+          <span class="authority rr">Robert's</span> An amendment must be <em>germane</em>: must relate directly to the subject of the main motion. <span class="authority rr">§12</span>
+        </p>
+        <p class="cite" style="margin-top:6px">
+          <span class="authority by">Bylaw</span> Only one amendment to an amendment may be entertained at a time. Bylaw 1021 <em>s.11</em>.
+        </p>
+        <p class="cite" style="margin-top:6px">
+          <span class="authority pc">Precedent</span> In <em>Council re Road Budget (2024-09-10)</em>, Mayor Veach ruled that a wholesale substitution was not an amendment. A <em>substitute motion</em> was required.
+        </p>
+        <h4>Analysis</h4>
+        <p>The proposed amendment is germane (adds, does not replace); no prior amendment is pending; no substitute-motion issue arises. <b>Finding: in order.</b></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 Bookshelf -->
+  <section class="design" id="d06">
+    <div class="design-header"><div class="num">6</div><h2>Library Bookshelf</h2><span class="mini">Tactile</span></div>
+    <div class="design-note">Three leather-bound volumes on a shelf. Click a spine to open. Ceremonial and tactile — feels like consulting actual authorities.</div>
+    <div class="design-stage d06-bg">
+      <div class="d06">
+        <div class="d06-book rr">ROBERT'S RULES <span class="yr">· 12th</span></div>
+        <div class="d06-book by selected">BYLAW 1021 <span class="yr">· 2025</span></div>
+        <div class="d06-book pc">PRECEDENT <span class="yr">· 2018–25</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 Precedent Timeline -->
+  <section class="design" id="d07">
+    <div class="design-header"><div class="num">7</div><h2>Precedent Timeline</h2><span class="mini">Historical</span></div>
+    <div class="design-note">Horizontal timeline of past rulings; Robert's/Bylaw markers pin when a source was updated. Shows how rules have actually been applied over time.</div>
+    <div class="design-stage d07-bg">
+      <div class="d07">
+        <h3>Amendments · Council History</h3>
+        <div class="d07-tl">
+          <div class="pt rr" style="left:8%"><div class="mk"></div><div class="yr">2020</div><div class="ev">Robert's <b>12th ed.</b></div></div>
+          <div class="pt pc" style="left:28%"><div class="mk"></div><div class="yr">2022-04</div><div class="ev">Friendly amend. <b>allowed</b></div></div>
+          <div class="pt pc" style="left:47%"><div class="mk"></div><div class="yr">2023-06</div><div class="ev">Chair let 2nd-lvl amend stand</div></div>
+          <div class="pt by" style="left:66%"><div class="mk"></div><div class="yr">2024-02</div><div class="ev">Bylaw 1021 <b>enacted</b></div></div>
+          <div class="pt pc" style="left:88%"><div class="mk"></div><div class="yr">2024-09</div><div class="ev">Substitution = <b>not an amend.</b></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 Venn -->
+  <section class="design" id="d08">
+    <div class="design-header"><div class="num">8</div><h2>Venn Diagram</h2><span class="mini">Overlap</span></div>
+    <div class="design-note">Three overlapping circles show where sources agree and where they diverge. Central intersection = triply-sourced rules (most bulletproof).</div>
+    <div class="design-stage d08-bg">
+      <div class="d08">
+        <div class="d08-wrap">
+          <div class="d08-circ rr">Robert's</div>
+          <div class="d08-circ by">Bylaw</div>
+          <div class="d08-circ pc">Precedent</div>
+          <div class="ctr">AMEND relevance</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 Binder Tabs -->
+  <section class="design" id="d09">
+    <div class="design-header"><div class="num">9</div><h2>Three-Ring Binder</h2><span class="mini">Split</span></div>
+    <div class="design-note">Classic legal-binder aesthetic. Coloured divider tabs on the side. Ring visible on the left. Tangible and traditional.</div>
+    <div class="design-stage d09-bg">
+      <div class="d09">
+        <div class="d09-rings"><span class="ring"></span><span class="ring"></span><span class="ring"></span></div>
+        <div class="d09-tabs">
+          <div class="d09-tab rr">Robert's</div>
+          <div class="d09-tab by active">Bylaw</div>
+          <div class="d09-tab pc">Precedent</div>
+        </div>
+        <div class="d09-page">
+          <h4>s.11 — Amendments</h4>
+          <p>A motion to amend must be relevant to the original motion. Only one amendment to an amendment at a time.</p>
+          <p>A friendly amendment is not recognised; any amendment requires a formal vote.</p>
+          <p style="font-size:9.5px;color:#78716c;font-style:italic">Enacted February 2024. Supersedes former procedure bylaw 994.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 Authority Scale -->
+  <section class="design" id="d10">
+    <div class="design-header"><div class="num">10</div><h2>Authority Scale</h2><span class="mini">Weight</span></div>
+    <div class="design-note">Visual weight bars show how strongly each source supports the current ruling. Useful when sources conflict and the clerk must justify a call.</div>
+    <div class="design-stage d10-bg">
+      <div class="d10">
+        <div style="text-align:center;font-size:10px;font-weight:800;letter-spacing:1.3px;color:#78716c;margin-bottom:4px;text-transform:uppercase">Support for: "Amendment requires a second"</div>
+        <div class="d10-row rr"><div class="label"><span class="dot-rr"></span>Robert's</div><div class="bar"><div class="fill" style="width:95%">§14 · explicit</div></div><div class="pct">95%</div></div>
+        <div class="d10-row by"><div class="label"><span class="dot-by"></span>Bylaw</div><div class="bar"><div class="fill" style="width:80%">s.11 · adopted</div></div><div class="pct">80%</div></div>
+        <div class="d10-row pc"><div class="label"><span class="dot-pc"></span>Precedent</div><div class="bar"><div class="fill" style="width:60%">consistent since 2018</div></div><div class="pct">60%</div></div>
+        <div class="d10-note">Strong triple-source support. Safe to enforce.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 Footnoted -->
+  <section class="design" id="d11">
+    <div class="design-header"><div class="num">11</div><h2>Footnoted Rule</h2><span class="mini">Merged</span></div>
+    <div class="design-note">The rule reads as one flowing paragraph. Superscript citations link to each source. Scholarly, clean.</div>
+    <div class="design-stage d11-bg">
+      <div class="d11">
+        <h3>On Amendments</h3>
+        <div class="main">
+          A motion to amend must be <em>relevant</em> to the original motion<sup class="rr">1</sup>. Only one amendment to an amendment may be pending at a time<sup>2</sup>. A wholesale substitution is not an amendment — it requires a separate substitute motion<sup class="pc">3</sup>.
+        </div>
+        <div class="footnotes">
+          <div class="fn rr"><div class="mk">1</div><div><b>Robert's Rules of Order Newly Revised, 12th ed., §12.</b> "An amendment must be germane — that is, it must relate directly to the subject of the motion."</div></div>
+          <div class="fn by"><div class="mk">2</div><div><b>Village of Pouce Coupe, Procedure Bylaw 1021, s.11.</b> "…only one amendment to an amendment is entertained at a time."</div></div>
+          <div class="fn pc"><div class="mk">3</div><div><b>Council Minutes, 2024-09-10, Item 5.</b> Mayor Veach ruled: "This is a substitute motion, not an amendment."</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 Gavel Dashboard -->
+  <section class="design" id="d12">
+    <div class="design-header"><div class="num">12</div><h2>Gavel Dashboard</h2><span class="mini">Dark</span></div>
+    <div class="design-note">Dark, gilded — feels presidential. Seal at top, source rows below. Great for evening meetings.</div>
+    <div class="design-stage d12-bg">
+      <div class="d12">
+        <div class="d12-seal">
+          <div class="emb">⚖</div>
+          <div>
+            <div class="tt">Council Authority</div>
+            <div class="sb">Pouce Coupe · Item 8</div>
+          </div>
+        </div>
+        <div class="d12-rows">
+          <div class="d12-row rr"><div class="src">RR</div><div class="tt">§12 — Amendments must be germane</div><div class="dd">12th ed.</div></div>
+          <div class="d12-row by"><div class="src">BYLAW</div><div class="tt">s.11 — One amend. to an amend.</div><div class="dd">1021/2024</div></div>
+          <div class="d12-row pc"><div class="src">PREC.</div><div class="tt">2024-09-10 — Substitution ≠ amend.</div><div class="dd">Mayor Veach</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 Field Guide -->
+  <section class="design" id="d13">
+    <div class="design-header"><div class="num">13</div><h2>Field Guide</h2><span class="mini">Approachable</span></div>
+    <div class="design-note">Warm, illustrated, friendly. Each entry is a "species" with a source icon. For councils where the vibe is "we're all learning together."</div>
+    <div class="design-stage d13-bg">
+      <div class="d13">
+        <div class="d13-head"><h3>Amendments · a field guide</h3></div>
+        <div class="d13-entry rr">
+          <div class="ic">📜</div>
+          <div class="body">
+            <div class="t">Robert's Rules · §12</div>
+            <div class="h">Germaneness</div>
+            <div class="p">An amendment must relate directly to the subject of the main motion.</div>
+          </div>
+        </div>
+        <div class="d13-entry by">
+          <div class="ic">🏛</div>
+          <div class="body">
+            <div class="t">Bylaw · s.11</div>
+            <div class="h">One at a Time</div>
+            <div class="p">Only one amendment to an amendment may be pending. Adopted February 2024.</div>
+          </div>
+        </div>
+        <div class="d13-entry pc">
+          <div class="ic">🗂</div>
+          <div class="body">
+            <div class="t">Precedent · 2024-09-10</div>
+            <div class="h">Substitute vs. Amend</div>
+            <div class="p">Mayor ruled a wholesale substitution was not an amendment — substitute motion required.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 Matrix -->
+  <section class="design" id="d14">
+    <div class="design-header"><div class="num">14</div><h2>Matrix</h2><span class="mini">Split</span></div>
+    <div class="design-note">Rows = topics, columns = sources. Spot where a source is silent. Best for councils that want a systematic audit.</div>
+    <div class="design-stage d14-bg">
+      <div class="d14">
+        <h3>Motion Procedure · Source Matrix</h3>
+        <div class="d14-grid">
+          <div class="hdr"></div>
+          <div class="hdr rr">Robert's</div>
+          <div class="hdr by">Bylaw</div>
+          <div class="hdr pc">Precedent</div>
+
+          <div class="row-h">Second required</div>
+          <div class="cell">Required for all motions.<span class="ref">§14</span></div>
+          <div class="cell">Adopted verbatim.<span class="ref">s.11</span></div>
+          <div class="cell">Enforced consistently.<span class="ref">all years</span></div>
+
+          <div class="row-h">Amend relevance</div>
+          <div class="cell">Must be germane.<span class="ref">§12</span></div>
+          <div class="cell">—<span class="ref">silent</span></div>
+          <div class="cell">Substitution ≠ amend.<span class="ref">2024-09-10</span></div>
+
+          <div class="row-h">Friendly amend.</div>
+          <div class="cell">Disfavoured.<span class="ref">§12</span></div>
+          <div class="cell">Not recognised.<span class="ref">s.11</span></div>
+          <div class="cell">Allowed in practice.<span class="ref">2022-04</span></div>
+
+          <div class="row-h">Voting method</div>
+          <div class="cell">Multiple allowed.<span class="ref">§45</span></div>
+          <div class="cell">Show of hands default.<span class="ref">s.12</span></div>
+          <div class="cell">Recorded for bylaws.<span class="ref">practice</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 Citation Stack -->
+  <section class="design" id="d15">
+    <div class="design-header"><div class="num">15</div><h2>Citation Stack</h2><span class="mini">Merged</span></div>
+    <div class="design-note">Lead with the rule in plain language; stack the three citations below as evidence. Reads like an article with receipts.</div>
+    <div class="design-stage d15-bg">
+      <div class="d15">
+        <h3>Amendments must be germane</h3>
+        <div class="q">An amendment must relate to the subject of the motion. It must not transform the motion into a different question.</div>
+        <div class="cites">
+          <div class="cite rr"><div class="label">RR §12</div><div class="text"><b>Robert's Rules</b> — An amendment must be germane to the question being considered. It may not introduce a new subject.</div></div>
+          <div class="cite by"><div class="label">BYLAW s.11</div><div class="text"><b>Procedure Bylaw 1021</b> — Amendments relevant to the motion only. One amendment to an amendment at a time.</div></div>
+          <div class="cite pc"><div class="label">MIN 2024-09-10</div><div class="text"><b>Precedent</b> — Mayor Veach ruled a wholesale substitution not an amendment; a substitute motion was required.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>
