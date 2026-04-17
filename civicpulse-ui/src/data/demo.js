@@ -1,20 +1,93 @@
 // Hardcoded demo data for UI testing — Village of Pouce Coupe council meeting
 // Includes: regular motions (carried/defeated), amendments (carried/defeated)
 
+// Attachments per agenda item. Each item has up to 3 example attachments.
+// Type determines how AttachmentModal renders the content.
+const ATT_CENTENNIAL_MAP = {
+  id: 'att-8-map', type: 'map', title: 'Centennial Park — Site Map',
+  subtitle: 'Current layout + proposed playground zone',
+  pages: 1,
+};
+const ATT_GRANT_REPORT = {
+  id: 'att-8-report', type: 'report', title: 'Staff Report — NDIT Park Improvement Grant',
+  subtitle: 'RPT-2025-041 · 2025-03-18 · CAO',
+  pages: 4,
+  report: {
+    ref: 'RPT-2025-041', date: '2025-03-18', author: 'CAO (T. Sinclair)',
+    to: 'Mayor & Council', from: 'CAO',
+    subject: 'NDIT Park Improvement Grant Application — Centennial Park Playground',
+    sections: [
+      { heading: '1. Background',
+        text: 'Centennial Park\'s playground equipment was installed in 2006 and has reached the end of its service life. A 2024 inspection flagged three pieces (swings, climber, slide) as requiring replacement within 18 months. The Northern Development Initiative Trust (NDIT) Park Improvement Grant opened its 2025 intake on March 1; deadline for applications is April 30.' },
+      { heading: '2. Analysis',
+        text: 'Staff reviewed three playground equipment suppliers and obtained pre-construction estimates. The NDIT program funds up to $75,000 per project at 100% for municipalities with populations under 1,000. Village of Pouce Coupe qualifies. Matching funds are not required, but demonstrated community support (letters, survey results, or consultation) strengthens the application.' },
+      { heading: '3. Financial Implications',
+        text: 'If successful, the grant covers 100% of equipment ($62,400) plus installation ($12,600). No impact on 2025 tax levy. Staff time for application: approximately 12 hours, absorbed into existing operations budget.' },
+      { heading: '4. Options',
+        text: 'A) Authorize staff to submit the application as presented (recommended). B) Defer the decision pending additional community consultation (will miss April 30 deadline). C) Decline to apply.' },
+      { heading: '5. Recommendation',
+        text: 'THAT Council authorizes staff to submit the NDIT Park Improvement grant application for $75,000 for playground equipment replacement at Centennial Park.' },
+    ],
+  },
+};
+const ATT_GRANT_BUDGET = {
+  id: 'att-8-budget', type: 'budget', title: 'Playground Equipment — Budget Estimate',
+  subtitle: 'Pre-construction quotes · 3 suppliers',
+  pages: 1,
+  budget: {
+    totalEstimate: 75000,
+    supplier: 'PlayWorks Northern (recommended)',
+    lines: [
+      { item: 'Primary play structure (5–12 yrs)',  qty: 1, unitCost: 28400, subtotal: 28400 },
+      { item: 'Swing set (2-bay + toddler seat)',   qty: 1, unitCost: 8200,  subtotal: 8200 },
+      { item: 'Climber / spinner combo',            qty: 1, unitCost: 14600, subtotal: 14600 },
+      { item: 'Safety surfacing (rubber tiles)',    qty: 240, unitCost: 47,  subtotal: 11200, note: 'sq ft' },
+      { item: 'Installation + site prep',           qty: 1, unitCost: 12600, subtotal: 12600 },
+    ],
+    contingency: 0,
+    notes: 'Quoted figures include freight to Pouce Coupe. Alternate supplier (KidKinetics) came in at $79,800 — above grant ceiling.',
+  },
+};
+
+const ATT_BYLAW_1021 = { id: 'att-5-bylaw', type: 'report', title: 'Bylaw 1021 — Council Procedure Bylaw (Third Reading copy)', subtitle: '22 pages · amended Feb 24, 2025', pages: 22,
+  report: { ref: 'BYLAW-1021', date: '2025-02-24', author: 'Corporate Officer', to: 'Council', from: 'Corporate Officer', subject: 'Council Procedure Bylaw 1021 — Third Reading',
+    sections: [
+      { heading: 'Preamble', text: 'A bylaw to establish procedures for the conduct of Council meetings and for the committees of Council.' },
+      { heading: 'Part 1 — Authority', text: 'Enacted under authority of the Community Charter, SBC 2003, c. 26.' },
+      { heading: 'Part 2 — Meetings', text: 'Regular meetings of Council shall be held on the second and fourth Monday of each month at 7:00 PM.' },
+      { heading: 's.14 — Public Consultation (amended)', text: 'Added by amendment 2025-02-24: Council shall consult publicly on matters materially affecting residents, using notice-of-intent or open house processes.' },
+    ] } };
+const ATT_WATER_REPORT = { id: 'att-6-report', type: 'report', title: 'Staff Report — Water Rate Review', subtitle: 'RPT-2025-028 · 2025-02-14', pages: 6,
+  report: { ref: 'RPT-2025-028', date: '2025-02-14', author: 'Finance Officer', to: 'Council', from: 'Finance', subject: 'Proposed 4.5% Water Rate Increase',
+    sections: [
+      { heading: 'Context', text: 'Water utility operating costs have risen 6.1% year-over-year, driven primarily by chemicals and electricity.' },
+      { heading: 'Options Analysis', text: 'A 4.5% rate increase would restore the utility to cost recovery within 2 fiscal years without drawing on reserves.' },
+      { heading: 'Recommendation', text: 'THAT Council approve a 4.5% water rate increase effective July 1, 2025.' },
+    ] } };
+const ATT_ZONING_MAP = { id: 'att-9-map', type: 'map', title: 'Rezoning Sketch — 4820 Pine Ave', subtitle: 'R1 → R2 boundary', pages: 1 };
+const ATT_ZONING_REPORT = { id: 'att-9-report', type: 'report', title: 'Staff Report — Zoning Amendment 4820 Pine Ave', subtitle: 'RPT-2025-045 · 2025-03-20', pages: 3,
+  report: { ref: 'RPT-2025-045', date: '2025-03-20', author: 'Planner', to: 'Council', from: 'Planning', subject: 'Rezone 4820 Pine Ave (R1 → R2)',
+    sections: [
+      { heading: 'Applicant', text: 'Property owner requesting rezone from R1 (single-family) to R2 (two-family / duplex).' },
+      { heading: 'OCP Alignment', text: 'Consistent with Official Community Plan policy 4.3 encouraging gentle density on arterial frontage.' },
+      { heading: 'Recommendation', text: 'THAT Council give first and second reading to Zoning Amendment Bylaw 1038 and refer to Public Hearing.' },
+    ] } };
+
 export const DEMO_AGENDA_ITEMS = [
-  { number: 1, title: 'Call to Order', description: 'Mayor Veach calls the meeting to order', status: 'discussed' },
-  { number: 2, title: 'Adoption of Agenda', description: 'Motion to adopt the agenda as presented', status: 'discussed' },
-  { number: 3, title: 'Adoption of Minutes — Feb 10, 2025', description: 'Regular council meeting minutes', status: 'discussed' },
-  { number: 4, title: 'Delegation — Pine Ave Residents', description: 'Presentation re: drainage concerns on Pine Avenue', status: 'discussed' },
-  { number: 5, title: 'Bylaw 1021 — Third Reading', description: 'Council Procedure Bylaw — final adoption (amendment proposed)', status: 'discussed' },
-  { number: 6, title: 'Water Rate Increase — 2025', description: 'Staff report on proposed 4.5% rate adjustment', status: 'discussed' },
-  { number: 7, title: 'Road Maintenance Budget', description: 'Review of spring grading and patching program', status: 'discussed' },
-  { number: 8, title: 'Park Improvement Grant Application', description: 'NDIT grant for playground equipment replacement', status: 'active' },
-  { number: 9, title: 'Zoning Amendment — Pine Ave', description: 'Rezone 4820 Pine Ave from R1 to R2', status: 'pending' },
-  { number: 10, title: 'CAO Report', description: 'Monthly operational update from Chief Administrative Officer', status: 'pending' },
-  { number: 11, title: 'New Business', status: 'pending' },
-  { number: 12, title: 'In-Camera (Closed Session)', description: 'Personnel matter per Community Charter s.90', status: 'pending' },
-  { number: 13, title: 'Adjournment', status: 'pending' },
+  { number: 1, title: 'Call to Order', description: 'Mayor Veach calls the meeting to order', status: 'discussed', attachments: [] },
+  { number: 2, title: 'Adoption of Agenda', description: 'Motion to adopt the agenda as presented', status: 'discussed', attachments: [] },
+  { number: 3, title: 'Adoption of Minutes — Feb 10, 2025', description: 'Regular council meeting minutes', status: 'discussed', attachments: [] },
+  { number: 4, title: 'Delegation — Pine Ave Residents', description: 'Presentation re: drainage concerns on Pine Avenue', status: 'discussed', attachments: [] },
+  { number: 5, title: 'Bylaw 1021 — Third Reading', description: 'Council Procedure Bylaw — final adoption (amendment proposed)', status: 'discussed', attachments: [ATT_BYLAW_1021] },
+  { number: 6, title: 'Water Rate Increase — 2025', description: 'Staff report on proposed 4.5% rate adjustment', status: 'discussed', attachments: [ATT_WATER_REPORT] },
+  { number: 7, title: 'Road Maintenance Budget', description: 'Review of spring grading and patching program', status: 'discussed', attachments: [] },
+  { number: 8, title: 'Park Improvement Grant Application', description: 'NDIT grant for playground equipment replacement', status: 'active',
+    attachments: [ATT_CENTENNIAL_MAP, ATT_GRANT_REPORT, ATT_GRANT_BUDGET] },
+  { number: 9, title: 'Zoning Amendment — Pine Ave', description: 'Rezone 4820 Pine Ave from R1 to R2', status: 'pending', attachments: [ATT_ZONING_MAP, ATT_ZONING_REPORT] },
+  { number: 10, title: 'CAO Report', description: 'Monthly operational update from Chief Administrative Officer', status: 'pending', attachments: [] },
+  { number: 11, title: 'New Business', status: 'pending', attachments: [] },
+  { number: 12, title: 'In-Camera (Closed Session)', description: 'Personnel matter per Community Charter s.90', status: 'pending', attachments: [] },
+  { number: 13, title: 'Adjournment', status: 'pending', attachments: [] },
 ];
 
 // Motion topics — these drive BiteCard rendering
