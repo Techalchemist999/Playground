@@ -8,6 +8,7 @@ import BiteCard from './BiteCard';
 import QuickMotion from './QuickMotion';
 import RulesPanel from './RulesPanel';
 import RobertsRulesCardPanel from './RobertsRulesCardPanel';
+import PrecedenceLadder from './PrecedenceLadder';
 import SessionControls from './SessionControls';
 
 // Topics + Clerk Notes in one panel with tabs
@@ -619,7 +620,10 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                       </button>
                     </div>
                     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-                      <RobertsRulesCardPanel initialCardId={session.sessionId === 'demo' ? 'amend' : 'move'} />
+                      <PrecedenceLadder
+                        initialCardId={session.sessionId === 'demo' ? 'amend' : 'move'}
+                        theme={theme}
+                      />
                     </div>
                   </div>
                 );
