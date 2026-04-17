@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 function MapView({ attachment }) {
   const isZoning = attachment.id === 'att-9-map';
@@ -195,6 +196,8 @@ const TYPE_META = {
 };
 
 export default function AttachmentModal({ attachment, agendaItem, onClose }) {
+  const [fullscreen, setFullscreen] = useState(false);
+
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -204,24 +207,26 @@ export default function AttachmentModal({ attachment, agendaItem, onClose }) {
   if (!attachment) return null;
   const meta = TYPE_META[attachment.type] || TYPE_META.report;
 
-  return (
+  const content = (
     <div
       onClick={onClose}
       style={{
-        position: 'fixed', inset: 0, zIndex: 500,
+        position: 'fixed', inset: 0, zIndex: 9999,
         background: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(6px)',
-        display: 'flex', alignItems: 'stretch', justifyContent: 'center',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
         animation: 'attachFadeIn .2s ease-out',
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          flex: 1, margin: 24,
+          width: fullscreen ? 'calc(100vw - 48px)' : 'min(576px, calc(100vw - 32px))',
+          height: fullscreen ? 'calc(100vh - 48px)' : 'min(576px, calc(100vh - 32px))',
           background: '#fff', borderRadius: 14, overflow: 'hidden',
           display: 'flex', flexDirection: 'column',
           boxShadow: '0 40px 100px rgba(0,0,0,0.4)',
           animation: 'attachZoomIn .25s cubic-bezier(.22,1,.36,1)',
+          transition: 'width .2s ease, height .2s ease',
         }}
       >
         {/* Header */}
@@ -276,6 +281,29 @@ export default function AttachmentModal({ attachment, agendaItem, onClose }) {
             )}
           </div>
           <button
+            onClick={() => setFullscreen(f => !f)}
+            title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+            style={{
+              width: 36, height: 36, borderRadius: 8,
+              background: '#f1f5f9', border: '1px solid #e2e8f0',
+              color: '#475569', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, transition: 'all .15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#e2e8f0'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#f1f5f9'; }}
+          >
+            {fullscreen ? (
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M8 3v4a1 1 0 0 1-1 1H3M21 8h-4a1 1 0 0 1-1-1V3M3 16h4a1 1 0 0 1 1 1v4M16 21v-4a1 1 0 0 1 1-1h4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M3 8V5a2 2 0 0 1 2-2h3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </button>
+          <button
             onClick={onClose}
             title="Close (Esc)"
             style={{
@@ -306,4 +334,6 @@ export default function AttachmentModal({ attachment, agendaItem, onClose }) {
       `}</style>
     </div>
   );
+
+  return createPortal(content, document.body);
 }
