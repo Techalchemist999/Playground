@@ -599,6 +599,8 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                   <div style={{
                     position: 'absolute', bottom: 72, left: 14,
                     width: procedureDims.w, height: procedureDims.h,
+                    maxWidth: 'calc(100% - 28px)',
+                    maxHeight: 'calc(100% - 84px)',
                     background: '#fff',
                     border: '1px solid #cbd5e1',
                     borderRadius: 12,
