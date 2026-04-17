@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>On The Floor + Toolbox — 15 Design Vibes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f1f5f9; font-family: 'Inter', sans-serif; color: #0f172a; }
+  body { padding: 24px 20px 80px; }
+
+  /* Page header */
+  .page-header {
+    max-width: 1280px; margin: 0 auto 28px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+    flex-wrap: wrap;
+  }
+  .page-header h1 {
+    font-size: 30px; font-weight: 900; letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #1e293b, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .page-header p { color: #64748b; font-size: 13px; margin-top: 4px; max-width: 580px; line-height: 1.5; }
+
+  /* Nav pills */
+  .nav {
+    display: flex; gap: 6px; flex-wrap: wrap; max-width: 1280px;
+    margin: 0 auto 32px; padding: 10px 12px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+  }
+  .nav a {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 10px; font-size: 11px; font-weight: 700; color: #475569;
+    text-decoration: none; border-radius: 999px; background: #f1f5f9;
+    transition: all .15s;
+  }
+  .nav a:hover { background: #3b82f6; color: #fff; transform: translateY(-1px); }
+  .nav a span { font-size: 9px; opacity: .7; }
+
+  /* Design grid */
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+    gap: 24px; max-width: 1280px; margin: 0 auto;
+  }
+
+  /* Each design card wrapper */
+  .design {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+    overflow: hidden; box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+    display: flex; flex-direction: column;
+  }
+  .design-header {
+    padding: 14px 18px; border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .design-header .num {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: #0f172a; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }
+  .design-header h2 { font-size: 15px; font-weight: 800; color: #0f172a; }
+  .design-header .tag {
+    font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    color: #94a3b8; padding: 3px 8px; background: #f1f5f9; border-radius: 999px;
+  }
+  .design-note { padding: 10px 18px; font-size: 11px; color: #64748b; line-height: 1.5; border-bottom: 1px solid #f1f5f9; background: #fafbfc; }
+  .design-stage {
+    padding: 22px; min-height: 340px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+
+  /* ============= DESIGN 1 — Classic Playing Card ============= */
+  .d1-bg { background: radial-gradient(circle at 30% 20%, #fef3c7, #fde68a); }
+  .playing-card {
+    width: 200px; height: 280px;
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border: 3px solid #d4b62e; border-radius: 14px;
+    position: relative; padding: 14px;
+    box-shadow: 0 12px 40px rgba(212,182,46,0.3), inset 0 0 0 1px #fffbeb;
+    display: flex; flex-direction: column; font-family: 'Cinzel', serif;
+  }
+  .playing-card .corner {
+    position: absolute; font-size: 12px; font-weight: 700; color: #7c5a0a; line-height: 1;
+  }
+  .playing-card .corner.tl { top: 10px; left: 10px; text-align: center; }
+  .playing-card .corner.br { bottom: 10px; right: 10px; text-align: center; transform: rotate(180deg); }
+  .playing-card .corner .n { font-size: 22px; font-weight: 900; display: block; }
+  .playing-card .corner .s { font-size: 16px; margin-top: 2px; display: block; }
+  .playing-card .center {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 12px;
+  }
+  .playing-card .center .glyph { font-size: 48px; margin-bottom: 10px; }
+  .playing-card .center .title { font-size: 15px; font-weight: 700; color: #4a3600; letter-spacing: 1px; }
+  .playing-card .center .sub { font-size: 9px; color: #7c5a0a; margin-top: 6px; font-family: 'Inter'; line-height: 1.4; font-weight: 500; }
+
+  /* ============= DESIGN 2 — Minimal Chip Grid ============= */
+  .d2-bg { background: #0f172a; }
+  .chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-width: 340px; }
+  .chip {
+    padding: 10px 8px; border-radius: 8px; text-align: center;
+    font-size: 9px; font-weight: 800; letter-spacing: .5px;
+    background: #1e293b; color: #cbd5e1; border: 1px solid #334155;
+    cursor: pointer; transition: all .15s;
+    position: relative;
+  }
+  .chip.active { background: #3b82f6; color: #fff; border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(59,130,246,.25); transform: translateY(-2px); }
+  .chip:hover:not(.active) { background: #334155; color: #fff; }
+  .chip .num { position: absolute; top: 3px; right: 4px; font-size: 7px; opacity: .6; }
+
+  /* ============= DESIGN 3 — Hexagonal Honeycomb ============= */
+  .d3-bg { background: linear-gradient(135deg, #fef3c7, #fed7aa); }
+  .hex-wrap { position: relative; width: 380px; height: 280px; }
+  .hex {
+    position: absolute; width: 86px; height: 100px;
+    background: #fff;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; font-size: 9px; font-weight: 800; color: #7c2d12;
+    text-align: center; padding: 10px 6px; cursor: pointer; transition: all .2s;
+  }
+  .hex:hover { transform: scale(1.08); z-index: 10; }
+  .hex.active {
+    background: linear-gradient(135deg, #f59e0b, #dc2626); color: #fff;
+    transform: scale(1.12); z-index: 20;
+  }
+  .hex .hnum { font-size: 14px; opacity: .7; margin-bottom: 3px; }
+
+  /* ============= DESIGN 4 — Fan Deck ============= */
+  .d4-bg { background: linear-gradient(180deg, #dbeafe, #ede9fe); }
+  .fan { position: relative; width: 360px; height: 280px; }
+  .fan-card {
+    position: absolute; bottom: 0; left: 50%;
+    width: 90px; height: 140px; border-radius: 10px;
+    background: linear-gradient(180deg, #fff, #f8fafc);
+    border: 2px solid #cbd5e1;
+    transform-origin: 50% 100%; margin-left: -45px;
+    box-shadow: 0 4px 14px rgba(15,23,42,0.1);
+    padding: 10px; display: flex; flex-direction: column;
+    cursor: pointer; transition: transform .2s;
+    font-size: 8.5px; font-weight: 700; color: #334155;
+  }
+  .fan-card:hover { transform: translateY(-30px) scale(1.1) rotate(var(--rot, 0deg)) !important; z-index: 50; }
+  .fan-card .tn { font-size: 7px; color: #94a3b8; font-weight: 800; letter-spacing: .5px; text-align: center; }
+  .fan-card .tt { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 9px; font-weight: 800; color: #1e293b; line-height: 1.2; }
+  .fan-card .cat { font-size: 7px; color: #94a3b8; text-align: center; letter-spacing: 1px; }
+
+  /* ============= DESIGN 5 — Rolodex ============= */
+  .d5-bg { background: linear-gradient(135deg, #e0e7ff, #fbcfe8); }
+  .rolo { position: relative; width: 280px; height: 260px; perspective: 1200px; }
+  .rolo-card {
+    width: 100%; height: 100%; position: absolute;
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(15,23,42,0.15);
+    padding: 20px; display: flex; flex-direction: column; gap: 10px;
+    border-top: 10px solid #8b5cf6;
+    animation: rolodex 8s infinite;
+    backface-visibility: hidden;
+  }
+  @keyframes rolodex {
+    0%, 30% { transform: rotateX(0); }
+    35%, 65% { transform: rotateX(-180deg); opacity: 0; }
+    70%, 100% { transform: rotateX(0); }
+  }
+  .rolo-nav { display: flex; justify-content: space-between; margin-top: 10px; }
+  .rolo-nav button { width: 32px; height: 32px; border-radius: 50%; border: none; background: #8b5cf6; color: #fff; font-size: 16px; cursor: pointer; font-weight: 800; }
+
+  /* ============= DESIGN 6 — Precedence Ladder ============= */
+  .d6-bg { background: linear-gradient(135deg, #f0f9ff, #ecfdf5); }
+  .ladder {
+    width: 320px; display: flex; flex-direction: column; gap: 0;
+    position: relative;
+  }
+  .ladder::before {
+    content: ''; position: absolute; left: 20px; top: 20px; bottom: 20px;
+    width: 2px; background: linear-gradient(180deg, #10b981, #3b82f6);
+  }
+  .rung {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; position: relative;
+    background: rgba(255,255,255,0.6); border-radius: 8px;
+    margin-bottom: 2px;
+    transition: all .15s; cursor: pointer;
+  }
+  .rung:hover { background: #fff; transform: translateX(4px); }
+  .rung.now { background: #fff; box-shadow: 0 4px 14px rgba(16,185,129,0.2); border: 2px solid #10b981; padding: 12px; }
+  .rung .rnum {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #fff; border: 2px solid #cbd5e1;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; color: #475569; flex-shrink: 0; z-index: 1;
+  }
+  .rung.now .rnum { border-color: #10b981; color: #10b981; }
+  .rung .rtitle { font-size: 11px; font-weight: 700; color: #1e293b; }
+  .rung.now .rtitle { font-size: 13px; font-weight: 900; }
+  .rung .rtag { font-size: 8px; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+
+  /* ============= DESIGN 7 — Radial Dial ============= */
+  .d7-bg { background: radial-gradient(circle, #111827, #030712); color: #fff; }
+  .dial { position: relative; width: 320px; height: 320px; border-radius: 50%;
+    background: conic-gradient(from 0deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b, #10b981, #3b82f6);
+    box-shadow: 0 0 40px rgba(59,130,246,0.4);
+  }
+  .dial::before {
+    content: ''; position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px;
+    border-radius: 50%; background: #0f172a;
+  }
+  .dial-wedge {
+    position: absolute; top: 50%; left: 50%;
+    font-size: 9px; font-weight: 800; color: #fff;
+    transform-origin: 0 0; pointer-events: none;
+  }
+  .dial-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 140px; height: 140px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 10px;
+    box-shadow: 0 0 30px rgba(139,92,246,0.5);
+  }
+  .dial-center .c-num { font-size: 32px; font-weight: 900; line-height: 1; }
+  .dial-center .c-title { font-size: 11px; font-weight: 800; margin-top: 4px; letter-spacing: 1px; }
+
+  /* ============= DESIGN 8 — Neon Cyber ============= */
+  .d8-bg { background: #030712; }
+  .neon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 380px; }
+  .neon-card {
+    background: rgba(6,182,212,0.05);
+    border: 1.5px solid #06b6d4;
+    border-radius: 10px; padding: 12px;
+    color: #67e8f9;
+    position: relative;
+    box-shadow: 0 0 12px rgba(6,182,212,0.3), inset 0 0 12px rgba(6,182,212,0.08);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .neon-card:hover { transform: translateY(-3px); box-shadow: 0 0 20px rgba(6,182,212,0.5), inset 0 0 20px rgba(6,182,212,0.15); }
+  .neon-card.active {
+    background: rgba(236,72,153,0.1);
+    border-color: #ec4899; color: #fbcfe8;
+    box-shadow: 0 0 20px rgba(236,72,153,0.5), inset 0 0 15px rgba(236,72,153,0.2);
+  }
+  .neon-card .nc-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; opacity: .7;
+    margin-bottom: 4px;
+  }
+  .neon-card .nc-title { font-size: 10px; font-weight: 800; letter-spacing: .8px; line-height: 1.2; }
+  .neon-card .nc-phrase { font-size: 8px; opacity: .6; margin-top: 4px; font-style: italic; }
+
+  /* ============= DESIGN 9 — Paper Index Cards ============= */
+  .d9-bg { background: #fef8e7; background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(180,140,80,0.04) 12px, rgba(180,140,80,0.04) 14px);
+  }
+  .index-card {
+    background: #fffbec;
+    border: 1px solid #d4c896;
+    border-radius: 3px;
+    width: 280px; padding: 16px 18px;
+    box-shadow: 2px 4px 0 rgba(212,200,150,0.5), 5px 10px 20px rgba(139,105,60,0.15);
+    transform: rotate(-1.5deg);
+    font-family: 'Caveat', cursive;
+    position: relative;
+  }
+  .index-card::before {
+    content: ''; position: absolute; top: 0; left: 40px; right: 0; bottom: 0;
+    background: repeating-linear-gradient(180deg, transparent, transparent 23px, rgba(180,140,80,0.15) 23px, rgba(180,140,80,0.15) 24px);
+    pointer-events: none;
+  }
+  .index-card::after {
+    content: ''; position: absolute; top: 0; left: 32px; bottom: 0; width: 1px;
+    background: rgba(220,80,60,0.5);
+  }
+  .index-card .ic-title {
+    font-family: 'Caveat', cursive; font-size: 28px; font-weight: 700;
+    color: #6b2415; line-height: 1; margin-bottom: 6px;
+  }
+  .index-card .ic-num {
+    font-family: 'Caveat'; font-size: 16px; color: #b45309; font-weight: 700;
+    text-decoration: underline; text-underline-offset: 3px; margin-bottom: 10px;
+  }
+  .index-card .ic-desc {
+    font-family: 'Caveat'; font-size: 16px; color: #3f2617; line-height: 1.3;
+  }
+  .index-card .ic-phrase {
+    font-family: 'Caveat'; font-size: 14px; color: #6b2415; font-style: italic;
+    margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(107,36,21,0.3);
+  }
+
+  /* ============= DESIGN 10 — Split Drawer ============= */
+  .d10-bg { background: #f8fafc; display: flex; padding: 0 !important; }
+  .drawer {
+    width: 190px; background: #1e293b; color: #fff;
+    display: flex; flex-direction: column;
+    min-height: 340px;
+  }
+  .drawer-head {
+    padding: 14px; border-bottom: 1px solid #334155;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .drawer-head svg { flex-shrink: 0; }
+  .drawer-item {
+    padding: 9px 14px; font-size: 10.5px; font-weight: 700; cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex; align-items: center; gap: 8px;
+    transition: all .15s;
+  }
+  .drawer-item:hover { background: rgba(255,255,255,0.05); }
+  .drawer-item.active { background: #3b82f6; }
+  .drawer-item .di-num { width: 20px; font-size: 8.5px; opacity: .7; }
+  .drawer-main {
+    flex: 1; padding: 20px; display: flex; align-items: center; justify-content: center;
+  }
+  .drawer-main .big-card {
+    max-width: 280px; padding: 20px;
+    background: linear-gradient(135deg, #fff, #f1f5f9);
+    border: 2px solid #3b82f6; border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(59,130,246,0.2);
+  }
+  .drawer-main .bc-num { font-size: 34px; font-weight: 900; color: #3b82f6; line-height: 1; }
+  .drawer-main .bc-title { font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 4px; }
+  .drawer-main .bc-desc { font-size: 10px; color: #475569; margin-top: 10px; line-height: 1.5; }
+
+  /* ============= DESIGN 11 — Command Palette ============= */
+  .d11-bg { background: rgba(15,23,42,0.85); backdrop-filter: blur(20px); }
+  .cmd {
+    width: 380px; background: #fff; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .cmd-search {
+    padding: 14px 16px; border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .cmd-search input {
+    flex: 1; border: none; outline: none; font-size: 14px; font-weight: 500; color: #0f172a;
+    font-family: inherit;
+  }
+  .cmd-kbd {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    padding: 2px 6px; background: #f1f5f9; color: #64748b; border-radius: 4px; border: 1px solid #e2e8f0;
+  }
+  .cmd-group { padding: 8px 0; }
+  .cmd-group-label {
+    padding: 4px 16px; font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8;
+  }
+  .cmd-item {
+    padding: 8px 16px; display: flex; align-items: center; gap: 10px;
+    cursor: pointer; font-size: 12px;
+    transition: background .1s;
+  }
+  .cmd-item:hover, .cmd-item.sel { background: #f1f5f9; }
+  .cmd-item.sel { background: #dbeafe; color: #1e40af; }
+  .cmd-item .ci-num {
+    width: 22px; height: 22px; border-radius: 5px;
+    background: #f1f5f9; color: #64748b;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; flex-shrink: 0;
+  }
+  .cmd-item.sel .ci-num { background: #3b82f6; color: #fff; }
+  .cmd-item .ci-title { flex: 1; font-weight: 600; color: #0f172a; }
+  .cmd-item.sel .ci-title { color: #1e40af; }
+  .cmd-item .ci-cat {
+    font-size: 8.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+    color: #94a3b8;
+  }
+
+  /* ============= DESIGN 12 — Horizontal Carousel ============= */
+  .d12-bg { background: linear-gradient(135deg, #fef3c7, #fed7aa); padding: 0 !important; }
+  .carousel {
+    width: 100%; height: 340px; position: relative;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .carousel .track { display: flex; gap: 14px; align-items: center; padding: 0 20px; }
+  .carousel .ccard {
+    min-width: 130px; height: 180px;
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    padding: 12px; display: flex; flex-direction: column;
+    transition: all .3s;
+  }
+  .carousel .ccard.center {
+    min-width: 200px; height: 260px; padding: 18px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    transform: scale(1.05); background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff;
+  }
+  .ccard .cn { font-size: 10px; color: #94a3b8; font-weight: 800; }
+  .ccard.center .cn { color: rgba(255,255,255,0.7); }
+  .ccard .ct { font-size: 11px; font-weight: 800; color: #1e293b; margin-top: 4px; line-height: 1.2; }
+  .ccard.center .ct { color: #fff; font-size: 15px; margin: 8px 0; }
+  .ccard .cd { font-size: 9px; color: #64748b; margin-top: auto; line-height: 1.3; }
+  .ccard.center .cd { color: rgba(255,255,255,0.9); font-size: 10.5px; }
+  .carousel .arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 36px; height: 36px; border-radius: 50%; background: #fff;
+    border: none; box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: #475569; z-index: 10;
+  }
+  .carousel .arrow.left { left: 10px; }
+  .carousel .arrow.right { right: 10px; }
+
+  /* ============= DESIGN 13 — Accordion Rows ============= */
+  .d13-bg { background: linear-gradient(180deg, #fafafa, #f1f5f9); }
+  .accordion { width: 340px; display: flex; flex-direction: column; gap: 2px; }
+  .acc-row {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+    overflow: hidden; transition: all .2s;
+  }
+  .acc-row.open { border-color: #3b82f6; box-shadow: 0 6px 18px rgba(59,130,246,0.15); }
+  .acc-head {
+    padding: 12px 14px; display: flex; align-items: center; gap: 10px;
+    cursor: pointer; font-size: 11px; font-weight: 700; color: #1e293b;
+  }
+  .acc-head .ah-num {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: #f1f5f9; color: #64748b;
+    font-size: 11px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .acc-row.open .ah-num { background: #3b82f6; color: #fff; }
+  .acc-head .ah-title { flex: 1; font-weight: 700; }
+  .acc-head .ah-chev { color: #94a3b8; transition: transform .2s; }
+  .acc-row.open .ah-chev { transform: rotate(90deg); color: #3b82f6; }
+  .acc-body {
+    padding: 0 14px 14px 50px;
+    font-size: 10.5px; color: #64748b; line-height: 1.5;
+    display: none;
+  }
+  .acc-row.open .acc-body { display: block; }
+  .acc-body .phrase {
+    display: block; margin-top: 6px; padding: 6px 10px;
+    background: #f0f9ff; border-left: 3px solid #3b82f6; border-radius: 4px;
+    font-style: italic; color: #1e40af;
+  }
+
+  /* ============= DESIGN 14 — Isometric Stack ============= */
+  .d14-bg { background: linear-gradient(180deg, #1e1b4b, #312e81); }
+  .iso-stack {
+    position: relative; width: 280px; height: 280px;
+    transform-style: preserve-3d;
+    transform: rotateX(55deg) rotateZ(-30deg);
+  }
+  .iso-card {
+    position: absolute; width: 200px; height: 140px;
+    left: 40px; top: 70px;
+    background: linear-gradient(135deg, #fff, #f1f5f9);
+    border-radius: 10px;
+    box-shadow: 0 1px 0 #64748b, 0 2px 0 #475569;
+    padding: 10px; display: flex; flex-direction: column;
+  }
+  .iso-card:nth-child(1) { transform: translateZ(0px); }
+  .iso-card:nth-child(2) { transform: translateZ(12px); background: linear-gradient(135deg, #fef3c7, #fde68a); }
+  .iso-card:nth-child(3) { transform: translateZ(24px); background: linear-gradient(135deg, #c7d2fe, #a5b4fc); }
+  .iso-card:nth-child(4) { transform: translateZ(36px); background: linear-gradient(135deg, #fbcfe8, #f9a8d4); }
+  .iso-card:nth-child(5) { transform: translateZ(48px); background: linear-gradient(135deg, #fff, #fff); box-shadow: 0 15px 50px rgba(59,130,246,0.4); }
+  .iso-card .in { font-size: 9px; color: #64748b; font-weight: 800; }
+  .iso-card .it { font-size: 12px; color: #0f172a; font-weight: 800; margin-top: 4px; }
+  .iso-card .ip { font-size: 9px; color: #475569; font-style: italic; margin-top: auto; }
+
+  /* ============= DESIGN 15 — 3D Flip Card ============= */
+  .d15-bg { background: linear-gradient(135deg, #ecfdf5, #a7f3d0); }
+  .flip-wrap { perspective: 1400px; width: 220px; height: 300px; }
+  .flip-card {
+    width: 100%; height: 100%; position: relative;
+    transform-style: preserve-3d;
+    animation: flipLoop 6s infinite;
+  }
+  @keyframes flipLoop {
+    0%, 40% { transform: rotateY(0); }
+    50%, 90% { transform: rotateY(180deg); }
+    100% { transform: rotateY(360deg); }
+  }
+  .flip-face {
+    position: absolute; inset: 0;
+    border-radius: 14px;
+    backface-visibility: hidden;
+    padding: 18px; display: flex; flex-direction: column;
+    box-shadow: 0 20px 50px rgba(16,185,129,0.2);
+  }
+  .flip-front { background: linear-gradient(180deg, #fff, #ecfdf5); border: 2px solid #10b981; }
+  .flip-back {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: #fff; transform: rotateY(180deg);
+    align-items: center; justify-content: center; text-align: center;
+  }
+  .flip-front .fn { font-size: 11px; color: #059669; font-weight: 800; letter-spacing: 1px; }
+  .flip-front .ft { font-size: 20px; color: #064e3b; font-weight: 900; margin-top: 8px; line-height: 1.1; }
+  .flip-front .fd { font-size: 10.5px; color: #374151; margin-top: 12px; line-height: 1.4; }
+  .flip-front .fcat {
+    margin-top: auto; display: inline-block; align-self: flex-start;
+    padding: 3px 8px; font-size: 8.5px; font-weight: 800; letter-spacing: 1px;
+    background: #d1fae5; color: #065f46; border-radius: 4px; text-transform: uppercase;
+  }
+  .flip-back .fb-glyph { font-size: 54px; margin-bottom: 10px; }
+  .flip-back .fb-phrase { font-size: 14px; font-weight: 700; line-height: 1.4; font-style: italic; }
+  .flip-back .fb-num { margin-top: auto; font-size: 38px; font-weight: 900; opacity: .3; }
+
+  /* ============= Shared: toolbox trigger mock ============= */
+  .trigger-mock {
+    position: absolute; bottom: 14px; left: 14px;
+    width: 40px; height: 40px; border-radius: 10px;
+    background: rgba(255,255,255,0.95); border: 1.5px solid rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    color: #475569;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <h1>On The Floor + Toolbox — 15 Design Vibes</h1>
+    <p>15 directions for the procedure-cards UI and the toolbox trigger we just built. Each shows a different mood, density and interaction model — pick one or combine.</p>
+  </div>
+  <div style="font-size: 11px; color: #94a3b8; font-weight: 700;">
+    Robert's Rules deck · 23 cards · CivicPulse
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#d1"><span>01</span> Classic Card</a>
+  <a href="#d2"><span>02</span> Chip Grid</a>
+  <a href="#d3"><span>03</span> Honeycomb</a>
+  <a href="#d4"><span>04</span> Fan Deck</a>
+  <a href="#d5"><span>05</span> Rolodex</a>
+  <a href="#d6"><span>06</span> Ladder</a>
+  <a href="#d7"><span>07</span> Radial Dial</a>
+  <a href="#d8"><span>08</span> Neon Cyber</a>
+  <a href="#d9"><span>09</span> Paper Cards</a>
+  <a href="#d10"><span>10</span> Split Drawer</a>
+  <a href="#d11"><span>11</span> Command Palette</a>
+  <a href="#d12"><span>12</span> Carousel</a>
+  <a href="#d13"><span>13</span> Accordion</a>
+  <a href="#d14"><span>14</span> Isometric Stack</a>
+  <a href="#d15"><span>15</span> 3D Flip</a>
+</nav>
+
+<div class="grid">
+
+  <!-- 1 Classic Playing Card -->
+  <section class="design" id="d1">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">1</div><h2>Classic Playing Card</h2></div>
+      <span class="tag">Tactile</span>
+    </div>
+    <div class="design-note">Physical-card feel. Cinzel serif, ornate border, corner numbers like a real deck. Feels formal and ceremonial — fits the parliamentary vibe.</div>
+    <div class="design-stage d1-bg">
+      <div class="playing-card">
+        <div class="corner tl"><span class="n">4</span><span class="s">♦</span></div>
+        <div class="corner br"><span class="n">4</span><span class="s">♦</span></div>
+        <div class="center">
+          <div class="glyph">♦</div>
+          <div class="title">AMEND</div>
+          <div class="sub">Changes the main motion by adding, striking, or substituting words.</div>
+        </div>
+      </div>
+      <div class="trigger-mock" title="Toolbox trigger">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7"/><path d="M2 12V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 Chip Grid -->
+  <section class="design" id="d2">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">2</div><h2>Minimal Chip Grid</h2></div>
+      <span class="tag">Dense</span>
+    </div>
+    <div class="design-note">All 23 cards at a glance. Dark mode, tiny pills. For power users who know the deck and want the fastest click-path.</div>
+    <div class="design-stage d2-bg">
+      <div class="chips">
+        <div class="chip"><span class="num">1</span>MOVE</div>
+        <div class="chip"><span class="num">2</span>SECOND</div>
+        <div class="chip"><span class="num">3</span>POSTPONE</div>
+        <div class="chip active"><span class="num">4</span>AMEND</div>
+        <div class="chip"><span class="num">5</span>REFER</div>
+        <div class="chip"><span class="num">6</span>DEFER</div>
+        <div class="chip"><span class="num">7</span>LIMIT</div>
+        <div class="chip"><span class="num">8</span>CALL Q</div>
+        <div class="chip"><span class="num">9</span>TABLE</div>
+        <div class="chip"><span class="num">10</span>ORDERS</div>
+        <div class="chip"><span class="num">11</span>PRIV</div>
+        <div class="chip"><span class="num">12</span>RECESS</div>
+        <div class="chip"><span class="num">13</span>ADJOURN</div>
+        <div class="chip"><span class="num">14</span>WITHDRAW</div>
+        <div class="chip"><span class="num">15</span>APPEAL</div>
+        <div class="chip"><span class="num">16</span>SERIATIM</div>
+        <div class="chip"><span class="num">17</span>INQUIRY</div>
+        <div class="chip"><span class="num">18</span>RECONS</div>
+        <div class="chip"><span class="num">19</span>SUSPEND</div>
+        <div class="chip"><span class="num">20</span>INFO</div>
+        <div class="chip"><span class="num">21</span>TAKE</div>
+        <div class="chip"><span class="num">22</span>ORDER</div>
+        <div class="chip"><span class="num">23</span>DIVIDE</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 Honeycomb -->
+  <section class="design" id="d3">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">3</div><h2>Hexagonal Honeycomb</h2></div>
+      <span class="tag">Spatial</span>
+    </div>
+    <div class="design-note">Hex tiles grouped by category (main, subsidiary, incidental). Precedence flows outward — active card is the center of gravity.</div>
+    <div class="design-stage d3-bg">
+      <div class="hex-wrap">
+        <div class="hex" style="left:148px;top:10px"><span class="hnum">1</span>MOVE</div>
+        <div class="hex" style="left:80px;top:60px"><span class="hnum">2</span>SECOND</div>
+        <div class="hex" style="left:216px;top:60px"><span class="hnum">3</span>POSTP</div>
+        <div class="hex active" style="left:148px;top:110px"><span class="hnum">4</span>AMEND</div>
+        <div class="hex" style="left:80px;top:160px"><span class="hnum">5</span>REFER</div>
+        <div class="hex" style="left:216px;top:160px"><span class="hnum">6</span>DEFER</div>
+        <div class="hex" style="left:148px;top:210px"><span class="hnum">7</span>LIMIT</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Fan Deck -->
+  <section class="design" id="d4">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">4</div><h2>Fan Deck</h2></div>
+      <span class="tag">Playful</span>
+    </div>
+    <div class="design-note">Cards fan out like a hand of playing cards. Hover lifts a card — active card sits highest. Feels like you're holding the deck.</div>
+    <div class="design-stage d4-bg">
+      <div class="fan">
+        <div class="fan-card" style="--rot:-40deg;transform:rotate(-40deg) translateY(-20px)"><div class="tn">#1</div><div class="tt">MOVE</div><div class="cat">M</div></div>
+        <div class="fan-card" style="--rot:-30deg;transform:rotate(-30deg) translateY(-10px)"><div class="tn">#2</div><div class="tt">SECOND</div><div class="cat">M</div></div>
+        <div class="fan-card" style="--rot:-20deg;transform:rotate(-20deg)"><div class="tn">#3</div><div class="tt">POSTP</div><div class="cat">P</div></div>
+        <div class="fan-card" style="--rot:-10deg;transform:rotate(-10deg) translateY(5px)"><div class="tn">#4</div><div class="tt">AMEND</div><div class="cat">P</div></div>
+        <div class="fan-card" style="--rot:0deg;transform:translateY(10px);border-color:#3b82f6;background:linear-gradient(180deg,#dbeafe,#93c5fd);z-index:5"><div class="tn" style="color:#1e40af">#5</div><div class="tt" style="color:#fff">REFER</div><div class="cat" style="color:#1e40af">P</div></div>
+        <div class="fan-card" style="--rot:10deg;transform:rotate(10deg) translateY(5px)"><div class="tn">#6</div><div class="tt">DEFER</div><div class="cat">P</div></div>
+        <div class="fan-card" style="--rot:20deg;transform:rotate(20deg)"><div class="tn">#7</div><div class="tt">LIMIT</div><div class="cat">2/3</div></div>
+        <div class="fan-card" style="--rot:30deg;transform:rotate(30deg) translateY(-10px)"><div class="tn">#8</div><div class="tt">CALL Q</div><div class="cat">2/3</div></div>
+        <div class="fan-card" style="--rot:40deg;transform:rotate(40deg) translateY(-20px)"><div class="tn">#9</div><div class="tt">TABLE</div><div class="cat">M</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Rolodex -->
+  <section class="design" id="d5">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">5</div><h2>Rolodex Flip</h2></div>
+      <span class="tag">Focus</span>
+    </div>
+    <div class="design-note">One card at a time, flips smoothly between cards. Best when the clerk is focused on a single procedure. Arrows cycle. Auto-flips here for demo.</div>
+    <div class="design-stage d5-bg">
+      <div class="rolo">
+        <div class="rolo-card">
+          <div style="font-size:9px;font-weight:800;color:#8b5cf6;letter-spacing:1px">#4 · SUBSIDIARY MOTION</div>
+          <div style="font-size:22px;font-weight:900;color:#0f172a">AMEND</div>
+          <div style="font-size:11px;color:#475569;line-height:1.4">Changes the main motion by adding, striking, or substituting words.</div>
+          <div style="font-size:10.5px;font-style:italic;color:#6d28d9;padding:8px 0;border-top:1px dashed #c4b5fd;margin-top:auto">"I move to amend the motion by…"</div>
+          <div class="rolo-nav">
+            <button>‹</button>
+            <div style="align-self:center;font-size:10px;color:#94a3b8;font-weight:700">4 / 23</div>
+            <button>›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 Precedence Ladder -->
+  <section class="design" id="d6">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">6</div><h2>Precedence Ladder</h2></div>
+      <span class="tag">Teaching</span>
+    </div>
+    <div class="design-note">Order matters in Robert's Rules — this makes precedence visible. Vertical spine shows the chain; the "now on the floor" card lights up.</div>
+    <div class="design-stage d6-bg">
+      <div class="ladder">
+        <div class="rung"><div class="rnum">1</div><div><div class="rtitle">MOVE</div><div class="rtag">Main</div></div></div>
+        <div class="rung"><div class="rnum">2</div><div><div class="rtitle">SECOND</div><div class="rtag">Main</div></div></div>
+        <div class="rung"><div class="rnum">3</div><div><div class="rtitle">POSTPONE INDEFINITELY</div><div class="rtag">Subsidiary</div></div></div>
+        <div class="rung now"><div class="rnum">4</div><div><div class="rtitle">AMEND</div><div class="rtag">On The Floor</div></div></div>
+        <div class="rung"><div class="rnum">5</div><div><div class="rtitle">REFER</div><div class="rtag">Subsidiary</div></div></div>
+        <div class="rung"><div class="rnum">6</div><div><div class="rtitle">DEFER</div><div class="rtag">Subsidiary</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 Radial Dial -->
+  <section class="design" id="d7">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">7</div><h2>Radial Dial</h2></div>
+      <span class="tag">Striking</span>
+    </div>
+    <div class="design-note">All 23 cards on a dial around the active motion. Rotate to pick. Visually arresting — works as a "hero" element. May need space.</div>
+    <div class="design-stage d7-bg">
+      <div class="dial">
+        <div class="dial-center">
+          <div class="c-num">4</div>
+          <div class="c-title">AMEND</div>
+          <div style="font-size:8.5px;opacity:.8;margin-top:6px;font-style:italic">On The Floor</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 Neon Cyber -->
+  <section class="design" id="d8">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">8</div><h2>Neon Cyber</h2></div>
+      <span class="tag">Bold</span>
+    </div>
+    <div class="design-note">Dark mode, glowing outlines, monospace accents. Looks like a control panel. Contrasts the paper-document feel of the rest of the app.</div>
+    <div class="design-stage d8-bg">
+      <div class="neon-grid">
+        <div class="neon-card"><div class="nc-num">[01]</div><div class="nc-title">MOVE</div><div class="nc-phrase">"I move that…"</div></div>
+        <div class="neon-card"><div class="nc-num">[02]</div><div class="nc-title">SECOND</div><div class="nc-phrase">"I second."</div></div>
+        <div class="neon-card"><div class="nc-num">[03]</div><div class="nc-title">POSTPONE</div><div class="nc-phrase">"…indefinitely."</div></div>
+        <div class="neon-card active"><div class="nc-num">[04]</div><div class="nc-title">AMEND</div><div class="nc-phrase">"…by [change]."</div></div>
+        <div class="neon-card"><div class="nc-num">[05]</div><div class="nc-title">REFER</div><div class="nc-phrase">"…to committee."</div></div>
+        <div class="neon-card"><div class="nc-num">[06]</div><div class="nc-title">DEFER</div><div class="nc-phrase">"…to [date]."</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 Paper Index Cards -->
+  <section class="design" id="d9">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">9</div><h2>Paper Index Cards</h2></div>
+      <span class="tag">Warm</span>
+    </div>
+    <div class="design-note">Handwritten feel, ruled lines, red margin. Evokes a clerk's notebook. Fits the "clerk support" emotional tone — analog and human.</div>
+    <div class="design-stage d9-bg">
+      <div class="index-card">
+        <div class="ic-title">AMEND</div>
+        <div class="ic-num">#4 · Subsidiary</div>
+        <div class="ic-desc">Changes the main motion by adding, striking, or substituting words.</div>
+        <div class="ic-phrase">"I move to amend the motion by [insert change]."</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 Split Drawer -->
+  <section class="design" id="d10">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">10</div><h2>Split Drawer</h2></div>
+      <span class="tag">Explorer</span>
+    </div>
+    <div class="design-note">List on the left, detail on the right — like an email client. Lets you scan the deck while reading the detail. Good for learning.</div>
+    <div class="design-stage d10-bg">
+      <div class="drawer">
+        <div class="drawer-head">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7"/><path d="M2 12V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+          Toolbox
+        </div>
+        <div class="drawer-item"><span class="di-num">1</span>MOVE</div>
+        <div class="drawer-item"><span class="di-num">2</span>SECOND</div>
+        <div class="drawer-item"><span class="di-num">3</span>POSTPONE</div>
+        <div class="drawer-item active"><span class="di-num">4</span>AMEND</div>
+        <div class="drawer-item"><span class="di-num">5</span>REFER</div>
+        <div class="drawer-item"><span class="di-num">6</span>DEFER</div>
+        <div class="drawer-item"><span class="di-num">7</span>LIMIT</div>
+      </div>
+      <div class="drawer-main">
+        <div class="big-card">
+          <div class="bc-num">#4</div>
+          <div class="bc-title">AMEND</div>
+          <div class="bc-desc">Changes the main motion by adding, striking, or substituting words. Needs a second; majority vote.</div>
+          <div style="font-size:10px;font-style:italic;color:#3b82f6;margin-top:12px;padding:8px 10px;background:#eff6ff;border-radius:6px">"I move to amend the motion by [insert change]."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 Command Palette -->
+  <section class="design" id="d11">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">11</div><h2>Command Palette</h2></div>
+      <span class="tag">Power-user</span>
+    </div>
+    <div class="design-note">Open with ⌘K, type to filter, ↵ to play. Treats procedures like commands. Best for fast clerks who know the deck — almost invisible UI.</div>
+    <div class="design-stage d11-bg">
+      <div class="cmd">
+        <div class="cmd-search">
+          <svg width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input placeholder="Search procedures…" value="am" />
+          <span class="cmd-kbd">⌘K</span>
+        </div>
+        <div class="cmd-group">
+          <div class="cmd-group-label">Matches</div>
+          <div class="cmd-item sel">
+            <div class="ci-num">4</div>
+            <div class="ci-title">AMEND</div>
+            <div class="ci-cat">Subsidiary</div>
+          </div>
+          <div class="cmd-item">
+            <div class="ci-num">10</div>
+            <div class="ci-title">CALL FOR THE ORDERS OF THE DAY</div>
+            <div class="ci-cat">Incidental</div>
+          </div>
+          <div class="cmd-item">
+            <div class="ci-num">17</div>
+            <div class="ci-title">PARLIAMENTARY INQUIRY</div>
+            <div class="ci-cat">Incidental</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 Carousel -->
+  <section class="design" id="d12">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">12</div><h2>Horizontal Carousel</h2></div>
+      <span class="tag">Cinematic</span>
+    </div>
+    <div class="design-note">Coverflow-style horizontal slider with a prominent center card. Good on touch devices — swipe through. Other cards peek at the edges.</div>
+    <div class="design-stage d12-bg">
+      <div class="carousel">
+        <button class="arrow left">‹</button>
+        <div class="track">
+          <div class="ccard"><div class="cn">#2</div><div class="ct">SECOND</div><div class="cd">Support the motion.</div></div>
+          <div class="ccard"><div class="cn">#3</div><div class="ct">POSTPONE</div><div class="cd">Kill without vote.</div></div>
+          <div class="ccard center">
+            <div class="cn">#4 · SUBSIDIARY</div>
+            <div class="ct">AMEND</div>
+            <div class="cd">Changes the main motion by adding, striking, or substituting words.</div>
+          </div>
+          <div class="ccard"><div class="cn">#5</div><div class="ct">REFER</div><div class="cd">Send to committee.</div></div>
+          <div class="ccard"><div class="cn">#6</div><div class="ct">DEFER</div><div class="cd">Delay to [date].</div></div>
+        </div>
+        <button class="arrow right">›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 Accordion -->
+  <section class="design" id="d13">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">13</div><h2>Accordion Rows</h2></div>
+      <span class="tag">Compact</span>
+    </div>
+    <div class="design-note">Everything fits in a narrow panel. Tap to expand for full detail + the exact phrase. Familiar, accessible, scales to any deck length.</div>
+    <div class="design-stage d13-bg">
+      <div class="accordion">
+        <div class="acc-row"><div class="acc-head"><div class="ah-num">2</div><div class="ah-title">SECOND</div><span class="ah-chev">›</span></div></div>
+        <div class="acc-row"><div class="acc-head"><div class="ah-num">3</div><div class="ah-title">POSTPONE INDEFINITELY</div><span class="ah-chev">›</span></div></div>
+        <div class="acc-row open">
+          <div class="acc-head"><div class="ah-num">4</div><div class="ah-title">AMEND</div><span class="ah-chev">›</span></div>
+          <div class="acc-body">
+            Changes the main motion by adding, striking, or substituting words. Needs a second; simple majority.
+            <span class="phrase">"I move to amend the motion by [insert change]."</span>
+          </div>
+        </div>
+        <div class="acc-row"><div class="acc-head"><div class="ah-num">5</div><div class="ah-title">REFER</div><span class="ah-chev">›</span></div></div>
+        <div class="acc-row"><div class="acc-head"><div class="ah-num">6</div><div class="ah-title">DEFER</div><span class="ah-chev">›</span></div></div>
+        <div class="acc-row"><div class="acc-head"><div class="ah-num">7</div><div class="ah-title">LIMIT/EXTEND DEBATE</div><span class="ah-chev">›</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 Isometric Stack -->
+  <section class="design" id="d14">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">14</div><h2>Isometric Stack</h2></div>
+      <span class="tag">3D</span>
+    </div>
+    <div class="design-note">Cards stacked in 3D isometric — every card visible at a glance, active one on top. Looks great as a brand moment; requires real estate.</div>
+    <div class="design-stage d14-bg">
+      <div class="iso-stack">
+        <div class="iso-card"><div class="in">#1</div><div class="it">MOVE</div></div>
+        <div class="iso-card"><div class="in">#2</div><div class="it">SECOND</div></div>
+        <div class="iso-card"><div class="in">#3</div><div class="it">POSTPONE</div></div>
+        <div class="iso-card"><div class="in">#4 · SUBSIDIARY</div><div class="it">AMEND</div><div class="ip">"I move to amend…"</div></div>
+        <div class="iso-card"><div class="in">ACTIVE</div><div class="it" style="color:#3b82f6">AMEND</div><div class="ip" style="color:#3b82f6">On The Floor</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 3D Flip -->
+  <section class="design" id="d15">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px"><div class="num">15</div><h2>3D Flip Card</h2></div>
+      <span class="tag">Reveal</span>
+    </div>
+    <div class="design-note">Front shows the rule; flip reveals the exact phrase to say. Good for learning + live reference. Auto-flips here for demo.</div>
+    <div class="design-stage d15-bg">
+      <div class="flip-wrap">
+        <div class="flip-card">
+          <div class="flip-face flip-front">
+            <div class="fn">#4 · SUBSIDIARY</div>
+            <div class="ft">AMEND</div>
+            <div class="fd">Changes the main motion by adding, striking, or substituting words. Needs a second; simple majority.</div>
+            <div class="fcat">M · Majority</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div class="fb-glyph">✦</div>
+            <div class="fb-phrase">"I move to amend<br/>the motion by<br/>[insert change]."</div>
+            <div class="fb-num">04</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>
