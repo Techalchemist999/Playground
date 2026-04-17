@@ -126,19 +126,15 @@ export default function PrecedenceLadder({ activeId: controlledId, onActiveChang
                 )}
               </div>
               {isActive ? (
-                <span style={{
-                  fontSize: 8,
-                  fontWeight: 800,
-                  letterSpacing: 1,
-                  textTransform: 'uppercase',
-                  color: '#fff',
-                  background: accent,
-                  padding: '3px 7px',
-                  borderRadius: 4,
-                  flexShrink: 0,
-                }}>
-                  On The Floor
-                </span>
+                <span
+                  title="On The Floor"
+                  style={{
+                    width: 8, height: 8, borderRadius: '50%',
+                    background: accent, flexShrink: 0,
+                    alignSelf: 'flex-start', marginTop: 3,
+                    boxShadow: `0 0 0 3px ${accent}33`,
+                  }}
+                />
               ) : (
                 <span style={{
                   fontSize: 7.5,

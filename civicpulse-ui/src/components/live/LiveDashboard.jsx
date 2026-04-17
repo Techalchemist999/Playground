@@ -227,9 +227,32 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
   const [pbNewestTop, setPbNewestTop] = useState(false);
   const [quickMotionOpen, setQuickMotionOpen] = useState(false);
   const [procedureOpen, setProcedureOpen] = useState(false);
-  const [procedureSize, setProcedureSize] = useState('compact'); // 'compact' | 'landscape' | 'portrait'
+  const [procedureDims, setProcedureDims] = useState({ w: 260, h: 180 });
   const [activeProcedureId, setActiveProcedureId] = useState(session.sessionId === 'demo' ? 'amend' : 'move');
   const activeProcedure = getCardById(activeProcedureId);
+
+  const startProcedureResize = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startW = procedureDims.w;
+    const startH = procedureDims.h;
+    const onMove = (ev) => {
+      const dx = ev.clientX - startX;
+      const dy = startY - ev.clientY; // anchored bottom-left → up = taller
+      setProcedureDims({
+        w: Math.max(200, Math.min(640, startW + dx)),
+        h: Math.max(140, Math.min(560, startH + dy)),
+      });
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }, [procedureDims.w, procedureDims.h]);
   const [showSettings, setShowSettings] = useState(false);
 
   // Panel lock + saved positions — persists to localStorage
@@ -571,32 +594,11 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                   </div>
                 );
 
-                // Procedure toolbox popover — Precedence Ladder, sized compact/landscape/portrait
-                const procedureSizes = {
-                  compact:   { w: 260, h: 180 },
-                  landscape: { w: 384, h: 192 },
-                  portrait:  { w: 192, h: 384 },
-                };
-                const pSize = procedureSizes[procedureSize];
-                const SizeBtn = ({ id, label, icon }) => (
-                  <button
-                    onClick={() => setProcedureSize(id)}
-                    title={label}
-                    style={{
-                      width: 22, height: 22, borderRadius: 5,
-                      background: procedureSize === id ? accentColor : 'transparent',
-                      border: `1px solid ${procedureSize === id ? accentColor : '#cbd5e1'}`,
-                      color: procedureSize === id ? '#fff' : '#64748b',
-                      cursor: 'pointer', padding: 0,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      transition: 'all .15s',
-                    }}
-                  >{icon}</button>
-                );
+                // Procedure popover — Precedence Ladder, drag bottom-right to resize
                 const procedureSheet = procedureOpen && (
                   <div style={{
                     position: 'absolute', bottom: 72, left: 14,
-                    width: pSize.w, height: pSize.h,
+                    width: procedureDims.w, height: procedureDims.h,
                     background: '#fff',
                     border: '1px solid #cbd5e1',
                     borderRadius: 12,
@@ -605,54 +607,36 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                     animation: 'slideUp .2s cubic-bezier(.22,1,.36,1)',
                     zIndex: 20,
                     overflow: 'hidden',
-                    transition: 'width .2s ease, height .2s ease',
                   }}>
                     <div style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '8px 10px', flexShrink: 0,
+                      padding: '6px 8px 6px 10px', flexShrink: 0,
                       borderBottom: '1px solid #f1f5f9',
                       gap: 8,
                     }}>
                       <div style={{
-                        fontSize: 11, fontWeight: 800, color: '#1e293b',
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        minWidth: 0,
+                        fontSize: 10, fontWeight: 800, color: '#64748b',
+                        letterSpacing: 1, textTransform: 'uppercase',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                       }}>
-                        <svg width="13" height="13" fill="none" stroke="#475569" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-                          <path d="M22 12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7" />
-                          <path d="M2 12V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3" />
-                          <line x1="2" y1="12" x2="22" y2="12" />
-                          <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                        Precedence
+                      </div>
+                      <button
+                        onClick={() => setProcedureOpen(false)}
+                        title="Close"
+                        style={{
+                          width: 20, height: 20, borderRadius: 5,
+                          background: 'transparent', border: '1px solid transparent',
+                          color: '#94a3b8', cursor: 'pointer', padding: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = 'transparent'; }}
+                      >
+                        <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                         </svg>
-                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          Now On The Floor
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                        <SizeBtn id="compact" label="Compact"
-                          icon={<svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="8" rx="1"/></svg>} />
-                        <SizeBtn id="landscape" label="Landscape"
-                          icon={<svg width="11" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="1"/></svg>} />
-                        <SizeBtn id="portrait" label="Portrait"
-                          icon={<svg width="9" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="1"/></svg>} />
-                        <button
-                          onClick={() => setProcedureOpen(false)}
-                          title="Close"
-                          style={{
-                            width: 22, height: 22, borderRadius: 5,
-                            background: 'transparent', border: '1px solid transparent',
-                            color: '#94a3b8', cursor: 'pointer', padding: 0,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            marginLeft: 2,
-                          }}
-                          onMouseEnter={e => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
-                          onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = 'transparent'; }}
-                        >
-                          <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                          </svg>
-                        </button>
-                      </div>
+                      </button>
                     </div>
                     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
                       <PrecedenceLadder
@@ -660,6 +644,25 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                         onActiveChange={setActiveProcedureId}
                         theme={theme}
                       />
+                    </div>
+                    {/* Resize handle — bottom right */}
+                    <div
+                      onMouseDown={startProcedureResize}
+                      title="Drag to resize"
+                      style={{
+                        position: 'absolute', bottom: 0, right: 0,
+                        width: 16, height: 16,
+                        cursor: 'nwse-resize',
+                        zIndex: 2,
+                        display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end',
+                        padding: 2,
+                      }}
+                    >
+                      <svg width="10" height="10" viewBox="0 0 10 10" style={{ opacity: 0.5 }}>
+                        <line x1="10" y1="3" x2="3" y2="10" stroke="#94a3b8" strokeWidth="1.2" />
+                        <line x1="10" y1="6" x2="6" y2="10" stroke="#94a3b8" strokeWidth="1.2" />
+                        <line x1="10" y1="9" x2="9" y2="10" stroke="#94a3b8" strokeWidth="1.2" />
+                      </svg>
                     </div>
                   </div>
                 );
