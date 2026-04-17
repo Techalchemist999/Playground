@@ -226,6 +226,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
   const [pbNewestTop, setPbNewestTop] = useState(false);
   const [quickMotionOpen, setQuickMotionOpen] = useState(false);
   const [procedureOpen, setProcedureOpen] = useState(false);
+  const [procedureSize, setProcedureSize] = useState('compact'); // 'compact' | 'landscape' | 'portrait'
   const [showSettings, setShowSettings] = useState(false);
 
   // Panel lock + saved positions — persists to localStorage
@@ -567,57 +568,88 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                   </div>
                 );
 
-                // Procedure toolbox bottom sheet — Robert's Rules cards
+                // Procedure toolbox popover — Precedence Ladder, sized compact/landscape/portrait
+                const procedureSizes = {
+                  compact:   { w: 260, h: 180 },
+                  landscape: { w: 384, h: 192 },
+                  portrait:  { w: 192, h: 384 },
+                };
+                const pSize = procedureSizes[procedureSize];
+                const SizeBtn = ({ id, label, icon }) => (
+                  <button
+                    onClick={() => setProcedureSize(id)}
+                    title={label}
+                    style={{
+                      width: 22, height: 22, borderRadius: 5,
+                      background: procedureSize === id ? accentColor : 'transparent',
+                      border: `1px solid ${procedureSize === id ? accentColor : '#cbd5e1'}`,
+                      color: procedureSize === id ? '#fff' : '#64748b',
+                      cursor: 'pointer', padding: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'all .15s',
+                    }}
+                  >{icon}</button>
+                );
                 const procedureSheet = procedureOpen && (
                   <div style={{
-                    position: 'absolute', bottom: 0, left: 0, right: 0,
-                    maxHeight: '92%',
+                    position: 'absolute', bottom: 72, left: 14,
+                    width: pSize.w, height: pSize.h,
                     background: '#fff',
-                    borderTop: `1px solid #cbd5e1`,
-                    borderRadius: '14px 14px 0 0',
-                    boxShadow: '0 -10px 40px rgba(15,23,42,0.22)',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 12,
+                    boxShadow: '0 14px 44px rgba(15,23,42,0.22)',
                     display: 'flex', flexDirection: 'column',
-                    animation: 'slideUp .25s cubic-bezier(.22,1,.36,1)',
+                    animation: 'slideUp .2s cubic-bezier(.22,1,.36,1)',
                     zIndex: 20,
                     overflow: 'hidden',
+                    transition: 'width .2s ease, height .2s ease',
                   }}>
                     <div style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '10px 14px 8px', flexShrink: 0,
+                      padding: '8px 10px', flexShrink: 0,
                       borderBottom: '1px solid #f1f5f9',
+                      gap: 8,
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{
-                          width: 36, height: 4, borderRadius: 2, background: '#cbd5e1',
-                        }} />
-                        <div style={{
-                          fontSize: 13, fontWeight: 800, color: '#1e293b',
-                          display: 'flex', alignItems: 'center', gap: 6,
-                        }}>
-                          <svg width="15" height="15" fill="none" stroke="#475569" strokeWidth="2" viewBox="0 0 24 24">
-                            <path d="M22 12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7" />
-                            <path d="M2 12V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3" />
-                            <line x1="2" y1="12" x2="22" y2="12" />
-                            <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
-                          </svg>
-                          Now On The Floor
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setProcedureOpen(false)}
-                        style={{
-                          background: 'transparent', border: 'none', color: '#94a3b8',
-                          fontSize: 11, fontWeight: 700, cursor: 'pointer', padding: '4px 8px',
-                          display: 'flex', alignItems: 'center', gap: 4,
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.color = '#475569'}
-                        onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}
-                      >
-                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                      <div style={{
+                        fontSize: 11, fontWeight: 800, color: '#1e293b',
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        minWidth: 0,
+                      }}>
+                        <svg width="13" height="13" fill="none" stroke="#475569" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                          <path d="M22 12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7" />
+                          <path d="M2 12V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3" />
+                          <line x1="2" y1="12" x2="22" y2="12" />
+                          <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
                         </svg>
-                        Close
-                      </button>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          Now On The Floor
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                        <SizeBtn id="compact" label="Compact"
+                          icon={<svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="8" rx="1"/></svg>} />
+                        <SizeBtn id="landscape" label="Landscape"
+                          icon={<svg width="11" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="1"/></svg>} />
+                        <SizeBtn id="portrait" label="Portrait"
+                          icon={<svg width="9" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="1"/></svg>} />
+                        <button
+                          onClick={() => setProcedureOpen(false)}
+                          title="Close"
+                          style={{
+                            width: 22, height: 22, borderRadius: 5,
+                            background: 'transparent', border: '1px solid transparent',
+                            color: '#94a3b8', cursor: 'pointer', padding: 0,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            marginLeft: 2,
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                          onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = 'transparent'; }}
+                        >
+                          <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
                       <PrecedenceLadder
