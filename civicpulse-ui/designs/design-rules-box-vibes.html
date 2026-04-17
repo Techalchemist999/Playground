@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Rules Box — 17 Design Vibes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Caveat:wght@500;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f1f5f9; font-family: 'Inter', sans-serif; color: #0f172a; }
+  body { padding: 24px 20px 80px; }
+
+  .page-header { max-width: 1280px; margin: 0 auto 28px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .page-header h1 {
+    font-size: 28px; font-weight: 900; letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #0f172a, #3b82f6, #ec4899);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .page-header p { color: #64748b; font-size: 13px; margin-top: 4px; max-width: 720px; line-height: 1.5; }
+  .categories {
+    display: flex; gap: 6px; margin-top: 12px;
+  }
+  .cat-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+  }
+  .cat-chip.rule  { background: #dbeafe; color: #1e40af; }
+  .cat-chip.alert { background: #fef3c7; color: #92400e; }
+  .cat-chip.card  { background: #ede9fe; color: #5b21b6; }
+
+  .nav {
+    display: flex; gap: 6px; flex-wrap: wrap; max-width: 1280px;
+    margin: 0 auto 28px; padding: 10px 12px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+  }
+  .nav a {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 10px; font-size: 11px; font-weight: 700; color: #475569;
+    text-decoration: none; border-radius: 999px; background: #f1f5f9;
+    transition: all .15s;
+  }
+  .nav a:hover { background: #3b82f6; color: #fff; transform: translateY(-1px); }
+  .nav a span { font-size: 9px; opacity: .7; }
+  .nav a .m { font-size: 9px; padding: 0 4px; border-radius: 3px; background: rgba(0,0,0,0.08); }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    gap: 24px; max-width: 1280px; margin: 0 auto;
+  }
+
+  .design {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+    overflow: hidden; box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+    display: flex; flex-direction: column;
+  }
+  .design-header { padding: 14px 18px; border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .design-header .num {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: #0f172a; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }
+  .design-header h2 { font-size: 15px; font-weight: 800; color: #0f172a; flex: 1; }
+  .design-header .tags { display: flex; gap: 4px; }
+  .mini {
+    font-size: 8px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 3px;
+  }
+  .mini.split  { background: #f1f5f9; color: #475569; }
+  .mini.merged { background: #fef3c7; color: #92400e; }
+
+  .design-note { padding: 10px 18px; font-size: 11px; color: #64748b; line-height: 1.5; border-bottom: 1px solid #f1f5f9; background: #fafbfc; }
+  .design-stage {
+    padding: 22px; min-height: 320px;
+    display: flex; align-items: stretch; justify-content: stretch;
+    position: relative; overflow: hidden;
+  }
+
+  /* ============= 01 — Three-Tab Classic ============= */
+  .d01-bg { background: #f8fafc; padding: 0 !important; }
+  .d01 { flex: 1; background: #fff; display: flex; flex-direction: column; }
+  .d01-tabs {
+    display: flex; padding: 0 14px; border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+  .d01-tab {
+    padding: 10px 14px; font-size: 11px; font-weight: 700; color: #64748b;
+    cursor: pointer; border-bottom: 2px solid transparent;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .d01-tab.active { color: #0f172a; border-bottom-color: #3b82f6; }
+  .d01-tab .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .d01-body { flex: 1; padding: 12px 16px; overflow-y: auto; }
+  .d01-item { padding: 8px 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 6px; font-size: 11px; }
+  .d01-item .kbd { font-size: 8px; color: #64748b; font-weight: 700; }
+
+  /* ============= 02 — Unified Priority Feed ============= */
+  .d02-bg { background: #fff; padding: 0 !important; }
+  .d02 { flex: 1; display: flex; flex-direction: column; }
+  .d02-head { padding: 10px 16px; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #64748b; display: flex; align-items: center; gap: 8px; }
+  .d02-head .count { background: #0f172a; color: #fff; font-size: 9px; padding: 1px 6px; border-radius: 999px; letter-spacing: 0; }
+  .d02-feed { flex: 1; padding: 10px 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .d02-card {
+    display: flex; gap: 8px; padding: 9px 11px;
+    background: #fff; border-left: 3px solid transparent; border: 1px solid #e2e8f0; border-radius: 7px;
+    transition: all .1s;
+  }
+  .d02-card.alert { border-left-color: #f59e0b; background: #fffbeb; }
+  .d02-card.rule  { border-left-color: #3b82f6; }
+  .d02-card.card  { border-left-color: #8b5cf6; }
+  .d02-card .icon { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .d02-card.alert .icon { background: #fef3c7; color: #b45309; }
+  .d02-card.rule  .icon { background: #dbeafe; color: #1e40af; }
+  .d02-card.card  .icon { background: #ede9fe; color: #6d28d9; }
+  .d02-card .body { flex: 1; min-width: 0; }
+  .d02-card .title { font-size: 10.5px; font-weight: 800; color: #0f172a; }
+  .d02-card .desc  { font-size: 9.5px; color: #64748b; margin-top: 2px; line-height: 1.4; }
+
+  /* ============= 03 — Accordion Stack (toggle merged) ============= */
+  .d03-bg { background: #fafafa; padding: 0 !important; }
+  .d03 { flex: 1; padding: 14px; overflow-y: auto; }
+  .d03-toggle {
+    display: inline-flex; gap: 0; background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 999px; padding: 2px; margin-bottom: 10px;
+  }
+  .d03-toggle button {
+    border: none; background: transparent;
+    padding: 4px 10px; font-size: 9px; font-weight: 700; cursor: pointer;
+    border-radius: 999px; color: #64748b;
+  }
+  .d03-toggle button.on { background: #0f172a; color: #fff; }
+  .d03-sect {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    margin-bottom: 8px; overflow: hidden;
+  }
+  .d03-sect .head {
+    padding: 9px 12px; font-size: 11px; font-weight: 700; color: #0f172a;
+    display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+  }
+  .d03-sect.rule .head   { background: linear-gradient(90deg, #dbeafe, transparent); }
+  .d03-sect.alert .head  { background: linear-gradient(90deg, #fef3c7, transparent); }
+  .d03-sect.card .head   { background: linear-gradient(90deg, #ede9fe, transparent); }
+  .d03-sect .body { padding: 6px 12px 10px; font-size: 10.5px; color: #475569; line-height: 1.45; }
+  .d03-sect .body .bullet { display: block; padding: 3px 0; border-bottom: 1px dashed #f1f5f9; }
+
+  /* ============= 04 — Split: list + detail ============= */
+  .d04-bg { padding: 0 !important; background: #f8fafc; }
+  .d04 { flex: 1; display: flex; }
+  .d04-list { width: 42%; border-right: 1px solid #e2e8f0; background: #fff; overflow-y: auto; }
+  .d04-list .it { padding: 8px 10px; font-size: 10.5px; display: flex; gap: 6px; align-items: center; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+  .d04-list .it.sel { background: #dbeafe; }
+  .d04-list .it .tag { font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 3px; flex-shrink: 0; }
+  .d04-list .it.rule .tag { background: #dbeafe; color: #1e40af; }
+  .d04-list .it.alert .tag { background: #fef3c7; color: #b45309; }
+  .d04-list .it.card .tag { background: #ede9fe; color: #6d28d9; }
+  .d04-detail { flex: 1; padding: 16px; font-size: 11px; overflow-y: auto; background: #f8fafc; }
+  .d04-detail .hd { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .d04-detail h3 { font-size: 14px; font-weight: 800; margin: 6px 0 8px; color: #0f172a; }
+  .d04-detail p { font-size: 11.5px; color: #475569; line-height: 1.55; margin-bottom: 8px; }
+  .d04-detail .quote {
+    padding: 8px 12px; background: #eff6ff; border-left: 3px solid #3b82f6;
+    font-size: 10.5px; color: #1e40af; font-style: italic; border-radius: 4px;
+  }
+
+  /* ============= 05 — Floating Tool Tray ============= */
+  .d05-bg { background: linear-gradient(135deg, #f8fafc, #e2e8f0); padding: 0 !important; }
+  .d05 { flex: 1; display: flex; padding: 14px; gap: 12px; }
+  .d05-rail {
+    width: 46px; background: #0f172a; border-radius: 12px;
+    display: flex; flex-direction: column; padding: 8px 0; gap: 4px;
+  }
+  .d05-rail button {
+    width: 36px; height: 36px; margin: 0 auto;
+    background: transparent; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; color: #94a3b8; position: relative;
+  }
+  .d05-rail button.on { background: #3b82f6; color: #fff; }
+  .d05-rail button .bd { position: absolute; top: 3px; right: 3px; background: #ec4899; width: 6px; height: 6px; border-radius: 50%; }
+  .d05-main {
+    flex: 1; background: #fff; border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(15,23,42,0.08);
+    padding: 14px;
+  }
+  .d05-main h3 { font-size: 13px; margin-bottom: 6px; color: #0f172a; }
+  .d05-main p { font-size: 11px; color: #475569; line-height: 1.5; }
+
+  /* ============= 06 — Chat Stream (ProcedureBot) ============= */
+  .d06-bg { background: #eff6ff; padding: 0 !important; }
+  .d06 { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .d06-bot {
+    align-self: flex-start; display: flex; gap: 7px; max-width: 82%;
+  }
+  .d06-bot .av {
+    width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; flex-shrink: 0;
+  }
+  .d06-bot .msg {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px 12px 12px 3px;
+    padding: 8px 11px; font-size: 11px; color: #334155;
+  }
+  .d06-bot .msg b { color: #0f172a; }
+  .d06-bot.alert .av { background: linear-gradient(135deg, #f59e0b, #dc2626); }
+  .d06-bot.alert .msg { background: #fef3c7; border-color: #fed7aa; }
+  .d06-bot .ts { font-size: 8px; color: #94a3b8; margin-top: 2px; }
+  .d06-quick {
+    align-self: flex-end; display: flex; gap: 4px;
+  }
+  .d06-quick button {
+    font-size: 10px; padding: 4px 8px; border-radius: 999px;
+    background: #fff; border: 1px solid #cbd5e1; cursor: pointer; color: #475569;
+  }
+
+  /* ============= 07 — Sticky-Note Pinboard ============= */
+  .d07-bg { background: #fef3c7 url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%228%22><circle cx=%221%22 cy=%221%22 r=%22.6%22 fill=%22%23b45309%22 opacity=%22.15%22/></svg>') repeat; padding: 14px !important; }
+  .d07 { flex: 1; position: relative; }
+  .note {
+    position: absolute; width: 110px; padding: 10px 10px 14px;
+    font-family: 'Caveat', cursive; font-size: 14px; line-height: 1.2;
+    color: #1e293b; box-shadow: 2px 3px 10px rgba(0,0,0,0.18);
+  }
+  .note.r { background: #fde68a; transform: rotate(-3deg); }
+  .note.a { background: #fecaca; transform: rotate(2deg); }
+  .note.c { background: #ddd6fe; transform: rotate(-1.5deg); }
+  .note .pin { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); width: 10px; height: 10px; background: #dc2626; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  .note .lbl { font-family: 'Inter'; font-size: 7px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: rgba(0,0,0,0.5); }
+
+  /* ============= 08 — Hex Grid ============= */
+  .d08-bg { background: linear-gradient(135deg, #ede9fe, #dbeafe); padding: 0 !important; }
+  .d08 { flex: 1; position: relative; padding: 10px; display: flex; align-items: center; justify-content: center; }
+  .hex {
+    position: absolute; width: 80px; height: 92px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 12px 6px; font-size: 9px; font-weight: 800; line-height: 1.2;
+    cursor: pointer; transition: transform .15s;
+  }
+  .hex:hover { transform: scale(1.08); z-index: 5; }
+  .hex.r { background: #dbeafe; color: #1e40af; }
+  .hex.a { background: #fef3c7; color: #92400e; }
+  .hex.c { background: #ede9fe; color: #5b21b6; }
+  .hex .hnum { font-size: 14px; margin-bottom: 2px; opacity: .7; }
+  .hex.active { box-shadow: 0 0 0 3px #0f172a, 0 0 0 5px #fff; transform: scale(1.1); z-index: 10; }
+
+  /* ============= 09 — Timeline Ribbon ============= */
+  .d09-bg { background: #fff; padding: 0 !important; }
+  .d09 { flex: 1; padding: 18px 14px; position: relative; display: flex; flex-direction: column; }
+  .d09-title { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #64748b; margin-bottom: 14px; }
+  .d09-tl { position: relative; flex: 1; padding-left: 24px; }
+  .d09-tl::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, #3b82f6, #ec4899); }
+  .d09-ev { position: relative; margin-bottom: 14px; }
+  .d09-ev::before {
+    content: ''; position: absolute; left: -18px; top: 4px; width: 10px; height: 10px; border-radius: 50%;
+    background: #fff; border: 2.5px solid #3b82f6;
+  }
+  .d09-ev.a::before { border-color: #f59e0b; }
+  .d09-ev.c::before { border-color: #8b5cf6; }
+  .d09-ev .ts { font-size: 8.5px; font-weight: 700; color: #94a3b8; letter-spacing: .5px; }
+  .d09-ev .label {
+    display: inline-block; margin-top: 2px; font-size: 11px; font-weight: 800; color: #0f172a;
+  }
+  .d09-ev .sub { font-size: 10px; color: #64748b; margin-top: 2px; line-height: 1.4; }
+
+  /* ============= 10 — Card-dealer stack ============= */
+  .d10-bg { background: linear-gradient(180deg, #0f172a, #1e293b); padding: 20px !important; }
+  .d10 { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+  .d10-card {
+    position: absolute; width: 200px; padding: 14px;
+    background: #fff; border-radius: 12px; box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+    font-size: 11px; cursor: grab;
+  }
+  .d10-card .tag {
+    display: inline-block; font-size: 8px; padding: 2px 6px; border-radius: 4px; font-weight: 800;
+    margin-bottom: 6px; letter-spacing: 0.8px; text-transform: uppercase;
+  }
+  .d10-card .tt { font-size: 13px; font-weight: 900; color: #0f172a; margin-bottom: 4px; }
+  .d10-card .dd { font-size: 10px; color: #475569; line-height: 1.4; }
+  .d10-card:nth-child(3) { transform: rotate(-4deg) translate(-35px, 4px); z-index: 1; }
+  .d10-card:nth-child(2) { transform: rotate(2deg) translate(15px, -2px); z-index: 2; }
+  .d10-card:nth-child(1) { z-index: 3; transform: translate(0,0); }
+
+  /* ============= 11 — Command palette ============= */
+  .d11-bg { background: rgba(15,23,42,0.85); padding: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+  .d11 {
+    width: 86%; max-width: 420px; background: #fff; border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+  .d11 .search { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid #f1f5f9; }
+  .d11 .search input { flex: 1; border: none; outline: none; font-size: 14px; font-family: inherit; color: #0f172a; }
+  .d11 .kb { font-family: 'JetBrains Mono'; font-size: 10px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #64748b; border: 1px solid #e2e8f0; }
+  .d11 .filters { display: flex; gap: 4px; padding: 6px 14px; border-bottom: 1px solid #f1f5f9; background: #fafbfc; }
+  .d11 .f { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 999px; cursor: pointer; }
+  .d11 .f.on { background: #0f172a; color: #fff; }
+  .d11 .f.off { background: #f1f5f9; color: #475569; }
+  .d11 .it { display: flex; align-items: center; gap: 8px; padding: 8px 14px; cursor: pointer; font-size: 11.5px; }
+  .d11 .it.sel { background: #dbeafe; }
+  .d11 .it .num { font-size: 9px; font-weight: 800; background: #f1f5f9; color: #64748b; width: 20px; height: 20px; border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+  .d11 .it .tt { flex: 1; color: #0f172a; font-weight: 600; }
+  .d11 .it .ty { font-size: 8px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #94a3b8; }
+
+  /* ============= 12 — Procedure Forecast (weather) ============= */
+  .d12-bg { background: linear-gradient(180deg, #0ea5e9 0%, #7dd3fc 40%, #fff 100%); padding: 0 !important; }
+  .d12 { flex: 1; padding: 16px; display: flex; flex-direction: column; color: #0c4a6e; }
+  .d12-now {
+    background: rgba(255,255,255,0.8); border-radius: 14px; padding: 12px 14px;
+    box-shadow: 0 8px 24px rgba(12,74,110,0.2); backdrop-filter: blur(4px);
+  }
+  .d12-now .lbl { font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; opacity: .7; }
+  .d12-now .t { font-size: 15px; font-weight: 900; margin-top: 2px; }
+  .d12-now .d { font-size: 10.5px; margin-top: 2px; opacity: .8; }
+  .d12-forecast {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px;
+  }
+  .d12-fc {
+    background: rgba(255,255,255,0.7); border-radius: 10px; padding: 8px; text-align: center;
+    font-size: 9.5px; backdrop-filter: blur(3px);
+  }
+  .d12-fc .icn { font-size: 20px; margin: 2px 0; }
+  .d12-fc .label { font-weight: 700; }
+  .d12-fc .prob { font-size: 8px; opacity: .7; margin-top: 2px; }
+
+  /* ============= 13 — Periodic Table ============= */
+  .d13-bg { background: #fafaf9; padding: 0 !important; }
+  .d13 { flex: 1; padding: 16px; display: flex; flex-direction: column; }
+  .d13 h3 { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #64748b; margin-bottom: 10px; text-align: center; }
+  .d13-grid { flex: 1; display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; }
+  .d13-el {
+    aspect-ratio: 1; border-radius: 4px; padding: 3px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    font-size: 7px; font-weight: 700; cursor: pointer; transition: transform .15s;
+    position: relative;
+  }
+  .d13-el:hover { transform: scale(1.15); z-index: 10; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+  .d13-el.r { background: #dbeafe; color: #1e40af; }
+  .d13-el.a { background: #fef3c7; color: #92400e; animation: pulse 2s infinite; }
+  .d13-el.c { background: #ede9fe; color: #5b21b6; }
+  .d13-el .sym { font-size: 11px; font-weight: 900; text-align: center; letter-spacing: -0.3px; }
+  .d13-el .n { opacity: .6; text-align: right; font-size: 6.5px; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 #fbbf24; } 50% { box-shadow: 0 0 0 4px #fbbf2400; } }
+
+  /* ============= 14 — Chip Cloud + List ============= */
+  .d14-bg { background: #fff; padding: 0 !important; }
+  .d14 { flex: 1; display: flex; flex-direction: column; }
+  .d14-cloud {
+    padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 5px;
+    border-bottom: 1px dashed #e2e8f0; background: linear-gradient(180deg, #f8fafc, #fff);
+  }
+  .d14-chip {
+    font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+    cursor: pointer;
+  }
+  .d14-chip.r  { background: #dbeafe; color: #1e40af; }
+  .d14-chip.a  { background: #fef3c7; color: #92400e; }
+  .d14-chip.c  { background: #ede9fe; color: #5b21b6; }
+  .d14-chip.lg { font-size: 12px; padding: 4px 12px; font-weight: 800; }
+  .d14-list { flex: 1; padding: 8px 14px; overflow-y: auto; }
+  .d14-row { display: flex; gap: 7px; padding: 7px 0; font-size: 11px; border-bottom: 1px dashed #f1f5f9; }
+  .d14-row .d { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .d14-row .d.r { background: #3b82f6; }
+  .d14-row .d.a { background: #f59e0b; }
+  .d14-row .d.c { background: #8b5cf6; }
+
+  /* ============= 15 — Triangle Venn ============= */
+  .d15-bg { background: #f8fafc; padding: 0 !important; }
+  .d15 { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+  .d15-tri {
+    position: relative; width: 280px; height: 240px;
+  }
+  .d15-tri .blob {
+    position: absolute; width: 140px; height: 140px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-size: 11px; font-weight: 900;
+    mix-blend-mode: multiply;
+  }
+  .d15-tri .rule  { background: rgba(59,130,246,0.65);  color: #fff; top: 0; left: 70px; }
+  .d15-tri .alert { background: rgba(245,158,11,0.7);   color: #fff; bottom: 10px; left: 0; }
+  .d15-tri .card  { background: rgba(139,92,246,0.65);  color: #fff; bottom: 10px; right: 0; }
+  .d15-dot { position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #0f172a; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,.3); animation: blink 2s infinite; }
+  .d15-dot.c1 { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  .d15-label { position: absolute; font-size: 9px; font-weight: 800; color: #1e293b; text-align: center; background: rgba(255,255,255,0.9); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
+
+  /* ============= 16 — Horizontal Carousel ============= */
+  .d16-bg { background: linear-gradient(180deg, #fafaf9, #e7e5e4); padding: 0 !important; }
+  .d16 { flex: 1; padding: 0; position: relative; overflow: hidden; display: flex; align-items: center; }
+  .d16-track { display: flex; gap: 10px; padding: 0 20px; align-items: center; }
+  .d16-cc { min-width: 100px; height: 130px; background: #fff; border-radius: 10px; padding: 10px; font-size: 9.5px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: all .2s; }
+  .d16-cc.center { min-width: 170px; height: 200px; padding: 14px; font-size: 11px; transform: scale(1.04); box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+  .d16-cc .tag { font-size: 7px; font-weight: 800; padding: 2px 6px; border-radius: 3px; letter-spacing: 1px; text-transform: uppercase; align-self: flex-start; }
+  .d16-cc.rule  .tag { background: #dbeafe; color: #1e40af; }
+  .d16-cc.alert .tag { background: #fef3c7; color: #92400e; }
+  .d16-cc.card  .tag { background: #ede9fe; color: #5b21b6; }
+  .d16-cc .tt { font-size: 11px; font-weight: 800; margin-top: 6px; color: #0f172a; line-height: 1.2; }
+  .d16-cc .dd { font-size: 9.5px; color: #475569; margin-top: 4px; line-height: 1.4; flex: 1; }
+
+  /* ============= 17 — Book of Rules ============= */
+  .d17-bg { background: linear-gradient(180deg, #7c2d12, #431407); padding: 20px !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+  .d17 { width: 88%; max-width: 400px; height: 260px; display: flex; perspective: 1600px; position: relative; }
+  .d17-page {
+    flex: 1; background: #fefce8;
+    background-image: repeating-linear-gradient(180deg, transparent, transparent 20px, rgba(212,175,55,0.06) 20px, rgba(212,175,55,0.06) 21px);
+    padding: 16px 14px;
+    border: 1px solid #d6d3d1;
+    box-shadow: inset 0 0 20px rgba(139,69,19,0.08);
+    font-family: 'Cinzel', serif; color: #451a03;
+    position: relative;
+  }
+  .d17-page.left { border-right: 1px solid #a8a29e; }
+  .d17-page h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; text-align: center; letter-spacing: 1.5px; }
+  .d17-page .sect { font-size: 9px; text-align: center; font-family: 'Inter'; color: #78350f; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .d17-page p { font-family: 'Inter'; font-size: 10.5px; color: #44403c; line-height: 1.55; margin-bottom: 8px; }
+  .d17-page p:first-letter { font-family: 'Cinzel'; font-size: 26px; font-weight: 700; float: left; line-height: 1; padding-right: 6px; color: #7c2d12; }
+  .d17-page .num { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); font-size: 8px; color: #78350f; font-family: 'Inter'; opacity: .6; }
+  .d17-spine { width: 6px; background: linear-gradient(180deg, #451407, #78350f); }
+  .d17 .ribbon { position: absolute; top: -4px; left: 45%; width: 12px; height: 60%; background: linear-gradient(180deg, #dc2626, #991b1b); box-shadow: 2px 0 4px rgba(0,0,0,.3); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <h1>Rules Box — 17 Design Vibes</h1>
+    <p>17 ways to present the three kinds of procedural info together: procedure <b>Rules</b> (bylaws), <b>Alerts</b> (triggered rules from the transcript), and <b>Cards</b> (Robert's Rules deck). Some designs keep them split, others blend them. Mini tags show which approach each uses.</p>
+    <div class="categories">
+      <span class="cat-chip rule">● Rule — bylaws / procedure</span>
+      <span class="cat-chip alert">● Alert — transcript-triggered</span>
+      <span class="cat-chip card">● Card — Robert's Rules deck</span>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#d01"><span>01</span> Three-Tab <span class="m">split</span></a>
+  <a href="#d02"><span>02</span> Priority Feed <span class="m">merged</span></a>
+  <a href="#d03"><span>03</span> Accordion <span class="m">both</span></a>
+  <a href="#d04"><span>04</span> List + Detail <span class="m">merged</span></a>
+  <a href="#d05"><span>05</span> Tool Tray <span class="m">split</span></a>
+  <a href="#d06"><span>06</span> Chat Stream <span class="m">merged</span></a>
+  <a href="#d07"><span>07</span> Pinboard <span class="m">merged</span></a>
+  <a href="#d08"><span>08</span> Hex Grid <span class="m">merged</span></a>
+  <a href="#d09"><span>09</span> Timeline <span class="m">merged</span></a>
+  <a href="#d10"><span>10</span> Dealer Stack <span class="m">merged</span></a>
+  <a href="#d11"><span>11</span> Palette <span class="m">both</span></a>
+  <a href="#d12"><span>12</span> Forecast <span class="m">merged</span></a>
+  <a href="#d13"><span>13</span> Periodic <span class="m">split</span></a>
+  <a href="#d14"><span>14</span> Chip Cloud <span class="m">merged</span></a>
+  <a href="#d15"><span>15</span> Venn <span class="m">merged</span></a>
+  <a href="#d16"><span>16</span> Carousel <span class="m">merged</span></a>
+  <a href="#d17"><span>17</span> Book <span class="m">split</span></a>
+</nav>
+
+<div class="grid">
+
+  <!-- 01 Three-tab -->
+  <section class="design" id="d01">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">1</div><h2>Three-Tab Classic</h2></div>
+      <div class="tags"><span class="mini split">Split</span></div>
+    </div>
+    <div class="design-note">Traditional. Each category gets its own tab. Simple, familiar, boring in a safe way. Good default.</div>
+    <div class="design-stage d01-bg">
+      <div class="d01">
+        <div class="d01-tabs">
+          <div class="d01-tab"><span class="dot" style="color:#3b82f6"></span>Rules <span style="font-size:9px;opacity:.6">7</span></div>
+          <div class="d01-tab active"><span class="dot" style="color:#f59e0b"></span>Alerts <span style="font-size:9px;opacity:.6">3</span></div>
+          <div class="d01-tab"><span class="dot" style="color:#8b5cf6"></span>Cards <span style="font-size:9px;opacity:.6">23</span></div>
+        </div>
+        <div class="d01-body">
+          <div class="d01-item"><div style="font-weight:800;color:#0f172a">s.11 · Amendments</div><div style="color:#64748b;margin-top:2px">A motion to amend must be relevant to the original motion…</div></div>
+          <div class="d01-item"><div style="font-weight:800;color:#0f172a">s.11 · Motion Procedure</div><div style="color:#64748b;margin-top:2px">A motion must be moved and seconded before being debated…</div></div>
+          <div class="d01-item"><div style="font-weight:800;color:#0f172a">s.12 · Voting</div><div style="color:#64748b;margin-top:2px">Each Council member present must vote unless they have a conflict…</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 Unified Priority Feed -->
+  <section class="design" id="d02">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">2</div><h2>Unified Priority Feed</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">All three categories stream together; alerts bubble to the top, tinted. Feels like a Slack inbox for meeting procedure.</div>
+    <div class="design-stage d02-bg">
+      <div class="d02">
+        <div class="d02-head">Procedure Feed <span class="count">12</span> <span style="margin-left:auto;font-weight:600;color:#94a3b8;letter-spacing:0">Newest first</span></div>
+        <div class="d02-feed">
+          <div class="d02-card alert"><div class="icon">⚠</div><div class="body"><div class="title">Amendments — s.11</div><div class="desc">Only one amendment to an amendment at a time.</div></div></div>
+          <div class="d02-card card"><div class="icon">♠</div><div class="body"><div class="title">AMEND (#4) · Subsidiary</div><div class="desc">Changes main motion by adding, striking, or substituting…</div></div></div>
+          <div class="d02-card rule"><div class="icon">§</div><div class="body"><div class="title">Motion Procedure — s.11</div><div class="desc">A motion must be moved and seconded before debate.</div></div></div>
+          <div class="d02-card rule"><div class="icon">§</div><div class="body"><div class="title">Voting — s.12</div><div class="desc">Each Council member present must vote unless conflict.</div></div></div>
+          <div class="d02-card alert"><div class="icon">⚠</div><div class="body"><div class="title">Quorum — s.9</div><div class="desc">Quorum is a majority of Council members.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 Accordion Stack -->
+  <section class="design" id="d03">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">3</div><h2>Accordion with Merge Toggle</h2></div>
+      <div class="tags"><span class="mini split">Split</span><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Accordion sections by default (split). Toggle pill flips into merged-by-priority mode. Best of both.</div>
+    <div class="design-stage d03-bg">
+      <div class="d03">
+        <div class="d03-toggle"><button class="on">Split</button><button>Merged</button></div>
+        <div class="d03-sect alert">
+          <div class="head">⚠ Alerts active <span style="font-size:9px;color:#94a3b8">3</span></div>
+          <div class="body"><span class="bullet">Amendments — one amendment to an amendment</span><span class="bullet">Quorum — majority required</span></div>
+        </div>
+        <div class="d03-sect rule">
+          <div class="head">§ Rules applicable <span style="font-size:9px;color:#94a3b8">7</span></div>
+          <div class="body"><span class="bullet">s.11 Motion Procedure</span><span class="bullet">s.12 Voting</span><span class="bullet">s.13 Bylaw Readings</span></div>
+        </div>
+        <div class="d03-sect card">
+          <div class="head">♠ Card on the floor <span style="font-size:9px;color:#94a3b8">AMEND</span></div>
+          <div class="body"><span class="bullet"><b>#4 AMEND</b> — Subsidiary, majority</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 Split list + detail -->
+  <section class="design" id="d04">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">4</div><h2>List + Detail</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Email-client layout — scan the mixed list on the left, read detail on the right. Scales to any volume.</div>
+    <div class="design-stage d04-bg">
+      <div class="d04">
+        <div class="d04-list">
+          <div class="it alert sel"><span class="tag">ALERT</span> Amendments</div>
+          <div class="it rule"><span class="tag">RULE</span> Motion Procedure</div>
+          <div class="it card"><span class="tag">CARD</span> AMEND #4</div>
+          <div class="it rule"><span class="tag">RULE</span> Voting</div>
+          <div class="it alert"><span class="tag">ALERT</span> Quorum</div>
+          <div class="it card"><span class="tag">CARD</span> MOVE #1</div>
+          <div class="it rule"><span class="tag">RULE</span> Bylaw Readings</div>
+        </div>
+        <div class="d04-detail">
+          <div class="hd"><span style="font-size:9px;font-weight:800;letter-spacing:1px;color:#b45309;background:#fef3c7;padding:2px 6px;border-radius:4px">ALERT · s.11</span><span style="font-size:8px;color:#94a3b8;margin-left:auto">7:07 PM</span></div>
+          <h3>Amendments</h3>
+          <p>A motion to amend must be relevant to the original motion. Only one amendment to an amendment at a time.</p>
+          <div class="quote">"I move to amend the motion by [insert change]."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 Floating Tool Tray -->
+  <section class="design" id="d05">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">5</div><h2>Floating Tool Tray</h2></div>
+      <div class="tags"><span class="mini split">Split</span></div>
+    </div>
+    <div class="design-note">Vertical icon rail on the left (alerts dot indicator). Clicking an icon fills the main area. IDE-style.</div>
+    <div class="design-stage d05-bg">
+      <div class="d05">
+        <div class="d05-rail">
+          <button class="on" title="Rules">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </button>
+          <button title="Alerts">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span class="bd"></span>
+          </button>
+          <button title="Cards">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14"/></svg>
+          </button>
+          <div style="flex:1"></div>
+          <button title="Search">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+        <div class="d05-main">
+          <div style="font-size:9px;font-weight:800;letter-spacing:1px;color:#94a3b8;text-transform:uppercase">Procedure Bylaw · 12 rules</div>
+          <h3 style="margin-top:4px">s.11 — Motion Procedure</h3>
+          <p>A motion must be moved and seconded before being debated or voted upon. A motion to amend must be relevant to the original motion. Only one amendment to an amendment at a time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 Chat Stream -->
+  <section class="design" id="d06">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">6</div><h2>ProcedureBot Chat</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Rules speak to the clerk in conversation. Alerts use a warning-tinted persona. Feels alive, less intimidating.</div>
+    <div class="design-stage d06-bg">
+      <div class="d06">
+        <div class="d06-bot">
+          <div class="av">§</div>
+          <div>
+            <div class="msg">Motion on the floor — <b>must be seconded</b> before debate (bylaw s.11).</div>
+            <div class="ts">7:05 PM · Rule</div>
+          </div>
+        </div>
+        <div class="d06-bot alert">
+          <div class="av">⚠</div>
+          <div>
+            <div class="msg"><b>Amendment triggered.</b> Remember: only one amendment to an amendment at a time.</div>
+            <div class="ts">7:07 PM · Alert</div>
+          </div>
+        </div>
+        <div class="d06-bot">
+          <div class="av">♠</div>
+          <div>
+            <div class="msg">You're on card <b>#4 AMEND</b>. Precedence above it: LIMIT DEBATE, CALL Q, TABLE.</div>
+            <div class="ts">7:07 PM · Card</div>
+          </div>
+        </div>
+        <div class="d06-quick">
+          <button>Show precedence</button>
+          <button>Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 Pinboard -->
+  <section class="design" id="d07">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">7</div><h2>Sticky-Note Pinboard</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Each rule/alert/card is a sticky note. Color = category. Analog, tactile, a little chaotic — good for visual thinkers.</div>
+    <div class="design-stage d07-bg">
+      <div class="d07">
+        <div class="note r" style="top:8px;left:12px"><div class="pin"></div><div class="lbl">Rule · s.11</div>Motion must be moved and seconded first</div>
+        <div class="note a" style="top:20px;left:150px"><div class="pin"></div><div class="lbl">Alert</div>Amendment — one at a time!</div>
+        <div class="note c" style="top:140px;left:32px"><div class="pin"></div><div class="lbl">Card · #4</div>AMEND — subsidiary</div>
+        <div class="note r" style="top:150px;left:170px"><div class="pin"></div><div class="lbl">Rule · s.12</div>Every member must vote</div>
+        <div class="note a" style="top:50px;right:12px"><div class="pin"></div><div class="lbl">Alert</div>Quorum = majority</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 Hex Grid -->
+  <section class="design" id="d08">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">8</div><h2>Hexagonal Grid</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Honeycomb of mixed tiles, color-coded. Active item highlighted. Dense but playful — hover to see full.</div>
+    <div class="design-stage d08-bg">
+      <div class="d08">
+        <div style="position:relative;width:320px;height:260px">
+          <div class="hex r"   style="left:10px;top:0"><span class="hnum">§11</span>MOTION</div>
+          <div class="hex a"   style="left:72px;top:36px"><span class="hnum">⚠</span>AMEND</div>
+          <div class="hex c active" style="left:134px;top:0"><span class="hnum">♠4</span>AMEND</div>
+          <div class="hex r"   style="left:196px;top:36px"><span class="hnum">§12</span>VOTE</div>
+          <div class="hex r"   style="left:10px;top:120px"><span class="hnum">§13</span>BYLAW</div>
+          <div class="hex a"   style="left:72px;top:156px"><span class="hnum">⚠</span>QUORUM</div>
+          <div class="hex c"   style="left:134px;top:120px"><span class="hnum">♠1</span>MOVE</div>
+          <div class="hex c"   style="left:196px;top:156px"><span class="hnum">♠9</span>TABLE</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 Timeline -->
+  <section class="design" id="d09">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">9</div><h2>Timeline Ribbon</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Everything plotted chronologically — rules cited, alerts triggered, cards played. Great for post-meeting review.</div>
+    <div class="design-stage d09-bg">
+      <div class="d09">
+        <div class="d09-title">Meeting Procedure Trace</div>
+        <div class="d09-tl">
+          <div class="d09-ev"><div class="ts">7:02 PM</div><div class="label">Meeting called to order</div><div class="sub">Rule s.5 · Adjournment time 9:00 PM</div></div>
+          <div class="d09-ev c"><div class="ts">7:05 PM</div><div class="label">Motion moved: Park Grant</div><div class="sub">Card MOVE #1 · Johnston / Wall</div></div>
+          <div class="d09-ev a"><div class="ts">7:07 PM</div><div class="label">Amendment raised</div><div class="sub">Alert: Amendments — only one at a time (s.11)</div></div>
+          <div class="d09-ev c"><div class="ts">7:07 PM</div><div class="label">Card: AMEND #4</div><div class="sub">Subsidiary, majority</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 Dealer Stack -->
+  <section class="design" id="d10">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">10</div><h2>Card-dealer Stack</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Top card is the "right now" item (alert/rule/card). Drag to deal the next. Dark, dramatic, focused.</div>
+    <div class="design-stage d10-bg">
+      <div class="d10">
+        <div class="d10-card">
+          <div class="tag" style="background:#fef3c7;color:#92400e">⚠ Alert · s.11</div>
+          <div class="tt">Amendments</div>
+          <div class="dd">Only one amendment to an amendment at a time. Must be relevant to the original motion.</div>
+        </div>
+        <div class="d10-card">
+          <div class="tag" style="background:#ede9fe;color:#5b21b6">♠ Card · #4</div>
+          <div class="tt">AMEND</div>
+          <div class="dd">Subsidiary motion. Majority vote. "I move to amend the motion by…"</div>
+        </div>
+        <div class="d10-card">
+          <div class="tag" style="background:#dbeafe;color:#1e40af">§ Rule · s.11</div>
+          <div class="tt">Motion Procedure</div>
+          <div class="dd">Motion must be moved and seconded before debate.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 Command Palette -->
+  <section class="design" id="d11">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">11</div><h2>Command Palette</h2></div>
+      <div class="tags"><span class="mini split">Split</span><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Hit ⌘K to find any rule, alert, or card. Category filters can be combined. Power user's dream.</div>
+    <div class="design-stage d11-bg">
+      <div class="d11">
+        <div class="search">
+          <svg width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input value="amen" />
+          <span class="kb">⌘K</span>
+        </div>
+        <div class="filters">
+          <span class="f on">All</span>
+          <span class="f off">Rules</span>
+          <span class="f on">Alerts</span>
+          <span class="f off">Cards</span>
+        </div>
+        <div class="it sel"><div class="num">⚠</div><div class="tt">Amendments — s.11</div><div class="ty">Alert</div></div>
+        <div class="it"><div class="num">4</div><div class="tt">AMEND (Subsidiary)</div><div class="ty">Card</div></div>
+        <div class="it"><div class="num">§</div><div class="tt">Motion to amend requires second — s.11</div><div class="ty">Rule</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 Forecast -->
+  <section class="design" id="d12">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">12</div><h2>Procedure Forecast</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Weather metaphor. "Now" shows active rule; "forecast" predicts likely next alerts based on agenda. Fun + intuitive.</div>
+    <div class="design-stage d12-bg">
+      <div class="d12">
+        <div class="d12-now">
+          <div class="lbl">Now on the Floor</div>
+          <div class="t">Amendment in progress — s.11</div>
+          <div class="d">⚠ Only one amendment to an amendment · ♠ Card: AMEND #4</div>
+        </div>
+        <div class="d12-forecast">
+          <div class="d12-fc"><div class="icn">🗳</div><div class="label">Vote</div><div class="prob">90%</div></div>
+          <div class="d12-fc"><div class="icn">🔨</div><div class="label">Bylaw §13</div><div class="prob">60%</div></div>
+          <div class="d12-fc"><div class="icn">🤐</div><div class="label">In-camera</div><div class="prob">30%</div></div>
+          <div class="d12-fc"><div class="icn">⏰</div><div class="label">Adjourn</div><div class="prob">85%</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 Periodic Table -->
+  <section class="design" id="d13">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">13</div><h2>Periodic Table</h2></div>
+      <div class="tags"><span class="mini split">Split</span></div>
+    </div>
+    <div class="design-note">Grid of elements, rows grouped by category. Pulsing = triggered alert. Dense display — every rule one click away.</div>
+    <div class="design-stage d13-bg">
+      <div class="d13">
+        <h3>Procedure · 23 elements</h3>
+        <div class="d13-grid">
+          <div class="d13-el c"><div class="n">1</div><div class="sym">MV</div></div>
+          <div class="d13-el c"><div class="n">2</div><div class="sym">SC</div></div>
+          <div class="d13-el c"><div class="n">3</div><div class="sym">PP</div></div>
+          <div class="d13-el c" style="background:#c4b5fd;box-shadow:0 0 0 2px #6d28d9"><div class="n">4</div><div class="sym">AM</div></div>
+          <div class="d13-el c"><div class="n">5</div><div class="sym">RF</div></div>
+          <div class="d13-el c"><div class="n">6</div><div class="sym">DF</div></div>
+          <div class="d13-el c"><div class="n">7</div><div class="sym">LD</div></div>
+          <div class="d13-el c"><div class="n">8</div><div class="sym">CQ</div></div>
+
+          <div class="d13-el a"><div class="n">⚠</div><div class="sym">AM</div></div>
+          <div class="d13-el a"><div class="n">⚠</div><div class="sym">QM</div></div>
+          <div class="d13-el a"><div class="n">⚠</div><div class="sym">PO</div></div>
+          <div class="d13-el"></div>
+          <div class="d13-el"></div>
+          <div class="d13-el"></div>
+          <div class="d13-el"></div>
+          <div class="d13-el"></div>
+
+          <div class="d13-el r"><div class="n">5</div><div class="sym">§5</div></div>
+          <div class="d13-el r"><div class="n">9</div><div class="sym">§9</div></div>
+          <div class="d13-el r"><div class="n">10</div><div class="sym">§10</div></div>
+          <div class="d13-el r"><div class="n">11</div><div class="sym">§11</div></div>
+          <div class="d13-el r"><div class="n">12</div><div class="sym">§12</div></div>
+          <div class="d13-el r"><div class="n">13</div><div class="sym">§13</div></div>
+          <div class="d13-el r"><div class="n">14</div><div class="sym">§14</div></div>
+          <div class="d13-el r"><div class="n">15</div><div class="sym">§15</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 Chip Cloud -->
+  <section class="design" id="d14">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">14</div><h2>Chip Cloud + List</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Hot items float to the top as chips (tap to pin). Full list below. Approachable and informationally dense.</div>
+    <div class="design-stage d14-bg">
+      <div class="d14">
+        <div class="d14-cloud">
+          <span class="d14-chip a lg">⚠ Amendments</span>
+          <span class="d14-chip c lg">♠ AMEND</span>
+          <span class="d14-chip r lg">§11 Motion</span>
+          <span class="d14-chip r">§12 Voting</span>
+          <span class="d14-chip a">⚠ Quorum</span>
+          <span class="d14-chip c">♠ MOVE</span>
+          <span class="d14-chip r">§13 Bylaw</span>
+          <span class="d14-chip c">♠ TABLE</span>
+        </div>
+        <div class="d14-list">
+          <div class="d14-row"><span class="d a"></span><div><b>Amendments</b> — only one to an amendment · <span style="color:#94a3b8">s.11</span></div></div>
+          <div class="d14-row"><span class="d r"></span><div><b>Voting</b> — every member must vote · <span style="color:#94a3b8">s.12</span></div></div>
+          <div class="d14-row"><span class="d c"></span><div><b>AMEND #4</b> — Subsidiary, majority</div></div>
+          <div class="d14-row"><span class="d r"></span><div><b>Motion procedure</b> — moved & seconded · <span style="color:#94a3b8">s.11</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 Venn Triangle -->
+  <section class="design" id="d15">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">15</div><h2>Venn Triangle</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Three overlapping circles. Dot in center = item intersects all three (e.g., AMEND triggers a rule AND is an active card). Nerdy + informative.</div>
+    <div class="design-stage d15-bg">
+      <div class="d15">
+        <div class="d15-tri">
+          <div class="blob rule">Rules</div>
+          <div class="blob alert">Alerts</div>
+          <div class="blob card">Cards</div>
+          <div class="d15-dot c1"></div>
+          <div class="d15-label" style="top:54%;left:50%;transform:translate(-50%, 20px)">AMEND<br/><span style="font-weight:500;color:#64748b">#4 · s.11 · alert</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 Carousel -->
+  <section class="design" id="d16">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">16</div><h2>Mixed Carousel</h2></div>
+      <div class="tags"><span class="mini merged">Merged</span></div>
+    </div>
+    <div class="design-note">Horizontal scrolling of all three types intermixed. Center card is large and in focus. Good for touch screens.</div>
+    <div class="design-stage d16-bg">
+      <div class="d16">
+        <div class="d16-track">
+          <div class="d16-cc rule"><span class="tag">Rule · s.11</span><div class="tt">Motion Procedure</div><div class="dd">Moved + seconded first.</div></div>
+          <div class="d16-cc card"><span class="tag">Card · #1</span><div class="tt">MOVE</div><div class="dd">Initiate a motion.</div></div>
+          <div class="d16-cc alert center"><span class="tag">Alert · s.11</span><div class="tt">Amendments</div><div class="dd">Only one amendment to an amendment. Must be relevant to original.</div></div>
+          <div class="d16-cc card"><span class="tag">Card · #4</span><div class="tt">AMEND</div><div class="dd">Subsidiary · majority.</div></div>
+          <div class="d16-cc rule"><span class="tag">Rule · s.12</span><div class="tt">Voting</div><div class="dd">All present must vote.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 Book of Rules -->
+  <section class="design" id="d17">
+    <div class="design-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><div class="num">17</div><h2>Book of Rules</h2></div>
+      <div class="tags"><span class="mini split">Split</span></div>
+    </div>
+    <div class="design-note">An open book. Left page = rules, right page = cards. Flip section tabs to see alerts. Ceremonial, parliament-library vibe.</div>
+    <div class="design-stage d17-bg">
+      <div class="d17">
+        <div class="ribbon"></div>
+        <div class="d17-page left">
+          <div class="sect">Part XI</div>
+          <h4>Motions</h4>
+          <p>A motion must be moved and seconded before being debated. A motion to amend must be relevant and only one amendment to an amendment is allowed at a time.</p>
+          <p style="text-indent:0">Voting proceeds as set out in Part XII; every member present shall vote unless recused.</p>
+          <div class="num">— 11 —</div>
+        </div>
+        <div class="d17-spine"></div>
+        <div class="d17-page">
+          <div class="sect">Card IV</div>
+          <h4>Amend</h4>
+          <p>Changes the main motion by adding, striking, or substituting words. Subsidiary motion; requires a second and majority vote.</p>
+          <p style="text-indent:0;font-style:italic;color:#78350f">"I move to amend the motion by [insert change]."</p>
+          <div class="num">— 12 —</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>
