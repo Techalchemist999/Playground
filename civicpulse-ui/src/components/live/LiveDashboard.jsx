@@ -9,6 +9,7 @@ import QuickMotion from './QuickMotion';
 import RulesPanel from './RulesPanel';
 import RobertsRulesCardPanel from './RobertsRulesCardPanel';
 import PrecedenceLadder from './PrecedenceLadder';
+import ProcedureAlertButton from './ProcedureAlertButton';
 import { getCardById } from '../../data/robertsRulesDeck';
 import SessionControls from './SessionControls';
 
@@ -226,7 +227,18 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
   const [draggingId, setDraggingId] = useState(null);
   const [pbNewestTop, setPbNewestTop] = useState(false);
   const [quickMotionOpen, setQuickMotionOpen] = useState(false);
-  const [procedureOpen, setProcedureOpen] = useState(false);
+  const [procedureOpen, setProcedureOpenState] = useState(false);
+  const [alertsOpen, setAlertsOpenState] = useState(false);
+  const setProcedureOpen = useCallback((v) => {
+    const next = typeof v === 'function' ? v(procedureOpen) : v;
+    setProcedureOpenState(next);
+    if (next) setAlertsOpenState(false);
+  }, [procedureOpen]);
+  const setAlertsOpen = useCallback((v) => {
+    const next = typeof v === 'function' ? v(alertsOpen) : v;
+    setAlertsOpenState(next);
+    if (next) setProcedureOpenState(false);
+  }, [alertsOpen]);
   const [procedureDims, setProcedureDims] = useState({ w: 260, h: 180 });
   const [activeProcedureId, setActiveProcedureId] = useState(session.sessionId === 'demo' ? 'amend' : 'move');
   const activeProcedure = getCardById(activeProcedureId);
@@ -691,37 +703,46 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                         borderTop: '1px solid #f1f5f9',
                         flexShrink: 0,
                       }}>
-                        <button
-                          onClick={() => setProcedureOpen(o => !o)}
-                          title={`On The Floor: ${activeProcedure.title} — click for precedence ladder`}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 8,
-                            padding: '8px 12px 8px 8px', height: 42,
-                            background: '#fff',
-                            border: `1.5px solid ${procedureOpen ? accentColor : '#cbd5e1'}`,
-                            borderRadius: 10,
-                            cursor: 'pointer',
-                            transition: 'all .15s',
-                            minWidth: 0, maxWidth: '55%',
-                          }}
-                          onMouseEnter={e => { if (!procedureOpen) e.currentTarget.style.borderColor = '#94a3b8'; }}
-                          onMouseLeave={e => { if (!procedureOpen) e.currentTarget.style.borderColor = '#cbd5e1'; }}
-                        >
-                          <span style={{
-                            width: 26, height: 26, borderRadius: 6,
-                            background: accentColor, color: '#fff',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 12, fontWeight: 900, flexShrink: 0,
-                          }}>
-                            {activeProcedure.number}
-                          </span>
-                          <span style={{
-                            fontSize: 12, fontWeight: 800, color: '#1e293b', letterSpacing: '.3px',
-                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                          }}>
-                            {activeProcedure.title}
-                          </span>
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, maxWidth: '65%' }}>
+                          <button
+                            onClick={() => setProcedureOpen(o => !o)}
+                            title={`On The Floor: ${activeProcedure.title} — click for precedence ladder`}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 8,
+                              padding: '8px 12px 8px 8px', height: 42,
+                              background: '#fff',
+                              border: `1.5px solid ${procedureOpen ? accentColor : '#cbd5e1'}`,
+                              borderRadius: 10,
+                              cursor: 'pointer',
+                              transition: 'all .15s',
+                              minWidth: 0, flex: 1,
+                            }}
+                            onMouseEnter={e => { if (!procedureOpen) e.currentTarget.style.borderColor = '#94a3b8'; }}
+                            onMouseLeave={e => { if (!procedureOpen) e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                          >
+                            <span style={{
+                              width: 26, height: 26, borderRadius: 6,
+                              background: accentColor, color: '#fff',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: 12, fontWeight: 900, flexShrink: 0,
+                            }}>
+                              {activeProcedure.number}
+                            </span>
+                            <span style={{
+                              fontSize: 12, fontWeight: 800, color: '#1e293b', letterSpacing: '.3px',
+                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                            }}>
+                              {activeProcedure.title}
+                            </span>
+                          </button>
+                          <ProcedureAlertButton
+                            topics={session.topics}
+                            transcript={session.transcript}
+                            theme={theme}
+                            open={alertsOpen}
+                            onOpenChange={setAlertsOpen}
+                          />
+                        </div>
                         <button
                           onClick={() => setQuickMotionOpen(true)}
                           style={{
@@ -832,37 +853,46 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                       borderTop: '1px solid #f1f5f9',
                       flexShrink: 0,
                     }}>
-                      <button
-                        onClick={() => setProcedureOpen(o => !o)}
-                        title={`On The Floor: ${activeProcedure.title} — click for precedence ladder`}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 8,
-                          padding: '8px 12px 8px 8px', height: 42,
-                          background: '#fff',
-                          border: `1.5px solid ${procedureOpen ? accentColor : '#cbd5e1'}`,
-                          borderRadius: 10,
-                          cursor: 'pointer',
-                          transition: 'all .15s',
-                          minWidth: 0, maxWidth: '55%',
-                        }}
-                        onMouseEnter={e => { if (!procedureOpen) { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
-                        onMouseLeave={e => { if (!procedureOpen) { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.transform = 'translateY(0)'; } }}
-                      >
-                        <span style={{
-                          width: 26, height: 26, borderRadius: 6,
-                          background: accentColor, color: '#fff',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 12, fontWeight: 900, flexShrink: 0,
-                        }}>
-                          {activeProcedure.number}
-                        </span>
-                        <span style={{
-                          fontSize: 12, fontWeight: 800, color: '#1e293b', letterSpacing: '.3px',
-                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        }}>
-                          {activeProcedure.title}
-                        </span>
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, maxWidth: '65%' }}>
+                        <button
+                          onClick={() => setProcedureOpen(o => !o)}
+                          title={`On The Floor: ${activeProcedure.title} — click for precedence ladder`}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 8,
+                            padding: '8px 12px 8px 8px', height: 42,
+                            background: '#fff',
+                            border: `1.5px solid ${procedureOpen ? accentColor : '#cbd5e1'}`,
+                            borderRadius: 10,
+                            cursor: 'pointer',
+                            transition: 'all .15s',
+                            minWidth: 0, flex: 1,
+                          }}
+                          onMouseEnter={e => { if (!procedureOpen) { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
+                          onMouseLeave={e => { if (!procedureOpen) { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.transform = 'translateY(0)'; } }}
+                        >
+                          <span style={{
+                            width: 26, height: 26, borderRadius: 6,
+                            background: accentColor, color: '#fff',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 12, fontWeight: 900, flexShrink: 0,
+                          }}>
+                            {activeProcedure.number}
+                          </span>
+                          <span style={{
+                            fontSize: 12, fontWeight: 800, color: '#1e293b', letterSpacing: '.3px',
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                          }}>
+                            {activeProcedure.title}
+                          </span>
+                        </button>
+                        <ProcedureAlertButton
+                          topics={session.topics}
+                          transcript={session.transcript}
+                          theme={theme}
+                          open={alertsOpen}
+                          onOpenChange={setAlertsOpen}
+                        />
+                      </div>
                       <button
                         onClick={() => setQuickMotionOpen(true)}
                         title="Start a new motion"

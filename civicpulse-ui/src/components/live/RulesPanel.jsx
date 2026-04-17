@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { COLORS } from '../../styles/tokens';
 import ProcedureRules from './ProcedureRules';
-import RuleAlert from './RuleAlert';
 
 const ROBERTS_RULES = [
   {
@@ -485,8 +484,6 @@ export default function RulesPanel({ topics, transcript }) {
         </div>
       )}
 
-      {/* Procedure alerts — always visible at bottom */}
-      <RuleAlert topics={topics} transcript={transcript} />
     </div>
   );
 }
