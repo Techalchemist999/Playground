@@ -194,9 +194,8 @@ function snapPx(val) {
 const DEFAULT_PANELS = [
   { id: 'agenda',    xPct: 1.5,  yPct: 2,   wPct: 25,  hPct: 96 },
   { id: 'floor',     xPct: 27.5, yPct: 2,   wPct: 40,  hPct: 96 },
-  { id: 'rules',     xPct: 68.5, yPct: 2,   wPct: 30,  hPct: 30 },
-  { id: 'procedure', xPct: 68.5, yPct: 34,  wPct: 30,  hPct: 30 },
-  { id: 'topics',    xPct: 68.5, yPct: 66,  wPct: 30,  hPct: 32 },
+  { id: 'rules',     xPct: 68.5, yPct: 2,   wPct: 30,  hPct: 47 },
+  { id: 'topics',    xPct: 68.5, yPct: 51,  wPct: 30,  hPct: 47 },
 ];
 
 // Edge resize zones — no right edge so scrolling isn't blocked
@@ -225,6 +224,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
   const [draggingId, setDraggingId] = useState(null);
   const [pbNewestTop, setPbNewestTop] = useState(false);
   const [quickMotionOpen, setQuickMotionOpen] = useState(false);
+  const [procedureOpen, setProcedureOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   // Panel lock + saved positions — persists to localStorage
@@ -566,6 +566,64 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                   </div>
                 );
 
+                // Procedure toolbox bottom sheet — Robert's Rules cards
+                const procedureSheet = procedureOpen && (
+                  <div style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0,
+                    maxHeight: '92%',
+                    background: '#fff',
+                    borderTop: `1px solid #cbd5e1`,
+                    borderRadius: '14px 14px 0 0',
+                    boxShadow: '0 -10px 40px rgba(15,23,42,0.22)',
+                    display: 'flex', flexDirection: 'column',
+                    animation: 'slideUp .25s cubic-bezier(.22,1,.36,1)',
+                    zIndex: 20,
+                    overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '10px 14px 8px', flexShrink: 0,
+                      borderBottom: '1px solid #f1f5f9',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{
+                          width: 36, height: 4, borderRadius: 2, background: '#cbd5e1',
+                        }} />
+                        <div style={{
+                          fontSize: 13, fontWeight: 800, color: '#1e293b',
+                          display: 'flex', alignItems: 'center', gap: 6,
+                        }}>
+                          <svg width="15" height="15" fill="none" stroke="#475569" strokeWidth="2" viewBox="0 0 24 24">
+                            <path d="M22 12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7" />
+                            <path d="M2 12V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3" />
+                            <line x1="2" y1="12" x2="22" y2="12" />
+                            <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                          </svg>
+                          Now On The Floor
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setProcedureOpen(false)}
+                        style={{
+                          background: 'transparent', border: 'none', color: '#94a3b8',
+                          fontSize: 11, fontWeight: 700, cursor: 'pointer', padding: '4px 8px',
+                          display: 'flex', alignItems: 'center', gap: 4,
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.color = '#475569'}
+                        onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}
+                      >
+                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                        Close
+                      </button>
+                    </div>
+                    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                      <RobertsRulesCardPanel initialCardId={session.sessionId === 'demo' ? 'amend' : 'move'} />
+                    </div>
+                  </div>
+                );
+
                 // No motion on the floor — show empty placeholder (+ the bottom sheet if open)
                 if (!onFloorMotion) {
                   return (
@@ -583,11 +641,34 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                         </span>
                       </div>
                       <div style={{
-                        display: 'flex', justifyContent: 'flex-end',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                         padding: '10px 14px 12px',
                         borderTop: '1px solid #f1f5f9',
                         flexShrink: 0,
                       }}>
+                        <button
+                          onClick={() => setProcedureOpen(true)}
+                          title="Procedure toolbox — Robert's Rules cards"
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            width: 42, height: 42,
+                            background: '#fff',
+                            border: '1.5px solid #cbd5e1',
+                            borderRadius: 10,
+                            cursor: 'pointer',
+                            color: '#475569',
+                            transition: 'all .15s',
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#94a3b8'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                        >
+                          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path d="M22 12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7" />
+                            <path d="M2 12V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3" />
+                            <line x1="2" y1="12" x2="22" y2="12" />
+                            <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                          </svg>
+                        </button>
                         <button
                           onClick={() => setQuickMotionOpen(true)}
                           style={{
@@ -606,6 +687,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                         </button>
                       </div>
                       {bottomSheet}
+                      {procedureSheet}
                     </div>
                   );
                 }
@@ -690,13 +772,36 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                     <div ref={pbScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '4px 10px 8px' }}>
                       {motionCard}
                     </div>
-                    {/* Footer — + Motion button, bottom right */}
+                    {/* Footer — toolbox icon (left) + Motion button (right) */}
                     <div style={{
-                      display: 'flex', justifyContent: 'flex-end',
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                       padding: '10px 14px 12px',
                       borderTop: '1px solid #f1f5f9',
                       flexShrink: 0,
                     }}>
+                      <button
+                        onClick={() => setProcedureOpen(true)}
+                        title="Procedure toolbox — Robert's Rules cards"
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          width: 42, height: 42,
+                          background: '#fff',
+                          border: '1.5px solid #cbd5e1',
+                          borderRadius: 10,
+                          cursor: 'pointer',
+                          color: '#475569',
+                          transition: 'all .15s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                      >
+                        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path d="M22 12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7" />
+                          <path d="M2 12V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3" />
+                          <line x1="2" y1="12" x2="22" y2="12" />
+                          <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                        </svg>
+                      </button>
                       <button
                         onClick={() => setQuickMotionOpen(true)}
                         title="Start a new motion"
@@ -723,6 +828,7 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                       </button>
                     </div>
                     {bottomSheet}
+                    {procedureSheet}
                   </div>
                 );
               })()}
@@ -771,26 +877,6 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
           </div>
         </div>
 
-        {/* Procedure Card — Robert's Rules deck, active card = what's happening on the floor */}
-        <div style={panelStyle('procedure')}>
-          <div style={{ position: 'relative', display: 'flex', flex: 1, minHeight: 0 }}>
-            <BentoPanel
-              title="Now On The Floor"
-              icon={<svg width="13" height="13" fill="none" stroke="#64748b" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="4" width="18" height="16" rx="2" />
-                <path d="M7 8h10M7 12h6" />
-              </svg>}
-              style={{ flex: 1, minHeight: 0 }}
-              headerProps={{
-                onMouseDown: (e) => startDrag('procedure', e, 'move'),
-                style: dragHandleStyle,
-              }}
-            >
-              <RobertsRulesCardPanel initialCardId={session.sessionId === 'demo' ? 'amend' : 'move'} />
-            </BentoPanel>
-            <EdgeHandles onEdgeDrag={(edge, e) => startDrag('procedure', e, edge)} />
-          </div>
-        </div>
       </div>
 
       {/* Bottom: session controls + Quick Motion */}
