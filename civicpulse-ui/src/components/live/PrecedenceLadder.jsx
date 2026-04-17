@@ -130,24 +130,6 @@ export default function PrecedenceLadder({ activeId: controlledId, onActiveChang
                       }}
                     />
                   )}
-                  {isInspected && !isOnFloor && (
-                    <span
-                      title="Inspecting"
-                      style={{
-                        fontSize: 7,
-                        fontWeight: 800,
-                        letterSpacing: 1,
-                        textTransform: 'uppercase',
-                        color: accent,
-                        border: `1px dashed ${accent}aa`,
-                        padding: '1px 5px',
-                        borderRadius: 3,
-                        flexShrink: 0,
-                      }}
-                    >
-                      Peek
-                    </span>
-                  )}
                   {!isExpanded && (
                     <span style={{
                       fontSize: 7.5,
