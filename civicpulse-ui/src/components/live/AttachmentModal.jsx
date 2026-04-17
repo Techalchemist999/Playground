@@ -92,45 +92,88 @@ function MapView({ attachment }) {
 function ReportView({ attachment }) {
   const r = attachment.report;
   if (!r) return <div style={{ padding: 40, color: '#94a3b8' }}>No report data.</div>;
+
+  // Chunk sections into pages — target the attachment's declared page count
+  const targetPages = Math.max(1, attachment.pages || 1);
+  const perPage = Math.max(1, Math.ceil(r.sections.length / targetPages));
+  const pageGroups = [];
+  for (let i = 0; i < r.sections.length; i += perPage) {
+    pageGroups.push(r.sections.slice(i, i + perPage));
+  }
+  const totalPages = pageGroups.length;
+
   return (
     <div style={{
       flex: 1, overflowY: 'auto',
-      background: '#f8fafc', padding: 24,
-      display: 'flex', justifyContent: 'center',
+      background: '#e2e8f0', padding: '24px 24px 40px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
     }}>
-      <div style={{
-        width: '100%', maxWidth: 720,
-        background: '#fff', padding: '40px 48px',
-        boxShadow: '0 4px 20px rgba(15,23,42,0.08)',
-        borderRadius: 4,
-        fontFamily: 'Georgia, "Times New Roman", serif',
-        color: '#1f2937', lineHeight: 1.6,
-      }}>
-        {/* Letterhead */}
-        <div style={{ borderBottom: '3px double #334155', paddingBottom: 14, marginBottom: 18, fontFamily: 'Inter, sans-serif' }}>
-          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#64748b' }}>Village of Pouce Coupe</div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginTop: 4 }}>Staff Report</div>
-          <div style={{ fontSize: 10, color: '#64748b', marginTop: 4 }}>
-            Ref {r.ref} · {r.date} · Prepared by {r.author}
+      {pageGroups.map((sections, pi) => (
+        <div key={pi} style={{
+          width: '100%', maxWidth: 720,
+          background: '#fff', padding: '40px 48px',
+          boxShadow: '0 4px 20px rgba(15,23,42,0.12)',
+          borderRadius: 4,
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          color: '#1f2937', lineHeight: 1.6,
+          position: 'relative',
+        }}>
+          {/* Page-number watermark in top-right corner of every page */}
+          <div style={{
+            position: 'absolute', top: 12, right: 16,
+            fontSize: 10, color: '#94a3b8', fontFamily: 'Inter, sans-serif',
+            fontWeight: 700, letterSpacing: 0.5,
+          }}>
+            Page {pi + 1} / {totalPages}
+          </div>
+
+          {/* Letterhead only on page 1 */}
+          {pi === 0 && (
+            <>
+              <div style={{ borderBottom: '3px double #334155', paddingBottom: 14, marginBottom: 18, fontFamily: 'Inter, sans-serif' }}>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#64748b' }}>Village of Pouce Coupe</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginTop: 4 }}>Staff Report</div>
+                <div style={{ fontSize: 10, color: '#64748b', marginTop: 4 }}>
+                  Ref {r.ref} · {r.date} · Prepared by {r.author}
+                </div>
+              </div>
+              <table style={{ width: '100%', fontSize: 11, marginBottom: 20, fontFamily: 'Inter, sans-serif' }}>
+                <tbody>
+                  <tr><td style={{ padding: '3px 0', color: '#64748b', width: 70, fontWeight: 700 }}>TO:</td><td style={{ padding: '3px 0', color: '#1e293b' }}>{r.to}</td></tr>
+                  <tr><td style={{ padding: '3px 0', color: '#64748b', fontWeight: 700 }}>FROM:</td><td style={{ padding: '3px 0', color: '#1e293b' }}>{r.from}</td></tr>
+                  <tr><td style={{ padding: '3px 0', color: '#64748b', fontWeight: 700 }}>SUBJECT:</td><td style={{ padding: '3px 0', color: '#1e293b', fontWeight: 600 }}>{r.subject}</td></tr>
+                </tbody>
+              </table>
+            </>
+          )}
+
+          {/* Continuation header on subsequent pages */}
+          {pi > 0 && (
+            <div style={{
+              fontSize: 9, color: '#94a3b8', fontFamily: 'Inter, sans-serif',
+              letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14,
+              paddingBottom: 8, borderBottom: '1px solid #e2e8f0',
+            }}>
+              {r.ref} · {r.subject} <span style={{ fontStyle: 'italic', textTransform: 'none' }}>— continued</span>
+            </div>
+          )}
+
+          {sections.map((s, i) => (
+            <div key={i} style={{ marginBottom: 18 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 6, fontFamily: 'Inter, sans-serif' }}>{s.heading}</div>
+              <div style={{ fontSize: 12, color: '#374151' }}>{s.text}</div>
+            </div>
+          ))}
+
+          <div style={{
+            marginTop: 28, paddingTop: 16, borderTop: '1px solid #e2e8f0',
+            fontSize: 10, color: '#94a3b8', fontFamily: 'Inter, sans-serif',
+            textAlign: 'center',
+          }}>
+            {r.ref} · Page {pi + 1} of {totalPages}
           </div>
         </div>
-        <table style={{ width: '100%', fontSize: 11, marginBottom: 20, fontFamily: 'Inter, sans-serif' }}>
-          <tbody>
-            <tr><td style={{ padding: '3px 0', color: '#64748b', width: 70, fontWeight: 700 }}>TO:</td><td style={{ padding: '3px 0', color: '#1e293b' }}>{r.to}</td></tr>
-            <tr><td style={{ padding: '3px 0', color: '#64748b', fontWeight: 700 }}>FROM:</td><td style={{ padding: '3px 0', color: '#1e293b' }}>{r.from}</td></tr>
-            <tr><td style={{ padding: '3px 0', color: '#64748b', fontWeight: 700 }}>SUBJECT:</td><td style={{ padding: '3px 0', color: '#1e293b', fontWeight: 600 }}>{r.subject}</td></tr>
-          </tbody>
-        </table>
-        {r.sections.map((s, i) => (
-          <div key={i} style={{ marginBottom: 18 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 6, fontFamily: 'Inter, sans-serif' }}>{s.heading}</div>
-            <div style={{ fontSize: 12, color: '#374151' }}>{s.text}</div>
-          </div>
-        ))}
-        <div style={{ marginTop: 28, paddingTop: 16, borderTop: '1px solid #e2e8f0', fontSize: 10, color: '#94a3b8', fontFamily: 'Inter, sans-serif', textAlign: 'center' }}>
-          Page 1 of {attachment.pages || 1} · {r.ref}
-        </div>
-      </div>
+      ))}
     </div>
   );
 }
