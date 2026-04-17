@@ -9,6 +9,7 @@ import QuickMotion from './QuickMotion';
 import RulesPanel from './RulesPanel';
 import RobertsRulesCardPanel from './RobertsRulesCardPanel';
 import PrecedenceLadder from './PrecedenceLadder';
+import { getCardById } from '../../data/robertsRulesDeck';
 import SessionControls from './SessionControls';
 
 // Topics + Clerk Notes in one panel with tabs
@@ -227,6 +228,8 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
   const [quickMotionOpen, setQuickMotionOpen] = useState(false);
   const [procedureOpen, setProcedureOpen] = useState(false);
   const [procedureSize, setProcedureSize] = useState('compact'); // 'compact' | 'landscape' | 'portrait'
+  const [activeProcedureId, setActiveProcedureId] = useState(session.sessionId === 'demo' ? 'amend' : 'move');
+  const activeProcedure = getCardById(activeProcedureId);
   const [showSettings, setShowSettings] = useState(false);
 
   // Panel lock + saved positions — persists to localStorage
@@ -653,7 +656,8 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                     </div>
                     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
                       <PrecedenceLadder
-                        initialCardId={session.sessionId === 'demo' ? 'amend' : 'move'}
+                        activeId={activeProcedureId}
+                        onActiveChange={setActiveProcedureId}
                         theme={theme}
                       />
                     </div>
@@ -683,27 +687,35 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                         flexShrink: 0,
                       }}>
                         <button
-                          onClick={() => setProcedureOpen(true)}
-                          title="Procedure toolbox — Robert's Rules cards"
+                          onClick={() => setProcedureOpen(o => !o)}
+                          title={`On The Floor: ${activeProcedure.title} — click for precedence ladder`}
                           style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            width: 42, height: 42,
+                            display: 'flex', alignItems: 'center', gap: 8,
+                            padding: '8px 12px 8px 8px', height: 42,
                             background: '#fff',
-                            border: '1.5px solid #cbd5e1',
+                            border: `1.5px solid ${procedureOpen ? accentColor : '#cbd5e1'}`,
                             borderRadius: 10,
                             cursor: 'pointer',
-                            color: '#475569',
                             transition: 'all .15s',
+                            minWidth: 0, maxWidth: '55%',
                           }}
-                          onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#94a3b8'; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                          onMouseEnter={e => { if (!procedureOpen) e.currentTarget.style.borderColor = '#94a3b8'; }}
+                          onMouseLeave={e => { if (!procedureOpen) e.currentTarget.style.borderColor = '#cbd5e1'; }}
                         >
-                          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path d="M22 12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7" />
-                            <path d="M2 12V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3" />
-                            <line x1="2" y1="12" x2="22" y2="12" />
-                            <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
-                          </svg>
+                          <span style={{
+                            width: 26, height: 26, borderRadius: 6,
+                            background: accentColor, color: '#fff',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 12, fontWeight: 900, flexShrink: 0,
+                          }}>
+                            {activeProcedure.number}
+                          </span>
+                          <span style={{
+                            fontSize: 12, fontWeight: 800, color: '#1e293b', letterSpacing: '.3px',
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                          }}>
+                            {activeProcedure.title}
+                          </span>
                         </button>
                         <button
                           onClick={() => setQuickMotionOpen(true)}
@@ -816,27 +828,35 @@ export default function LiveDashboard({ session, bgTheme, bgThemes, onBgThemeCha
                       flexShrink: 0,
                     }}>
                       <button
-                        onClick={() => setProcedureOpen(true)}
-                        title="Procedure toolbox — Robert's Rules cards"
+                        onClick={() => setProcedureOpen(o => !o)}
+                        title={`On The Floor: ${activeProcedure.title} — click for precedence ladder`}
                         style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          width: 42, height: 42,
+                          display: 'flex', alignItems: 'center', gap: 8,
+                          padding: '8px 12px 8px 8px', height: 42,
                           background: '#fff',
-                          border: '1.5px solid #cbd5e1',
+                          border: `1.5px solid ${procedureOpen ? accentColor : '#cbd5e1'}`,
                           borderRadius: 10,
                           cursor: 'pointer',
-                          color: '#475569',
                           transition: 'all .15s',
+                          minWidth: 0, maxWidth: '55%',
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                        onMouseEnter={e => { if (!procedureOpen) { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
+                        onMouseLeave={e => { if (!procedureOpen) { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.transform = 'translateY(0)'; } }}
                       >
-                        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path d="M22 12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7" />
-                          <path d="M2 12V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3" />
-                          <line x1="2" y1="12" x2="22" y2="12" />
-                          <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
-                        </svg>
+                        <span style={{
+                          width: 26, height: 26, borderRadius: 6,
+                          background: accentColor, color: '#fff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 12, fontWeight: 900, flexShrink: 0,
+                        }}>
+                          {activeProcedure.number}
+                        </span>
+                        <span style={{
+                          fontSize: 12, fontWeight: 800, color: '#1e293b', letterSpacing: '.3px',
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>
+                          {activeProcedure.title}
+                        </span>
                       </button>
                       <button
                         onClick={() => setQuickMotionOpen(true)}

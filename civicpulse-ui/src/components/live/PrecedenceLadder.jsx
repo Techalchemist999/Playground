@@ -7,8 +7,13 @@ const CATEGORY_LABELS = {
   '2/3': '⅔ Vote',
 };
 
-export default function PrecedenceLadder({ initialCardId = 'move', theme }) {
-  const [activeId, setActiveId] = useState(initialCardId);
+export default function PrecedenceLadder({ activeId: controlledId, onActiveChange, initialCardId = 'move', theme }) {
+  const [uncontrolledId, setUncontrolledId] = useState(initialCardId);
+  const activeId = controlledId ?? uncontrolledId;
+  const setActiveId = (id) => {
+    if (onActiveChange) onActiveChange(id);
+    if (controlledId == null) setUncontrolledId(id);
+  };
   const active = getCardById(activeId);
 
   const accent = theme?.accent || '#10b981';
