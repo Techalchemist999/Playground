@@ -127,6 +127,7 @@ export const DEMO_TOPICS = [
   },
 
   // Motion 6: Park Improvement Grant — ON THE FLOOR (demo showcase)
+  // Active amendment pending — drives the "4 AMEND" procedure pill
   {
     normalized_id: 'motion-park-grant',
     label: 'Park Improvement Grant Application',
@@ -139,7 +140,13 @@ export const DEMO_TOPICS = [
     seconder: 'Councillor Wall',
     motionText: 'THAT Council authorizes staff to submit the NDIT Park Improvement grant application for $75,000 for playground equipment replacement at Centennial Park.',
     votes: [null, null, null, null, null],
-    amendment: null,
+    amendment: {
+      status: 'pending',
+      text: 'adding a requirement for community consultation with Centennial Park neighbours prior to final design approval.',
+      mover: 'Councillor Rabel',
+      seconder: 'Councillor Wall',
+      votes: [null, null, null, null, null],
+    },
   },
 ];
 
