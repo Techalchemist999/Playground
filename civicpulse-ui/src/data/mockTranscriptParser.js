@@ -80,7 +80,7 @@ function extractMotions(text) {
         : result.includes('tabled') ? 'tabled'
         : result.includes('unanimously') ? 'carried unanimously'
         : 'carried',
-      amendment: null,
+      subsidiary: null,
     });
   }
 
@@ -184,13 +184,13 @@ function enrichWithDemoMotions(sections, speakers) {
   const find = (keyword) => sections.find(s => s.title.toLowerCase().includes(keyword.toLowerCase()));
 
   // Helper to create a motion object
-  const mot = (id, text, mover, seconder, result, amendment) => ({
+  const mot = (id, text, mover, seconder, result, subsidiary) => ({
     id, text, mover, seconder,
     result: result || 'carried unanimously',
     inFavor: allCouncil,
     opposed: '',
     absent: '',
-    amendment: amendment || null,
+    subsidiary: subsidiary || null,
   });
 
   // --- Sections with DIRECT motions (no sub-items) ---
@@ -269,6 +269,7 @@ function enrichWithDemoMotions(sections, speakers) {
         content: '', motions: [mot('motion-beautification',
           'THAT Council award the Main Street Beautification Project contract to Northern Landscapes in the amount of $78,500.',
           s1, s3, 'carried unanimously', {
+            type: 'amend',
             text: 'adding "and that the project include a public art component with a budget allocation of up to $5,000 from the community enhancement reserve."',
             mover: s2, seconder: s4, result: 'carried', status: 'carried',
             inFavor: 'Mayor Veach, Councillor Wall, Councillor Johnston, Councillor Woodill',
@@ -281,6 +282,7 @@ function enrichWithDemoMotions(sections, speakers) {
         content: '', motions: [mot('motion-canadaday',
           'THAT Council approve a contribution of $3,000 from the events reserve to the Pouce Coupe Recreation Commission for the 2026 Canada Day celebration.',
           s3, s4, 'carried unanimously', {
+            type: 'amend',
             text: 'reducing the contribution from $3,000 to $1,500 and directing the remaining $1,500 to the sidewalk repair reserve.',
             mover: s2, seconder: s1, result: 'defeated', status: 'defeated',
             inFavor: 'Councillor Wall, Councillor Rabel',
@@ -395,7 +397,7 @@ export function parseTranscriptToMinutes(text) {
       mover: speakers[0] || 'Councillor Smith',
       seconder: speakers[1] || 'Councillor Jones',
       result: 'carried',
-      amendment: null,
+      subsidiary: null,
     });
   }
 

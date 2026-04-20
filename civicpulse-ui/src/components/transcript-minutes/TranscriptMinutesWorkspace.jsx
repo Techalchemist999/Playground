@@ -236,17 +236,30 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
   );
 }
 
+const SUBSIDIARY_TYPES = [
+  { key: 'amend',             menu: 'Amendment',             cardLabel: 'AMENDMENT:' },
+  { key: 'postpone',          menu: 'Postpone indefinitely', cardLabel: 'POSTPONE INDEFINITELY:' },
+  { key: 'refer',             menu: 'Refer to committee',    cardLabel: 'REFER:' },
+  { key: 'defer',             menu: 'Defer',                 cardLabel: 'DEFER:' },
+  { key: 'table',             menu: 'Lay on the table',      cardLabel: 'LAY ON TABLE:' },
+  { key: 'withdraw',          menu: 'Withdraw',              cardLabel: 'WITHDRAW:' },
+  { key: 'previous-question', menu: 'Previous question',     cardLabel: 'PREVIOUS QUESTION:' },
+];
+const subsidiaryCardLabel = (type) =>
+  SUBSIDIARY_TYPES.find(t => t.key === type)?.cardLabel || 'SUBSIDIARY MOTION:';
+
 // ─── Motion Card — Nested But Flat ─────────────────────────────
-// Renders an amendment flow as three sibling cards:
-//   1) MOTION (original)  2) AMENDMENT (indented, L-connector)  3) MOTION — vote (snaps back)
-// When there's no amendment, renders a single flat card.
+// Renders a motion with an optional subsidiary (nested procedural motion) as three sibling cards:
+//   1) MOTION (original)  2) SUBSIDIARY (indented, L-connector)  3) MOTION — vote (snaps back)
+// When there's no subsidiary, renders a single flat card plus a "+ Nested motion" dropdown.
 function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReorder, resolutionNumber }) {
   const [isDragTarget, setIsDragTarget] = useState(false);
   const resultOptions = ['carried', 'carried unanimously', 'defeated', 'tabled', 'withdrawn'];
   const resultLabel = (motion.result || 'pending').toUpperCase();
-  const a = motion.amendment;
-  const hasAmendment = !!a;
-  const amendmentCarried = hasAmendment && a.status === 'carried';
+  const a = motion.subsidiary;
+  const hasSubsidiary = !!a;
+  const subType = a?.type || 'amend';
+  const subsidiaryCarried = hasSubsidiary && a.status === 'carried';
 
   const cardBase = {
     background: '#fff',
@@ -462,8 +475,36 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
     } : {}),
   };
 
-  // ─── No amendment: single flat card ───
-  if (!hasAmendment) {
+  const addSubsidiaryMenu = (isEditing) ? (
+    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+      <select
+        value=""
+        onChange={e => {
+          const type = e.target.value;
+          if (!type) return;
+          onUpdate('subsidiary', {
+            type, text: '', mover: '', seconder: '',
+            status: 'carried', inFavor: '', opposed: '', absent: '',
+          });
+          e.target.value = '';
+        }}
+        style={{
+          padding: '6px 12px', fontSize: 11, fontWeight: 600,
+          color: COLORS.secondaryText, background: '#fff',
+          border: `1.5px dashed ${COLORS.primaryBorder}`,
+          borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit',
+        }}
+      >
+        <option value="" disabled>+ Nested motion…</option>
+        {SUBSIDIARY_TYPES.map(t => (
+          <option key={t.key} value={t.key}>{t.menu}</option>
+        ))}
+      </select>
+    </div>
+  ) : null;
+
+  // ─── No subsidiary: single flat card (+ "+ Nested motion" dropdown) ───
+  if (!hasSubsidiary) {
     return (
       <div style={wrapperStyle} {...wrapperDragProps}>
         <div style={cardBase}>
@@ -483,12 +524,14 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
           )}
           {resultBlock}
         </div>
+        {addSubsidiaryMenu}
       </div>
     );
   }
 
-  // ─── Amendment flow: three sibling cards ───
-  const finalSectionLabel = amendmentCarried ? 'MOTION (AS AMENDED):' : 'MOTION:';
+  // ─── With subsidiary: three sibling cards ───
+  const finalSectionLabel = (subType === 'amend' && subsidiaryCarried) ? 'MOTION (AS AMENDED):' : 'MOTION:';
+  const nestedCardLabel = subsidiaryCardLabel(subType);
 
   return (
     <div style={wrapperStyle} {...wrapperDragProps}>
@@ -505,7 +548,7 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
         )}
       </div>
 
-      {/* Card 2: Amendment — indented, orange, L-connector */}
+      {/* Card 2: Subsidiary — indented, orange, L-connector */}
       <div style={cardAmend}>
         {/* L-connector */}
         <div style={{
@@ -514,14 +557,64 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
           borderLeft: '2px solid #cbd5e1',
           borderBottom: '2px solid #cbd5e1',
         }} />
-        <div style={{ ...sectionLabel, color: '#92400e' }}>AMENDMENT:</div>
+        {/* ✕ to remove the subsidiary, edit mode */}
+        {isEditing && (
+          <button
+            onClick={() => onUpdate('subsidiary', null)}
+            aria-label="Remove nested motion"
+            title="Remove nested motion"
+            style={{
+              position: 'absolute', top: 6, right: 6,
+              width: 22, height: 22, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'transparent', border: 'none',
+              color: COLORS.mutedText, cursor: 'pointer',
+              padding: 0, fontFamily: 'inherit',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = COLORS.dangerRed; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = COLORS.mutedText; }}
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
+        {/* Type selector (edit mode) / label (view mode) */}
+        {isEditing ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <span style={{ ...sectionLabel, color: '#92400e', marginBottom: 0 }}>{nestedCardLabel}</span>
+            <select
+              value={subType}
+              onChange={e => onUpdate('subsidiary', { ...a, type: e.target.value })}
+              style={{
+                padding: '2px 6px', fontSize: 11, fontWeight: 600,
+                color: COLORS.secondaryText, background: '#fff',
+                border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4,
+                fontFamily: 'inherit', cursor: 'pointer',
+              }}
+            >
+              {SUBSIDIARY_TYPES.map(t => (
+                <option key={t.key} value={t.key}>{t.menu}</option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div style={{ ...sectionLabel, color: '#92400e' }}>{nestedCardLabel}</div>
+        )}
         <div style={{
           ...bodyText,
           textDecoration: a.status === 'defeated' ? 'line-through' : 'none',
         }}>
-          THAT the main motion be amended by {a.text}
+          {isEditing
+            ? textField(a.text, v => onUpdate('subsidiary', { ...a, text: v }))
+            : (subType === 'amend' ? `THAT the main motion be amended by ${a.text}` : a.text)}
         </div>
-        {movedSeconded(a.mover, a.seconder, null, null)}
+        {movedSeconded(
+          a.mover, a.seconder,
+          v => onUpdate('subsidiary', { ...a, mover: v }),
+          v => onUpdate('subsidiary', { ...a, seconder: v }),
+        )}
         <div style={{
           display: 'flex', justifyContent: 'space-between',
           alignItems: 'flex-end', gap: 12, marginTop: 10,
@@ -529,14 +622,14 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
           <div style={{ flex: 1, minWidth: 0 }}>
             {rollCallLines(
               a,
-              (field, value) => onUpdate('amendment', { ...a, [field]: value }),
+              (field, value) => onUpdate('subsidiary', { ...a, [field]: value }),
             )}
           </div>
           <div style={{ flexShrink: 0 }}>
             {dispositionBox(
               (a.status || 'carried').toLowerCase(),
               resultOptions,
-              v => onUpdate('amendment', { ...a, status: v }),
+              v => onUpdate('subsidiary', { ...a, status: v }),
             )}
           </div>
         </div>
@@ -1105,20 +1198,22 @@ async function exportToDocx(data, approval) {
     addLabelValue('MOVED BY: ', m.mover, indent);
     addLabelValue('SECONDED BY: ', m.seconder, indent);
 
-    const resultText = m.amendment?.status === 'carried'
+    const sub = m.subsidiary;
+    const resultText = (sub?.type === 'amend' && sub?.status === 'carried')
       ? `${(m.result || 'CARRIED').toUpperCase()} (AS AMENDED)`
       : (m.result || 'CARRIED').toUpperCase();
     addPara(resultText, { bold: true, indent });
 
     if (m.opposed) addLabelValue('OPPOSED: ', m.opposed, indent);
 
-    if (m.amendment) {
-      const aStatus = (m.amendment.status || m.amendment.result || '').toUpperCase();
-      addPara('AMENDMENT:', { bold: true, indent });
-      addPara(`THAT the main motion be amended by ${m.amendment.text}`, { indent });
-      addLabelValue('MOVED BY: ', m.amendment.mover, indent);
-      addLabelValue('SECONDED BY: ', m.amendment.seconder, indent);
-      addPara(`AMENDMENT ${aStatus}`, { bold: true, indent });
+    if (sub) {
+      const aStatus = (sub.status || sub.result || '').toUpperCase();
+      const label = (SUBSIDIARY_TYPES.find(t => t.key === sub.type)?.cardLabel || 'SUBSIDIARY MOTION:');
+      addPara(label, { bold: true, indent });
+      addPara(sub.type === 'amend' ? `THAT the main motion be amended by ${sub.text}` : sub.text, { indent });
+      addLabelValue('MOVED BY: ', sub.mover, indent);
+      addLabelValue('SECONDED BY: ', sub.seconder, indent);
+      addPara(aStatus, { bold: true, indent });
     }
   };
 
@@ -1461,7 +1556,7 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
               mover: '',
               seconder: '',
               result: 'carried unanimously',
-              amendment: null,
+              subsidiary: null,
             };
             return { ...sub, motions: [...(sub.motions || []), newMotion] };
           }),
