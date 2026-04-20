@@ -394,36 +394,6 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
     isEditing ? dispositionSelect(value, options, onChange) : dispositionPill(value)
   );
 
-  const dragHandle = (isEditing && onReorder) ? (
-    <span
-      draggable
-      onDragStart={e => {
-        e.dataTransfer.setData('text/plain', `motion:${motionIndex}`);
-        e.dataTransfer.effectAllowed = 'move';
-      }}
-      title="Drag to reorder motion"
-      aria-label="Drag to reorder motion"
-      style={{
-        position: 'absolute', top: 6, left: 6,
-        width: 22, height: 22,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: COLORS.mutedText, cursor: 'grab',
-        userSelect: 'none',
-      }}
-      onMouseEnter={e => { e.currentTarget.style.color = COLORS.headingText; }}
-      onMouseLeave={e => { e.currentTarget.style.color = COLORS.mutedText; }}
-    >
-      <svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor">
-        <circle cx="6" cy="5" r="1.4" />
-        <circle cx="6" cy="10" r="1.4" />
-        <circle cx="6" cy="15" r="1.4" />
-        <circle cx="14" cy="5" r="1.4" />
-        <circle cx="14" cy="10" r="1.4" />
-        <circle cx="14" cy="15" r="1.4" />
-      </svg>
-    </span>
-  ) : null;
-
   const deleteButton = (isEditing && onDelete) ? (
     <button
       onClick={onDelete}
@@ -451,7 +421,22 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
     dispositionBox(motion.result, resultOptions, v => onUpdate('result', v))
   );
 
-  const wrapperDropProps = (isEditing && onReorder) ? {
+  const INTERACTIVE_TAGS = new Set(['input', 'textarea', 'select', 'button', 'option']);
+  const isInteractiveTarget = (el) => {
+    if (!el) return false;
+    const tag = el.tagName?.toLowerCase();
+    if (INTERACTIVE_TAGS.has(tag)) return true;
+    if (el.isContentEditable) return true;
+    return false;
+  };
+
+  const wrapperDragProps = (isEditing && onReorder) ? {
+    draggable: true,
+    onDragStart: e => {
+      if (isInteractiveTarget(e.target)) { e.preventDefault(); return; }
+      e.dataTransfer.setData('text/plain', `motion:${motionIndex}`);
+      e.dataTransfer.effectAllowed = 'move';
+    },
     onDragOver: e => {
       if (!e.dataTransfer.types.includes('text/plain')) return;
       e.preventDefault();
@@ -471,6 +456,7 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
 
   const wrapperStyle = {
     marginTop: 10, marginBottom: 6,
+    ...(isEditing && onReorder ? { cursor: 'grab' } : {}),
     ...(isDragTarget ? {
       outline: '2px solid #3b82f6', outlineOffset: 2, borderRadius: 10,
     } : {}),
@@ -479,9 +465,8 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
   // ─── No amendment: single flat card ───
   if (!hasAmendment) {
     return (
-      <div style={wrapperStyle} {...wrapperDropProps}>
+      <div style={wrapperStyle} {...wrapperDragProps}>
         <div style={cardBase}>
-          {dragHandle}
           {deleteButton}
           {resolutionNumber && (
             <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
@@ -506,10 +491,9 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
   const finalSectionLabel = amendmentCarried ? 'MOTION (AS AMENDED):' : 'MOTION:';
 
   return (
-    <div style={wrapperStyle} {...wrapperDropProps}>
+    <div style={wrapperStyle} {...wrapperDragProps}>
       {/* Card 1: Main motion */}
       <div style={cardBase}>
-        {dragHandle}
         {deleteButton}
         <div style={sectionLabel}>MOTION:</div>
         {isEditing
@@ -609,25 +593,42 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
     if (target !== subIndex) onReorder(subIndex, target);
   };
 
+  const INTERACTIVE_TAGS = new Set(['input', 'textarea', 'select', 'button', 'option']);
+  const isInteractiveTarget = (el) => {
+    if (!el) return false;
+    const tag = el.tagName?.toLowerCase();
+    if (INTERACTIVE_TAGS.has(tag)) return true;
+    if (el.isContentEditable) return true;
+    return false;
+  };
+
+  const subDragProps = (isEditing && onReorder) ? {
+    draggable: true,
+    onDragStart: e => {
+      if (isInteractiveTarget(e.target)) { e.preventDefault(); return; }
+      e.dataTransfer.setData('text/plain', `sub:${subIndex}`);
+      e.dataTransfer.effectAllowed = 'move';
+    },
+    onDragOver: e => {
+      if (!e.dataTransfer.types.includes('text/plain')) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (!isDragTarget) setIsDragTarget(true);
+    },
+    onDragLeave: () => { if (isDragTarget) setIsDragTarget(false); },
+    onDrop: e => {
+      e.preventDefault();
+      setIsDragTarget(false);
+      const payload = e.dataTransfer.getData('text/plain');
+      if (!payload.startsWith('sub:')) return;
+      const from = parseInt(payload.slice('sub:'.length), 10);
+      if (!Number.isNaN(from) && from !== subIndex) onReorder(from, subIndex);
+    },
+  } : {};
+
   return (
     <div
-      onDragOver={e => {
-        if (!isEditing || !onReorder) return;
-        if (!e.dataTransfer.types.includes('text/plain')) return;
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        if (!isDragTarget) setIsDragTarget(true);
-      }}
-      onDragLeave={() => { if (isDragTarget) setIsDragTarget(false); }}
-      onDrop={e => {
-        if (!isEditing || !onReorder) return;
-        e.preventDefault();
-        setIsDragTarget(false);
-        const payload = e.dataTransfer.getData('text/plain');
-        if (!payload.startsWith('sub:')) return;
-        const from = parseInt(payload.slice('sub:'.length), 10);
-        if (!Number.isNaN(from) && from !== subIndex) onReorder(from, subIndex);
-      }}
+      {...subDragProps}
       style={{
         marginTop: 14,
         background: isDragTarget ? '#eff6ff' : '#fafbfc',
@@ -636,40 +637,13 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
         borderRadius: 10,
         padding: 14,
         transition: 'background .1s, border-color .1s',
+        ...(isEditing && onReorder ? { cursor: 'grab' } : {}),
       }}>
       {/* Sub-item title — editable in edit mode */}
       {isEditing ? (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10,
         }}>
-          {onReorder && (
-            <span
-              draggable
-              onDragStart={e => {
-                e.dataTransfer.setData('text/plain', `sub:${subIndex}`);
-                e.dataTransfer.effectAllowed = 'move';
-              }}
-              title="Drag to reorder sub-item"
-              aria-label="Drag to reorder sub-item"
-              style={{
-                width: 22, height: 22,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: COLORS.mutedText, cursor: 'grab', userSelect: 'none',
-                flexShrink: 0,
-              }}
-              onMouseEnter={e => { e.currentTarget.style.color = COLORS.headingText; }}
-              onMouseLeave={e => { e.currentTarget.style.color = COLORS.mutedText; }}
-            >
-              <svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor">
-                <circle cx="6" cy="5" r="1.4" />
-                <circle cx="6" cy="10" r="1.4" />
-                <circle cx="6" cy="15" r="1.4" />
-                <circle cx="14" cy="5" r="1.4" />
-                <circle cx="14" cy="10" r="1.4" />
-                <circle cx="14" cy="15" r="1.4" />
-              </svg>
-            </span>
-          )}
           {isEditingNumber ? (
             <input
               type="text"
@@ -691,16 +665,11 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
             />
           ) : (
             <span
-              draggable={!!onReorder}
-              onDragStart={e => {
-                e.dataTransfer.setData('text/plain', `sub:${subIndex}`);
-                e.dataTransfer.effectAllowed = 'move';
-              }}
               onClick={beginNumberEdit}
-              title="Click to renumber · drag to reorder"
+              title="Click to renumber"
               style={{
                 fontSize: 13, fontWeight: 700, color: COLORS.headingText, flexShrink: 0,
-                cursor: onReorder ? 'grab' : 'default',
+                cursor: 'pointer',
                 padding: '3px 6px', borderRadius: 4, userSelect: 'none',
               }}
               onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; }}
