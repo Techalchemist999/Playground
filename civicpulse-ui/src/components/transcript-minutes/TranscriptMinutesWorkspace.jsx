@@ -324,34 +324,52 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
   };
 
   const bottomRow = (rightNode) => {
-    const needsOpposed = (motion.result || '').toLowerCase() === 'carried';
+    const needsRollCall = (motion.result || '').toLowerCase() === 'carried';
+    const editInput = (field, placeholder) => (
+      <input
+        value={motion[field] || ''}
+        onChange={e => onUpdate(field, e.target.value)}
+        placeholder={placeholder}
+        style={{
+          fontSize: 12, fontWeight: 600,
+          border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4,
+          padding: '2px 6px', fontFamily: 'inherit', background: '#fff',
+          minWidth: 220,
+        }}
+      />
+    );
     return (
       <div style={{
         display: 'flex', justifyContent: 'space-between',
         alignItems: 'flex-end', gap: 12, marginTop: 10,
       }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          {needsOpposed && (
+          {needsRollCall && (
             isEditing ? (
-              <div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>OPPOSED: </span>
-                <input
-                  value={motion.opposed || ''}
-                  onChange={e => onUpdate('opposed', e.target.value)}
-                  placeholder="Councillor names…"
-                  style={{
-                    fontSize: 12, fontWeight: 600,
-                    border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4,
-                    padding: '2px 6px', fontFamily: 'inherit', background: '#fff',
-                    minWidth: 220,
-                  }}
-                />
-              </div>
-            ) : motion.opposed ? (
-              <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-                <span style={{ fontWeight: 700 }}>OPPOSED:</span> {motion.opposed}
-              </div>
-            ) : null
+              <>
+                <div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>IN FAVOUR: </span>
+                  {editInput('inFavour', 'Councillor names…')}
+                </div>
+                <div style={{ marginTop: 2 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>OPPOSED: </span>
+                  {editInput('opposed', 'Councillor names…')}
+                </div>
+              </>
+            ) : (
+              <>
+                {motion.inFavour && (
+                  <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+                    <span style={{ fontWeight: 700 }}>IN FAVOUR:</span> {motion.inFavour}
+                  </div>
+                )}
+                {motion.opposed && (
+                  <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+                    <span style={{ fontWeight: 700 }}>OPPOSED:</span> {motion.opposed}
+                  </div>
+                )}
+              </>
+            )
           )}
         </div>
         <div style={{ flexShrink: 0 }}>{rightNode}</div>
