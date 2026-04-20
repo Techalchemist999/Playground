@@ -262,10 +262,6 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
     background: '#fffdf7',
     position: 'relative',
   };
-  const topLabel = (color) => ({
-    fontSize: 10.5, fontWeight: 800, letterSpacing: '.6px', textTransform: 'uppercase',
-    color, marginBottom: 6,
-  });
   const sectionLabel = { fontSize: 13, fontWeight: 700, color: COLORS.headingText, marginBottom: 4 };
   const bodyText = { fontSize: 13, lineHeight: 1.7, color: COLORS.bodyText, marginBottom: 6 };
 
@@ -347,7 +343,6 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
               {resolutionNumber}
             </div>
           )}
-          <div style={topLabel('#0f172a')}>MOTION</div>
           <div style={sectionLabel}>MOTION:</div>
           {isEditing
             ? textField(motion.text, v => onUpdate('text', v))
@@ -363,14 +358,12 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
   }
 
   // ─── Amendment flow: three sibling cards ───
-  const finalLabelText = amendmentCarried ? 'Main motion as amended — vote' : 'Main motion — vote';
   const finalSectionLabel = amendmentCarried ? 'MOTION (AS AMENDED):' : 'MOTION:';
 
   return (
     <div style={{ marginTop: 10, marginBottom: 6 }}>
       {/* Card 1: Main motion */}
       <div style={cardBase}>
-        <div style={topLabel('#0f172a')}>MOTION</div>
         <div style={sectionLabel}>MOTION:</div>
         {isEditing
           ? textField(motion.text, v => onUpdate('text', v))
@@ -390,8 +383,7 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
           borderLeft: '2px solid #cbd5e1',
           borderBottom: '2px solid #cbd5e1',
         }} />
-        <div style={topLabel('#92400e')}>Amendment on the floor</div>
-        <div style={sectionLabel}>AMENDMENT:</div>
+        <div style={{ ...sectionLabel, color: '#92400e' }}>AMENDMENT:</div>
         <div style={{
           ...bodyText,
           textDecoration: a.status === 'defeated' ? 'line-through' : 'none',
@@ -414,8 +406,7 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
             {resolutionNumber}
           </div>
         )}
-        <div style={topLabel('#166534')}>{finalLabelText}</div>
-        <div style={sectionLabel}>{finalSectionLabel}</div>
+        <div style={{ ...sectionLabel, color: '#166534' }}>{finalSectionLabel}</div>
         <div style={bodyText}>{motion.text}</div>
         {resultBlock}
       </div>
