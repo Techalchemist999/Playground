@@ -369,7 +369,7 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
 }
 
 // ─── Sub-Item Card — nested container with optional discussion ─────────────────────────────
-function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateContent, renderMotionsForSub }) {
+function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, onUpdateContent, renderMotionsForSub }) {
   const contentHasText = !!(sub.content && sub.content.trim());
   const [opened, setOpened] = useState(false);
   const editRef = useRef(null);
@@ -383,6 +383,8 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateContent, 
     });
   };
 
+  const numberPrefix = `${sectionIndex}.${subIndex + 1}`;
+
   return (
     <div style={{
       marginTop: 14,
@@ -392,13 +394,38 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateContent, 
       borderRadius: 10,
       padding: 14,
     }}>
-      {/* Sub-item title */}
-      <div style={{
-        fontSize: 13, fontWeight: 700, color: COLORS.headingText,
-        marginBottom: 10,
-      }}>
-        {sectionIndex}.{subIndex + 1} {sub.title}
-      </div>
+      {/* Sub-item title — editable in edit mode */}
+      {isEditing ? (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10,
+        }}>
+          <span style={{
+            fontSize: 13, fontWeight: 700, color: COLORS.headingText, flexShrink: 0,
+          }}>
+            {numberPrefix}
+          </span>
+          <input
+            type="text"
+            value={sub.title || ''}
+            onChange={e => onUpdateTitle(subIndex, e.target.value)}
+            placeholder="Sub-item title..."
+            style={{
+              flex: 1, padding: '5px 8px',
+              fontSize: 13, fontWeight: 700, color: COLORS.headingText,
+              background: '#fff',
+              border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+              fontFamily: 'inherit', outline: 'none',
+            }}
+          />
+        </div>
+      ) : (
+        <div style={{
+          fontSize: 13, fontWeight: 700, color: COLORS.headingText,
+          marginBottom: 10,
+        }}>
+          {numberPrefix} {sub.title}
+        </div>
+      )}
 
       {/* Discussion box — editable when in edit mode, read-only when viewing.
           Shows "+ Add Discussion" in edit mode when no discussion yet. */}
@@ -461,7 +488,7 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateContent, 
 }
 
 // ─── Minutes Section ─────────────────────────────
-function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onUpdateSubItem, onUpdateSubItemContent, resolutionMap }) {
+function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onUpdateSubItem, onUpdateSubItemContent, onUpdateSubItemTitle, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const numberedTitle = sectionIndex != null
@@ -553,6 +580,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
               sectionIndex={sectionIndex}
               subIndex={si}
               isEditing={isEditing}
+              onUpdateTitle={onUpdateSubItemTitle}
               onUpdateContent={onUpdateSubItemContent}
               renderMotionsForSub={(subIndex) =>
                 renderMotions(sub.motions || [], (mi, field, value) => onUpdateSubItem(subIndex, mi, field, value), `sub-${subIndex}`)
@@ -951,6 +979,22 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
     setIsDirty(true);
   }, []);
 
+  const updateSubItemTitle = useCallback((sectionId, subIndex, title) => {
+    setData(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => {
+        if (s.id !== sectionId) return s;
+        return {
+          ...s,
+          subItems: (s.subItems || []).map((sub, si) =>
+            si === subIndex ? { ...sub, title } : sub
+          ),
+        };
+      }),
+    }));
+    setIsDirty(true);
+  }, []);
+
   const updateSubItemContent = useCallback((sectionId, subIndex, content) => {
     setData(prev => ({
       ...prev,
@@ -1170,6 +1214,7 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
                 onUpdateMotion={(mi, field, value) => updateMotion(section.id, mi, field, value)}
                 onUpdateSubItem={(si, mi, field, value) => updateSubItemMotion(section.id, si, mi, field, value)}
                 onUpdateSubItemContent={(si, content) => updateSubItemContent(section.id, si, content)}
+                onUpdateSubItemTitle={(si, title) => updateSubItemTitle(section.id, si, title)}
                 resolutionMap={resolutionMap}
               />
             ))}

@@ -123,7 +123,9 @@ function splitIntoSections(text) {
     for (let i = 0; i < numbered.length; i++) {
       const start = numbered[i].index;
       const end = i + 1 < numbered.length ? numbered[i + 1].index : text.length;
-      const content = text.substring(start, end).replace(/^.*\n/, '').trim();
+      // Strip the numbered header line itself (e.g. "\n4. Adoption of Previous Minutes\n")
+      // so section.content only contains discussion, not a repeat of the section title.
+      const content = text.substring(start, end).replace(/^\s*\d+[.\)]\s*[^\n]*\n?/, '').trim();
       sections.push({
         id: `section-${i + 1}`,
         title: numbered[i].title,
