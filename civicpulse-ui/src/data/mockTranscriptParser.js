@@ -263,6 +263,8 @@ function enrichWithDemoMotions(sections, speakers) {
           s1, s3, 'carried unanimously', {
             text: 'adding "and that the project include a public art component with a budget allocation of up to $5,000 from the community enhancement reserve."',
             mover: s2, seconder: s4, result: 'carried', status: 'carried',
+            inFavour: 'Mayor Veach, Councillor Wall, Councillor Johnston, Councillor Woodill',
+            opposed: 'Councillor Rabel',
           })],
       },
       {
@@ -272,6 +274,8 @@ function enrichWithDemoMotions(sections, speakers) {
           s3, s4, 'carried unanimously', {
             text: 'reducing the contribution from $3,000 to $1,500 and directing the remaining $1,500 to the sidewalk repair reserve.',
             mover: s2, seconder: s1, result: 'defeated', status: 'defeated',
+            inFavour: 'Councillor Wall, Councillor Rabel',
+            opposed: 'Mayor Veach, Councillor Johnston, Councillor Woodill',
           })],
       },
       {
