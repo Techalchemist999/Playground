@@ -246,7 +246,6 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
   const a = motion.amendment;
   const hasAmendment = !!a;
   const amendmentCarried = hasAmendment && a.status === 'carried';
-  const aStatusText = hasAmendment ? (a.status || a.result || '').toUpperCase() : '';
 
   const cardBase = {
     background: '#fff',
@@ -340,20 +339,26 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
     </div>
   );
 
+  const dispositionSelect = (value, options, onChange) => (
+    <select
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      style={{
+        padding: '4px 10px', fontSize: 12, fontWeight: 700,
+        background: '#fff', border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+        fontFamily: 'inherit', color: COLORS.headingText,
+      }}
+    >
+      {options.map(opt => <option key={opt} value={opt}>{opt.toUpperCase()}</option>)}
+    </select>
+  );
+
+  const dispositionBox = (value, options, onChange) => (
+    isEditing ? dispositionSelect(value, options, onChange) : dispositionPill(value)
+  );
+
   const resultBlock = bottomRow(
-    isEditing ? (
-      <select
-        value={motion.result}
-        onChange={e => onUpdate('result', e.target.value)}
-        style={{
-          padding: '4px 10px', fontSize: 12, fontWeight: 700,
-          background: '#fff', border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
-          fontFamily: 'inherit', color: COLORS.headingText,
-        }}
-      >
-        {resultOptions.map(opt => <option key={opt} value={opt}>{opt.toUpperCase()}</option>)}
-      </select>
-    ) : dispositionPill(resultLabel)
+    dispositionBox(motion.result, resultOptions, v => onUpdate('result', v))
   );
 
   // ─── No amendment: single flat card ───
@@ -417,7 +422,11 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
         <div style={{
           display: 'flex', justifyContent: 'flex-end', marginTop: 10,
         }}>
-          {dispositionPill(aStatusText)}
+          {dispositionBox(
+            (a.status || 'pending').toLowerCase(),
+            ['carried', 'defeated', 'pending'],
+            v => onUpdate('amendment', { ...a, status: v }),
+          )}
         </div>
       </div>
 
