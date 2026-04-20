@@ -516,10 +516,13 @@ function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber })
 }
 
 // ─── Sub-Item Card — nested container with optional discussion ─────────────────────────────
-function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, onUpdateContent, onAddMotion, renderMotionsForSub }) {
+function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, onUpdateContent, onAddMotion, onReorder, renderMotionsForSub }) {
   const contentHasText = !!(sub.content && sub.content.trim());
   const [opened, setOpened] = useState(false);
   const editRef = useRef(null);
+  const [isEditingNumber, setIsEditingNumber] = useState(false);
+  const [numberDraft, setNumberDraft] = useState('');
+  const [isDragTarget, setIsDragTarget] = useState(false);
 
   const showBox = contentHasText || opened;
 
@@ -532,25 +535,91 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
 
   const numberPrefix = `${sectionIndex}.${subIndex + 1}`;
 
+  const beginNumberEdit = () => {
+    setNumberDraft(numberPrefix);
+    setIsEditingNumber(true);
+  };
+
+  const commitNumberEdit = () => {
+    setIsEditingNumber(false);
+    if (!onReorder) return;
+    const match = /(\d+)(?:\.(\d+))?/.exec(numberDraft.trim());
+    if (!match) return;
+    const raw = match[2] ? parseInt(match[2], 10) : parseInt(match[1], 10);
+    if (!Number.isFinite(raw) || raw < 1) return;
+    const target = raw - 1;
+    if (target !== subIndex) onReorder(subIndex, target);
+  };
+
   return (
-    <div style={{
-      marginTop: 14,
-      background: '#fafbfc',
-      border: `1px solid ${COLORS.cardBorder}`,
-      borderLeft: `3px solid ${COLORS.primary}`,
-      borderRadius: 10,
-      padding: 14,
-    }}>
+    <div
+      onDragOver={e => {
+        if (!isEditing || !onReorder) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (!isDragTarget) setIsDragTarget(true);
+      }}
+      onDragLeave={() => { if (isDragTarget) setIsDragTarget(false); }}
+      onDrop={e => {
+        if (!isEditing || !onReorder) return;
+        e.preventDefault();
+        setIsDragTarget(false);
+        const from = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        if (!Number.isNaN(from) && from !== subIndex) onReorder(from, subIndex);
+      }}
+      style={{
+        marginTop: 14,
+        background: isDragTarget ? '#eff6ff' : '#fafbfc',
+        border: `1px solid ${isDragTarget ? '#3b82f6' : COLORS.cardBorder}`,
+        borderLeft: `3px solid ${COLORS.primary}`,
+        borderRadius: 10,
+        padding: 14,
+        transition: 'background .1s, border-color .1s',
+      }}>
       {/* Sub-item title — editable in edit mode */}
       {isEditing ? (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10,
         }}>
-          <span style={{
-            fontSize: 13, fontWeight: 700, color: COLORS.headingText, flexShrink: 0,
-          }}>
-            {numberPrefix}
-          </span>
+          {isEditingNumber ? (
+            <input
+              type="text"
+              autoFocus
+              value={numberDraft}
+              onChange={e => setNumberDraft(e.target.value)}
+              onBlur={commitNumberEdit}
+              onKeyDown={e => {
+                if (e.key === 'Enter') e.currentTarget.blur();
+                if (e.key === 'Escape') { setIsEditingNumber(false); e.currentTarget.blur(); }
+              }}
+              style={{
+                width: 56, padding: '3px 6px',
+                fontSize: 13, fontWeight: 700, color: COLORS.headingText,
+                background: '#fff',
+                border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4,
+                fontFamily: 'inherit', outline: 'none',
+              }}
+            />
+          ) : (
+            <span
+              draggable={!!onReorder}
+              onDragStart={e => {
+                e.dataTransfer.setData('text/plain', String(subIndex));
+                e.dataTransfer.effectAllowed = 'move';
+              }}
+              onClick={beginNumberEdit}
+              title="Click to renumber · drag to reorder"
+              style={{
+                fontSize: 13, fontWeight: 700, color: COLORS.headingText, flexShrink: 0,
+                cursor: onReorder ? 'grab' : 'default',
+                padding: '3px 6px', borderRadius: 4, userSelect: 'none',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              {numberPrefix}
+            </span>
+          )}
           <input
             type="text"
             value={sub.title || ''}
@@ -659,7 +728,7 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
 }
 
 // ─── Minutes Section ─────────────────────────────
-function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onRemoveMotion, onUpdateSubItem, onRemoveSubItemMotion, onUpdateSubItemContent, onUpdateSubItemTitle, onAddSubItemMotion, resolutionMap }) {
+function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onRemoveMotion, onUpdateSubItem, onRemoveSubItemMotion, onUpdateSubItemContent, onUpdateSubItemTitle, onAddSubItemMotion, onReorderSubItem, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const numberedTitle = sectionIndex != null
@@ -760,6 +829,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
               onUpdateTitle={onUpdateSubItemTitle}
               onUpdateContent={onUpdateSubItemContent}
               onAddMotion={onAddSubItemMotion}
+              onReorder={onReorderSubItem}
               renderMotionsForSub={(subIndex) =>
                 renderMotions(
                   sub.motions || [],
@@ -1214,6 +1284,22 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
     setIsDirty(true);
   }, []);
 
+  const reorderSubItem = useCallback((sectionId, fromIndex, toIndex) => {
+    setData(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => {
+        if (s.id !== sectionId) return s;
+        const items = [...(s.subItems || [])];
+        if (fromIndex < 0 || fromIndex >= items.length) return s;
+        const [moved] = items.splice(fromIndex, 1);
+        const target = Math.max(0, Math.min(items.length, toIndex));
+        items.splice(target, 0, moved);
+        return { ...s, subItems: items };
+      }),
+    }));
+    setIsDirty(true);
+  }, []);
+
   const removeMotion = useCallback((sectionId, motionIndex) => {
     setData(prev => ({
       ...prev,
@@ -1454,6 +1540,7 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
                 onUpdateSubItemTitle={(si, title) => updateSubItemTitle(section.id, si, title)}
                 onAddSubItemMotion={si => addSubItemMotion(section.id, si)}
                 onRemoveMotion={mi => removeMotion(section.id, mi)}
+                onReorderSubItem={(from, to) => reorderSubItem(section.id, from, to)}
                 resolutionMap={resolutionMap}
               />
             ))}
