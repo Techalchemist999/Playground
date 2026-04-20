@@ -417,7 +417,7 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
         <div style={{
           display: 'flex', justifyContent: 'flex-end', marginTop: 10,
         }}>
-          {dispositionPill(`AMENDMENT ${aStatusText}`)}
+          {dispositionPill(aStatusText)}
         </div>
       </div>
 
