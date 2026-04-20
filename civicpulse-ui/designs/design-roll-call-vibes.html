@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Roll Call — 10 Design Vibes (app-accurate)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f1f5f9; font-family: 'Inter', system-ui, sans-serif; color: #0f172a; }
+  body { padding: 24px 20px 80px; }
+
+  .page-header { max-width: 1360px; margin: 0 auto 28px; }
+  .page-header h1 {
+    font-size: 28px; font-weight: 900; letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #0f172a, #3b82f6, #ec4899);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .page-header p { color: #64748b; font-size: 13px; margin-top: 6px; max-width: 900px; line-height: 1.55; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+    gap: 24px; max-width: 1360px; margin: 0 auto;
+  }
+
+  .design {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+    overflow: hidden; box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+    display: flex; flex-direction: column;
+  }
+  .design-header {
+    padding: 14px 18px; border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; gap: 12px;
+    background: #fafbfc;
+  }
+  .design-header .num {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: #0f172a; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }
+  .design-header h2 { font-size: 15px; font-weight: 800; color: #0f172a; flex: 1; }
+  .design-note { padding: 10px 18px; font-size: 11px; color: #64748b; line-height: 1.5; border-bottom: 1px solid #f1f5f9; background: #fff; }
+  .design-stage { padding: 22px; background: #f8fafc; }
+
+  /* ════════════════════════════════════════════════════════════════ */
+  /*  APP CARD — EXACT replication of TranscriptMinutesWorkspace       */
+  /* ════════════════════════════════════════════════════════════════ */
+  .card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .card + .card { margin-top: 10px; }
+  .lbl       { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  .mtext     { font-size: 13px; line-height: 1.7; color: #334155; margin-bottom: 6px; }
+  .mrow      { font-size: 13px; color: #334155; }
+  .mrow b    { font-weight: 700; }
+
+  .bottom-row {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 12px; margin-top: 10px;
+  }
+  .opposed-area { flex: 1; min-width: 0; }
+  .pill {
+    font-size: 11px; font-weight: 800; letter-spacing: .6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: #dcfce7; color: #166534;
+    text-transform: uppercase; white-space: nowrap;
+    display: inline-block;
+  }
+  .pill.red { background: #fee2e2; color: #991b1b; }
+
+  /* ════════════════════════════════════════════════════════════════ */
+  /*  1 · Two stacked text lines (IN FAVOUR / OPPOSED)                 */
+  /* ════════════════════════════════════════════════════════════════ */
+  /* (uses .mrow — no extra rules needed)                              */
+
+  /* ════════════════════════════════════════════════════════════════ */
+  /*  3 · Roll-call list — one councillor per line                     */
+  /* ════════════════════════════════════════════════════════════════ */
+  .v3-ind { color: #166534; font-weight: 700; }
+  .v3-opp { color: #991b1b; font-weight: 700; }
+
+  /* ════════════════════════════════════════════════════════════════ */
+  /*  4 · Nested sub-box "ROLL CALL"                                   */
+  /* ════════════════════════════════════════════════════════════════ */
+  .v4-sub {
+    margin-top: 10px; padding: 10px 12px;
+    background: #fafbfc; border: 1px solid #f1f5f9; border-radius: 8px;
+  }
+  .v4-head {
+    font-size: 10.5px; font-weight: 800; letter-spacing: .6px;
+    color: #64748b; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .v4-row { font-size: 13px; color: #334155; display: flex; justify-content: space-between; }
+  .v4-row + .v4-row { margin-top: 2px; }
+  .v4-row b { font-weight: 600; color: #0f172a; }
+  .v4-row .vy { color: #166534; font-weight: 700; }
+  .v4-row .vn { color: #991b1b; font-weight: 700; }
+
+  /* ════════════════════════════════════════════════════════════════ */
+  /*  5 · Collapsible "▸ Roll call (4-1)"                              */
+  /* ════════════════════════════════════════════════════════════════ */
+  .v5-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; color: #475569; font-weight: 700;
+    background: transparent; border: none; padding: 0; cursor: pointer;
+  }
+  .v5-toggle::before { content: '▸'; font-size: 10px; color: #94a3b8; }
+  .v5-open .v5-toggle::before { content: '▾'; }
+  .v5-body {
+    margin-top: 6px; padding-left: 14px;
+  }
+  .v5-body .mrow { margin-top: 2px; }
+
+  /* ════════════════════════════════════════════════════════════════ */
+  /*  6 · Two-column FOR / OPPOSED                                     */
+  /* ════════════════════════════════════════════════════════════════ */
+  .v6-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-top: 6px; }
+  .v6-col .mrow { margin-top: 2px; }
+  .v6-col .head { font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; margin-bottom: 2px; }
+  .v6-col .head.for { color: #166534; }
+  .v6-col .head.ag  { color: #991b1b; }
+
+  /* ════════════════════════════════════════════════════════════════ */
+  /*  7 · Full roll-call row BELOW the bottom-row                      */
+  /* ════════════════════════════════════════════════════════════════ */
+  .v7-strip {
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0;
+  }
+  .v7-strip .mrow { line-height: 1.8; }
+
+  /* ════════════════════════════════════════════════════════════════ */
+  /*  8 · Matching "1 OPPOSED" pill beside the CARRIED pill            */
+  /* ════════════════════════════════════════════════════════════════ */
+  .v8-right { display: flex; gap: 6px; align-items: center; }
+
+  /* ════════════════════════════════════════════════════════════════ */
+  /*  9 · Inline list with vote dots                                   */
+  /* ════════════════════════════════════════════════════════════════ */
+  .v9-wrap { font-size: 13px; color: #334155; line-height: 1.8; }
+  .v9-wrap b { font-weight: 700; color: #0f172a; margin-right: 4px; }
+  .v9-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: 1px; }
+  .v9-dot.y { background: #22c55e; }
+  .v9-dot.n { background: #ef4444; }
+  .v9-name + .v9-name::before { content: ' · '; color: #cbd5e1; margin-right: 2px; }
+
+  /* ════════════════════════════════════════════════════════════════ */
+  /* 10 · Tabs: Summary / Roll call                                    */
+  /* ════════════════════════════════════════════════════════════════ */
+  .v10-tabs {
+    display: flex; gap: 4px; margin-top: 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .v10-tab {
+    font-size: 10.5px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase;
+    color: #94a3b8; padding: 4px 10px; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .v10-tab.active { color: #0f172a; border-bottom-color: #0f172a; }
+  .v10-body { padding-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Roll Call — 10 Design Vibes</h1>
+  <p>All 10 options share the <strong>exact</strong> card from the app (white · 1px #e2e8f0 border · radius 10 · padding 12×14) plus the standard <code>MOTION:</code> / <code>MOVED BY:</code> / <code>SECONDED BY:</code> lines and the green <strong>CARRIED</strong> pill on the lower-right. Only the roll-call treatment varies. Sample vote: 4 in favour · 1 opposed (Rabel).</p>
+</div>
+
+<div class="grid">
+
+  <!-- ═══════ 1 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">1</div><h2>Two plain lines — IN FAVOUR / OPPOSED</h2></div>
+    <div class="design-note">Mirrors MOVED BY / SECONDED BY exactly. No new styling introduced.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div class="mrow" style="margin-top:4px"><b>IN FAVOUR:</b> Mayor Caisley, Councillor Johnston, Councillor Wall, Councillor Woodill</div>
+        <div class="mrow"><b>OPPOSED:</b> Councillor Rabel</div>
+        <div class="bottom-row">
+          <div class="opposed-area"></div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 2 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">2</div><h2>Single "VOTE:" summary line</h2></div>
+    <div class="design-note">One compact line with count + names. Same mrow styling as MOVED BY. Minimum footprint.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div class="mrow" style="margin-top:4px"><b>VOTE (4–1):</b> Caisley, Johnston, Wall, Woodill in favour; Rabel opposed.</div>
+        <div class="bottom-row">
+          <div class="opposed-area"></div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 3 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">3</div><h2>Roll-call list — one councillor per line</h2></div>
+    <div class="design-note">Each councillor on their own line in the exact MOVED BY style, with a colored IN FAVOUR / OPPOSED token.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div style="margin-top:4px">
+          <div class="mrow"><b>Mayor Caisley:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Johnston:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Wall:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Woodill:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Rabel:</b> <span class="v3-opp">OPPOSED</span></div>
+        </div>
+        <div class="bottom-row">
+          <div class="opposed-area"></div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 4 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">4</div><h2>Nested ROLL CALL sub-box</h2></div>
+    <div class="design-note">A quiet gray sub-box inside the card — same radius/border treatment as the sub-item wrap already in the app.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div class="v4-sub">
+          <div class="v4-head">Roll Call</div>
+          <div class="v4-row"><b>Mayor Caisley</b><span class="vy">In favour</span></div>
+          <div class="v4-row"><b>Councillor Johnston</b><span class="vy">In favour</span></div>
+          <div class="v4-row"><b>Councillor Wall</b><span class="vy">In favour</span></div>
+          <div class="v4-row"><b>Councillor Woodill</b><span class="vy">In favour</span></div>
+          <div class="v4-row"><b>Councillor Rabel</b><span class="vn">Opposed</span></div>
+        </div>
+        <div class="bottom-row">
+          <div class="opposed-area"></div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 5 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">5</div><h2>Collapsible "▸ Roll call (4–1)"</h2></div>
+    <div class="design-note">Collapsed by default — one tidy toggle line. Click to expand. Shown in both states.</div>
+    <div class="design-stage">
+      <!-- collapsed -->
+      <div class="card">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div style="margin-top:6px">
+          <button class="v5-toggle">Roll call (4–1)</button>
+        </div>
+        <div class="bottom-row">
+          <div class="opposed-area"></div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+      <!-- open -->
+      <div class="card v5-open">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div style="margin-top:6px">
+          <button class="v5-toggle">Roll call (4–1)</button>
+          <div class="v5-body">
+            <div class="mrow"><b>Mayor Caisley:</b> <span class="v3-ind">IN FAVOUR</span></div>
+            <div class="mrow"><b>Councillor Johnston:</b> <span class="v3-ind">IN FAVOUR</span></div>
+            <div class="mrow"><b>Councillor Wall:</b> <span class="v3-ind">IN FAVOUR</span></div>
+            <div class="mrow"><b>Councillor Woodill:</b> <span class="v3-ind">IN FAVOUR</span></div>
+            <div class="mrow"><b>Councillor Rabel:</b> <span class="v3-opp">OPPOSED</span></div>
+          </div>
+        </div>
+        <div class="bottom-row">
+          <div class="opposed-area"></div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 6 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">6</div><h2>Two-column FOR / OPPOSED</h2></div>
+    <div class="design-note">Two columns under the motion: left = in favour, right = opposed. Same text style, no extra boxes.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div class="v6-grid">
+          <div class="v6-col">
+            <div class="head for">In favour</div>
+            <div class="mrow">Mayor Caisley</div>
+            <div class="mrow">Councillor Johnston</div>
+            <div class="mrow">Councillor Wall</div>
+            <div class="mrow">Councillor Woodill</div>
+          </div>
+          <div class="v6-col">
+            <div class="head ag">Opposed</div>
+            <div class="mrow">Councillor Rabel</div>
+          </div>
+        </div>
+        <div class="bottom-row">
+          <div class="opposed-area"></div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 7 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">7</div><h2>Roll-call strip BELOW the bottom-row</h2></div>
+    <div class="design-note">Bottom-row stays exactly as the app has it now (OPPOSED on left, pill on right). Full roll-call appears in a dashed-divider strip below.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area">
+            <div class="mrow"><b>OPPOSED:</b> Councillor Rabel</div>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+        <div class="v7-strip">
+          <div class="mrow"><b>Mayor Caisley:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Johnston:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Wall:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Woodill:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Rabel:</b> <span class="v3-opp">OPPOSED</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 8 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">8</div><h2>Matching "1 OPPOSED" pill beside CARRIED</h2></div>
+    <div class="design-note">Exactly the same pill as CARRIED, just red. No new component. Names live on the left as plain text (same as today).</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area">
+            <div class="mrow"><b>OPPOSED:</b> Councillor Rabel</div>
+          </div>
+          <div class="v8-right">
+            <span class="pill red">1 Opposed</span>
+            <span class="pill">Carried</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 9 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">9</div><h2>Inline names with vote dots</h2></div>
+    <div class="design-note">Single flowing line of councillor names, each with a tiny green/red dot. Same mrow text style, wraps naturally.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div class="v9-wrap" style="margin-top:4px">
+          <b>VOTE:</b>
+          <span class="v9-name"><span class="v9-dot y"></span>Caisley</span>
+          <span class="v9-name"><span class="v9-dot y"></span>Johnston</span>
+          <span class="v9-name"><span class="v9-dot y"></span>Wall</span>
+          <span class="v9-name"><span class="v9-dot y"></span>Woodill</span>
+          <span class="v9-name"><span class="v9-dot n"></span>Rabel</span>
+        </div>
+        <div class="bottom-row">
+          <div class="opposed-area"></div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 10 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">10</div><h2>Tabs — Summary / Roll call</h2></div>
+    <div class="design-note">Two tiny tabs near the bottom. Summary shows just OPPOSED; Roll call reveals the full per-councillor list. Shown with "Roll call" selected.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="lbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mrow"><b>MOVED BY:</b> Councillor Johnston</div>
+        <div class="mrow"><b>SECONDED BY:</b> Councillor Wall</div>
+        <div class="v10-tabs">
+          <div class="v10-tab">Summary</div>
+          <div class="v10-tab active">Roll call</div>
+        </div>
+        <div class="v10-body">
+          <div class="mrow"><b>Mayor Caisley:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Johnston:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Wall:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Woodill:</b> <span class="v3-ind">IN FAVOUR</span></div>
+          <div class="mrow"><b>Councillor Rabel:</b> <span class="v3-opp">OPPOSED</span></div>
+        </div>
+        <div class="bottom-row">
+          <div class="opposed-area"></div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
