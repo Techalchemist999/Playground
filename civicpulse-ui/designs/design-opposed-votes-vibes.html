@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Opposed Votes — 10 Design Vibes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f1f5f9; font-family: 'Inter', sans-serif; color: #0f172a; }
+  body { padding: 24px 20px 80px; }
+
+  .page-header { max-width: 1360px; margin: 0 auto 28px; }
+  .page-header h1 {
+    font-size: 28px; font-weight: 900; letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #0f172a, #3b82f6, #ec4899);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .page-header p { color: #64748b; font-size: 13px; margin-top: 6px; max-width: 820px; line-height: 1.55; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 24px; max-width: 1360px; margin: 0 auto;
+  }
+
+  .design {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+    overflow: hidden; box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+    display: flex; flex-direction: column;
+  }
+  .design-header {
+    padding: 14px 18px; border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; gap: 12px;
+    background: #fafbfc;
+  }
+  .design-header .num {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: #0f172a; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }
+  .design-header h2 { font-size: 15px; font-weight: 800; color: #0f172a; flex: 1; }
+  .design-note { padding: 10px 18px; font-size: 11px; color: #64748b; line-height: 1.5; border-bottom: 1px solid #f1f5f9; background: #fff; }
+  .design-stage { padding: 22px; background: #f8fafc; }
+
+  /* ─── Shared card (matches the Nested But Flat main/final card) ─── */
+  .card {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .reslbl { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  .mtext { font-size: 13px; line-height: 1.7; color: #334155; margin-bottom: 6px; }
+  .mmeta { font-size: 13px; color: #334155; }
+  .mmeta strong { font-weight: 700; }
+
+  /* ─── Bottom row: opposed-area (LEFT) + disposition pill (RIGHT) ─── */
+  .bottom-row {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 12px; margin-top: 10px;
+  }
+  .opposed-area { flex: 1; min-width: 0; }
+  .pill {
+    font-size: 11px; font-weight: 800; letter-spacing: .6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: #dcfce7; color: #166534;
+    text-transform: uppercase; white-space: nowrap;
+    display: inline-block;
+  }
+
+  /* ═════════════════ 1 · Plain inline text ═════════════════ */
+  .o1 { font-size: 13px; color: #334155; }
+  .o1 strong { font-weight: 700; color: #0f172a; }
+
+  /* ═════════════════ 2 · Red outlined name chips ═════════════════ */
+  .o2-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .o2-label { font-size: 10px; font-weight: 800; letter-spacing: .6px; color: #94a3b8; text-transform: uppercase; margin-right: 4px; }
+  .o2-chip {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 6px;
+    background: #fff; border: 1.5px solid #fca5a5; color: #991b1b;
+  }
+
+  /* ═════════════════ 3 · For/Against tally pills ═════════════════ */
+  .o3-wrap { display: flex; gap: 6px; align-items: center; }
+  .o3-pill {
+    font-size: 11px; font-weight: 800; letter-spacing: .4px;
+    padding: 4px 9px; border-radius: 999px;
+  }
+  .o3-pill.for   { background: #dcfce7; color: #166534; }
+  .o3-pill.ag    { background: #fee2e2; color: #991b1b; }
+  .o3-names { font-size: 11px; color: #64748b; margin-left: 6px; font-weight: 500; }
+
+  /* ═════════════════ 4 · Councillor dot-matrix ═════════════════ */
+  .o4-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .o4-row { display: flex; gap: 4px; align-items: center; }
+  .o4-dot {
+    width: 16px; height: 16px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800;
+  }
+  .o4-dot.yes { background: #dcfce7; color: #166534; }
+  .o4-dot.no  { background: #fee2e2; color: #991b1b; }
+  .o4-note { font-size: 10.5px; color: #64748b; font-weight: 600; }
+
+  /* ═════════════════ 5 · Expandable "1 opposed ▸" ═════════════════ */
+  .o5-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 700; color: #991b1b;
+    background: #fef2f2; border: 1px solid #fecaca;
+    padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .o5-toggle::after { content: '▸'; font-size: 10px; }
+  .o5-open {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 700; color: #991b1b;
+    background: #fef2f2; border: 1px solid #fecaca;
+    padding: 4px 10px 4px 10px; border-radius: 8px;
+  }
+  .o5-open .caret { font-size: 10px; }
+  .o5-label { font-weight: 800; }
+
+  /* ═════════════════ 6 · Initial avatars stacked ═════════════════ */
+  .o6-wrap { display: flex; align-items: center; gap: 8px; }
+  .o6-avs { display: flex; }
+  .o6-av {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9.5px; font-weight: 800;
+    border: 2px solid #fff;
+    margin-left: -6px;
+  }
+  .o6-av:first-child { margin-left: 0; }
+  .o6-av.yes { background: #dcfce7; color: #166534; }
+  .o6-av.no  { background: #fee2e2; color: #991b1b; }
+  .o6-summary { font-size: 11px; color: #334155; }
+  .o6-summary strong { color: #991b1b; font-weight: 700; }
+
+  /* ═════════════════ 7 · Split bar with counts ═════════════════ */
+  .o7-wrap { display: flex; align-items: center; gap: 8px; min-width: 140px; }
+  .o7-bar {
+    flex: 1; display: flex; height: 8px; border-radius: 999px; overflow: hidden;
+    background: #e2e8f0; max-width: 100px;
+  }
+  .o7-fill.for { background: #22c55e; }
+  .o7-fill.ag  { background: #ef4444; }
+  .o7-label { font-size: 10.5px; font-weight: 700; color: #334155; white-space: nowrap; }
+  .o7-label .ag { color: #991b1b; }
+
+  /* ═════════════════ 8 · Minus-prefix names ═════════════════ */
+  .o8-wrap { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .o8-label { font-size: 10px; font-weight: 800; letter-spacing: .6px; color: #991b1b; text-transform: uppercase; }
+  .o8-name { font-size: 12.5px; color: #334155; }
+  .o8-name::before { content: '−'; color: #dc2626; font-weight: 900; margin-right: 3px; }
+
+  /* ═════════════════ 9 · Vote breakdown inline table ═════════════════ */
+  .o9-wrap { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; font-size: 11.5px; }
+  .o9-lbl { color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; font-size: 9.5px; align-self: center; }
+  .o9-names { color: #334155; font-weight: 600; }
+  .o9-names.against { color: #991b1b; }
+
+  /* ═════════════════ 10 · "View Vote" ghost button ═════════════════ */
+  .o10-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; color: #475569;
+    background: #fff; border: 1px solid #cbd5e1;
+    padding: 4px 10px; border-radius: 6px; cursor: pointer;
+    font-family: inherit;
+  }
+  .o10-btn .dot { width: 6px; height: 6px; border-radius: 50%; background: #ef4444; }
+  .o10-btn .count { color: #991b1b; font-weight: 800; }
+  .o10-open {
+    background: #fff; border: 1px solid #cbd5e1; border-radius: 8px;
+    padding: 6px 10px; display: inline-flex; gap: 10px; align-items: center;
+  }
+  .o10-open .for { color: #166534; font-size: 11px; font-weight: 700; }
+  .o10-open .ag  { color: #991b1b; font-size: 11px; font-weight: 700; }
+  .o10-open .sep { color: #cbd5e1; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Opposed Votes — 10 Design Vibes</h1>
+  <p>Where the opposed voters live on the bottom-left of the motion/amendment/final-vote card (mirroring the disposition pill on the right). Rule: if a motion is <strong>carried</strong> (but not <em>carried unanimously</em>), show who opposed. Card shell, nesting, and pill style stay locked — this is the add-on for that empty left slot.</p>
+</div>
+
+<div class="grid">
+
+  <!-- ═══════ 1 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">1</div><h2>Plain inline text</h2></div>
+    <div class="design-note">Cleanest minutes-document style. Reads like a printed minute. Zero visual weight, but can wrap if there are many opposed.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area">
+            <div class="o1"><strong>OPPOSED:</strong> Councillor Rabel</div>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 2 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">2</div><h2>Red outlined name chips</h2></div>
+    <div class="design-note">Each opposed councillor gets their own outlined chip. Scannable at a glance — easy to count without reading.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area o2-wrap">
+            <span class="o2-label">Opposed</span>
+            <span class="o2-chip">Rabel</span>
+            <span class="o2-chip">Woodill</span>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 3 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">3</div><h2>For / Against tally pills</h2></div>
+    <div class="design-note">Mirrors the disposition pill. Two small pills side-by-side: total FOR and total AGAINST. Names appear quietly after, or on hover.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area o3-wrap">
+            <span class="o3-pill for">4 FOR</span>
+            <span class="o3-pill ag">1 AGAINST</span>
+            <span class="o3-names">Rabel</span>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 4 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">4</div><h2>Councillor dot-matrix (initials)</h2></div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area o4-wrap">
+            <div class="o4-row">
+              <span class="o4-dot yes" title="Mayor Caisley">C</span>
+              <span class="o4-dot yes" title="Councillor Johnston">J</span>
+              <span class="o4-dot yes" title="Councillor Wall">W</span>
+              <span class="o4-dot yes" title="Councillor Woodill">Wd</span>
+              <span class="o4-dot no"  title="Councillor Rabel (opposed)">R</span>
+            </div>
+            <div class="o4-note">4–1 · Opposed: Rabel</div>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+    <div class="design-note">Tiny colored squares (one per councillor, initial inside). Whole council is visible. Hover reveals full name.</div>
+  </div>
+
+  <!-- ═══════ 5 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">5</div><h2>Expandable "1 opposed ▸" chip</h2></div>
+    <div class="design-note">Collapsed by default — a subtle red pill with a count. Click to expand and reveal names. Compact when most motions pass unanimously.</div>
+    <div class="design-stage">
+      <div class="card" style="margin-bottom:12px">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area">
+            <span class="o5-toggle">1 opposed</span>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area">
+            <span class="o5-open">
+              <span class="o5-label">OPPOSED:</span>
+              <span>Rabel, Woodill</span>
+              <span class="caret">▾</span>
+            </span>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 6 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">6</div><h2>Stacked initial avatars</h2></div>
+    <div class="design-note">Overlapping circular avatars — green for yes, red for opposed. Feels like a voting "team photo." Subtle summary text beside.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area o6-wrap">
+            <div class="o6-avs">
+              <span class="o6-av yes">C</span>
+              <span class="o6-av yes">J</span>
+              <span class="o6-av yes">W</span>
+              <span class="o6-av yes">Wd</span>
+              <span class="o6-av no">R</span>
+            </div>
+            <span class="o6-summary"><strong>Opposed:</strong> Rabel</span>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 7 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">7</div><h2>Split bar with counts</h2></div>
+    <div class="design-note">A tiny horizontal stacked bar (green/red) visualizes the split at a glance. Compact count label beside. Feels infographic-y.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area o7-wrap">
+            <div class="o7-bar">
+              <div class="o7-fill for" style="flex:4"></div>
+              <div class="o7-fill ag" style="flex:1"></div>
+            </div>
+            <span class="o7-label">4–<span class="ag">1</span> · Rabel</span>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 8 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">8</div><h2>Minus-prefix name list</h2></div>
+    <div class="design-note">Each opposed name with a red "−" sign in front. Hybrid of text and chip — quiet but distinctly flagged.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area o8-wrap">
+            <span class="o8-label">Opposed</span>
+            <span class="o8-name">Rabel</span>
+            <span class="o8-name">Woodill</span>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 9 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">9</div><h2>Inline vote-breakdown grid</h2></div>
+    <div class="design-note">Mini two-column grid: FOR / AGAINST with the names beside each. Reads like a formal roll-call without being a full table.</div>
+    <div class="design-stage">
+      <div class="card">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area o9-wrap">
+            <div class="o9-lbl">For</div>
+            <div class="o9-names">Caisley, Johnston, Wall, Woodill</div>
+            <div class="o9-lbl" style="color:#991b1b">Opp</div>
+            <div class="o9-names against">Rabel</div>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 10 ═══════ -->
+  <div class="design">
+    <div class="design-header"><div class="num">10</div><h2>"View vote" ghost button</h2></div>
+    <div class="design-note">Neutral button with a red dot + count. Click to expand the card and reveal the full breakdown inline. Minimal footprint, hides detail until needed.</div>
+    <div class="design-stage">
+      <div class="card" style="margin-bottom:12px">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area">
+            <button class="o10-btn"><span class="dot"></span> View vote <span class="count">4–1</span></button>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="reslbl">MOTION:</div>
+        <div class="mtext">THAT Council approves a 4.5% water rate increase effective July 1, 2025.</div>
+        <div class="mmeta"><strong>MOVED BY:</strong> Councillor Johnston</div>
+        <div class="mmeta"><strong>SECONDED BY:</strong> Councillor Wall</div>
+        <div class="bottom-row">
+          <div class="opposed-area">
+            <div class="o10-open">
+              <span class="for">FOR (4): Caisley · Johnston · Wall · Woodill</span>
+              <span class="sep">|</span>
+              <span class="ag">OPP (1): Rabel</span>
+            </div>
+          </div>
+          <span class="pill">Carried</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
