@@ -642,6 +642,34 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10,
         }}>
+          {onReorder && (
+            <span
+              draggable
+              onDragStart={e => {
+                e.dataTransfer.setData('text/plain', `sub:${subIndex}`);
+                e.dataTransfer.effectAllowed = 'move';
+              }}
+              title="Drag to reorder sub-item"
+              aria-label="Drag to reorder sub-item"
+              style={{
+                width: 22, height: 22,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: COLORS.mutedText, cursor: 'grab', userSelect: 'none',
+                flexShrink: 0,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = COLORS.headingText; }}
+              onMouseLeave={e => { e.currentTarget.style.color = COLORS.mutedText; }}
+            >
+              <svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor">
+                <circle cx="6" cy="5" r="1.4" />
+                <circle cx="6" cy="10" r="1.4" />
+                <circle cx="6" cy="15" r="1.4" />
+                <circle cx="14" cy="5" r="1.4" />
+                <circle cx="14" cy="10" r="1.4" />
+                <circle cx="14" cy="15" r="1.4" />
+              </svg>
+            </span>
+          )}
           {isEditingNumber ? (
             <input
               type="text"
