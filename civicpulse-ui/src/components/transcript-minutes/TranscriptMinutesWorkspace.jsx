@@ -345,7 +345,6 @@ function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber })
               <input
                 value={source[key] || ''}
                 onChange={e => onFieldUpdate(key, e.target.value)}
-                placeholder="Councillor names…"
                 style={inputStyle}
               />
             </div>
