@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { COLORS, SPACING, CATEGORY_COLORS } from '../../styles/tokens';
 import { gradientButtonStyle, outlineButtonStyle, cardStyle } from '../../styles/shared';
 import { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, convertInchesToTwip } from 'docx';
@@ -368,6 +368,98 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
   );
 }
 
+// ─── Sub-Item Card — nested container with optional discussion ─────────────────────────────
+function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateContent, renderMotionsForSub }) {
+  const contentHasText = !!(sub.content && sub.content.trim());
+  const [opened, setOpened] = useState(false);
+  const editRef = useRef(null);
+
+  const showBox = contentHasText || opened;
+
+  const handleAdd = () => {
+    setOpened(true);
+    requestAnimationFrame(() => {
+      editRef.current?.focus();
+    });
+  };
+
+  return (
+    <div style={{
+      marginTop: 14,
+      background: '#fafbfc',
+      border: `1px solid ${COLORS.cardBorder}`,
+      borderLeft: `3px solid ${COLORS.primary}`,
+      borderRadius: 10,
+      padding: 14,
+    }}>
+      {/* Sub-item title */}
+      <div style={{
+        fontSize: 13, fontWeight: 700, color: COLORS.headingText,
+        marginBottom: 10,
+      }}>
+        {sectionIndex}.{subIndex + 1} {sub.title}
+      </div>
+
+      {/* Discussion box — editable when in edit mode, read-only when viewing.
+          Shows "+ Add Discussion" in edit mode when no discussion yet. */}
+      {isEditing ? (
+        showBox ? (
+          <div
+            ref={editRef}
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={e => onUpdateContent(subIndex, e.currentTarget.textContent)}
+            dangerouslySetInnerHTML={{ __html: sub.content || '' }}
+            style={{
+              fontSize: 12.5, color: COLORS.bodyText, lineHeight: 1.7,
+              fontStyle: 'italic', outline: 'none',
+              padding: 10, borderRadius: 6,
+              border: `1px dashed ${COLORS.primaryBorder}`,
+              background: '#fff',
+              minHeight: 36, marginBottom: 10,
+            }}
+          />
+        ) : (
+          <button
+            onClick={handleAdd}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              padding: '6px 12px', marginBottom: 10,
+              fontSize: 11, fontWeight: 600,
+              color: COLORS.secondaryText, background: '#fff',
+              border: `1.5px dashed ${COLORS.primaryBorder}`,
+              borderRadius: 6, cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add Discussion
+          </button>
+        )
+      ) : (
+        contentHasText && (
+          <div style={{
+            fontSize: 12.5, color: COLORS.bodyText, lineHeight: 1.7,
+            fontStyle: 'italic',
+            padding: 10, borderRadius: 6,
+            border: `1px solid ${COLORS.subtleBorder}`,
+            background: '#fff',
+            marginBottom: 10,
+          }}>
+            {sub.content}
+          </div>
+        )
+      )}
+
+      {/* Sub-item motions */}
+      {renderMotionsForSub(subIndex)}
+    </div>
+  );
+}
+
 // ─── Minutes Section ─────────────────────────────
 function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onUpdateSubItem, onUpdateSubItemContent, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
@@ -454,83 +546,19 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
 
           {/* Sub-items — nested container: each sub-item is a bordered card
               containing its title, optional discussion box, and motions */}
-          {(section.subItems || []).map((sub, si) => {
-            const hasSubContent = sub.content && sub.content.trim();
-            return (
-              <div key={sub.id} style={{
-                marginTop: 14,
-                background: '#fafbfc',
-                border: `1px solid ${COLORS.cardBorder}`,
-                borderLeft: `3px solid ${COLORS.primary}`,
-                borderRadius: 10,
-                padding: 14,
-              }}>
-                {/* Sub-item title */}
-                <div style={{
-                  fontSize: 13, fontWeight: 700, color: COLORS.headingText,
-                  marginBottom: 10,
-                }}>
-                  {sectionIndex}.{si + 1} {sub.title}
-                </div>
-
-                {/* Discussion box — editable dashed box, or "+ Add Discussion" when empty */}
-                {hasSubContent ? (
-                  isEditing ? (
-                    <div
-                      contentEditable
-                      suppressContentEditableWarning
-                      onBlur={e => onUpdateSubItemContent(si, e.currentTarget.textContent)}
-                      style={{
-                        fontSize: 12.5, color: COLORS.bodyText, lineHeight: 1.7,
-                        fontStyle: 'italic', outline: 'none',
-                        padding: 10, borderRadius: 6,
-                        border: `1px dashed ${COLORS.primaryBorder}`,
-                        background: '#fff',
-                        minHeight: 30, marginBottom: 10,
-                      }}
-                    >
-                      {sub.content}
-                    </div>
-                  ) : (
-                    <div style={{
-                      fontSize: 12.5, color: COLORS.bodyText, lineHeight: 1.7,
-                      fontStyle: 'italic',
-                      padding: 10, borderRadius: 6,
-                      border: `1px solid ${COLORS.subtleBorder}`,
-                      background: '#fff',
-                      marginBottom: 10,
-                    }}>
-                      {sub.content}
-                    </div>
-                  )
-                ) : (
-                  isEditing && (
-                    <button
-                      onClick={() => onUpdateSubItemContent(si, ' ')}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 5,
-                        padding: '6px 12px', marginBottom: 10,
-                        fontSize: 11, fontWeight: 600,
-                        color: COLORS.secondaryText, background: '#fff',
-                        border: `1.5px dashed ${COLORS.primaryBorder}`,
-                        borderRadius: 6, cursor: 'pointer',
-                        fontFamily: 'inherit',
-                      }}
-                    >
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                      </svg>
-                      Add Discussion
-                    </button>
-                  )
-                )}
-
-                {/* Sub-item motions */}
-                {renderMotions(sub.motions || [], (mi, field, value) => onUpdateSubItem(si, mi, field, value), `sub-${si}`)}
-              </div>
-            );
-          })}
+          {(section.subItems || []).map((sub, si) => (
+            <SubItemCard
+              key={sub.id}
+              sub={sub}
+              sectionIndex={sectionIndex}
+              subIndex={si}
+              isEditing={isEditing}
+              onUpdateContent={onUpdateSubItemContent}
+              renderMotionsForSub={(subIndex) =>
+                renderMotions(sub.motions || [], (mi, field, value) => onUpdateSubItem(subIndex, mi, field, value), `sub-${subIndex}`)
+              }
+            />
+          ))}
         </div>
       )}
     </div>

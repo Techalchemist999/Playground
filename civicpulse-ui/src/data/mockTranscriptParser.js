@@ -203,6 +203,21 @@ function enrichWithDemoMotions(sections, speakers) {
 
   // --- Sections with SUB-ITEMS ---
 
+  // Delegations — sub-items (each delegation as a sub-item, like Adoption of Minutes)
+  const delegSec = find('Delegation');
+  if (delegSec) {
+    delegSec.subItems = [
+      {
+        id: 'sub-deleg-1',
+        title: 'Delegation \u2014 Sarah Chen, South Peace Community Foundation',
+        content: 'Sarah Chen presented on the South Peace Community Foundation\u2019s 2026 granting program. The Foundation awarded $142,000 in grants to community organizations in 2025. The 2026 intake is now open, with a focus on youth mental health and infrastructure for seniors. The active living grant stream (up to $25,000 for infrastructure, $10,000 for programming) was highlighted as a potential fit for the proposed trail expansion project. Applications close May 15.',
+        motions: [],
+      },
+    ];
+    // Clear the parent section's prose content — everything now lives in sub-items
+    delegSec.content = '';
+  }
+
   // Adoption of Minutes — sub-items
   const minutesSec = find('Adoption of Minutes') || find('Minutes');
   if (minutesSec) {
@@ -301,6 +316,35 @@ function enrichWithDemoMotions(sections, speakers) {
       { id: 'sub-rpt-3', title: 'Mayor Veach Report', content: 'Reported meeting with staff to review preliminary 2026 budget figures.', motions: [] },
     ];
   }
+
+  // ─── Every remaining section gets a single sub-item so all sections
+  //     share the same "X.1 title → discussion → motion" structure ───
+  const wrapIntoSubItem = (sec, title, fallbackContent) => {
+    if (!sec || (sec.subItems && sec.subItems.length > 0)) return;
+    const stripped = (sec.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    sec.subItems = [{
+      id: `sub-${sec.id}`,
+      title,
+      content: stripped || fallbackContent || '',
+      motions: sec.motions || [],
+    }];
+    sec.content = '';
+    sec.motions = [];
+  };
+
+  wrapIntoSubItem(find('Call to Order'), 'Meeting Called to Order at 7:00 PM');
+  wrapIntoSubItem(find('Land Acknow'), 'Territorial Land Acknowledgement');
+  wrapIntoSubItem(find('Adoption of Agenda') || find('Approval of Agenda'), 'March 25, 2026 Regular Council Meeting Agenda');
+  wrapIntoSubItem(find('Correspondence'), 'Correspondence Received');
+  wrapIntoSubItem(find('Notices of Motion'), 'Notices of Motion');
+  wrapIntoSubItem(find('Question Period'), 'Council Question Period');
+  wrapIntoSubItem(find('Late Items') || find('Introduction of Late Items'), 'Introduction of Late Items');
+  wrapIntoSubItem(find('Public Hearing'), 'Public Hearing');
+  wrapIntoSubItem(find('In-Camera') || find('In Camera'), 'In-Camera Session');
+  wrapIntoSubItem(find('Rise and Report'), 'Rise and Report');
+  wrapIntoSubItem(find('Resolutions'), 'Resolutions');
+  wrapIntoSubItem(find('Administration'), 'Administration Report');
+  wrapIntoSubItem(find('Adjourn'), 'Meeting Adjourned at 8:23 PM');
 }
 
 export function parseTranscriptToMinutes(text) {
