@@ -323,21 +323,41 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
     );
   };
 
-  const bottomRow = (rightNode) => (
-    <div style={{
-      display: 'flex', justifyContent: 'space-between',
-      alignItems: 'flex-end', gap: 12, marginTop: 10,
-    }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {motion.opposed && !isEditing && (
-          <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-            <span style={{ fontWeight: 700 }}>OPPOSED:</span> {motion.opposed}
-          </div>
-        )}
+  const bottomRow = (rightNode) => {
+    const needsOpposed = (motion.result || '').toLowerCase() === 'carried';
+    return (
+      <div style={{
+        display: 'flex', justifyContent: 'space-between',
+        alignItems: 'flex-end', gap: 12, marginTop: 10,
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {needsOpposed && (
+            isEditing ? (
+              <div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>OPPOSED: </span>
+                <input
+                  value={motion.opposed || ''}
+                  onChange={e => onUpdate('opposed', e.target.value)}
+                  placeholder="Councillor names…"
+                  style={{
+                    fontSize: 12, fontWeight: 600,
+                    border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4,
+                    padding: '2px 6px', fontFamily: 'inherit', background: '#fff',
+                    minWidth: 220,
+                  }}
+                />
+              </div>
+            ) : motion.opposed ? (
+              <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+                <span style={{ fontWeight: 700 }}>OPPOSED:</span> {motion.opposed}
+              </div>
+            ) : null
+          )}
+        </div>
+        <div style={{ flexShrink: 0 }}>{rightNode}</div>
       </div>
-      <div style={{ flexShrink: 0 }}>{rightNode}</div>
-    </div>
-  );
+    );
+  };
 
   const dispositionSelect = (value, options, onChange) => (
     <select
