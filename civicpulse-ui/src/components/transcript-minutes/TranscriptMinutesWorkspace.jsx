@@ -323,59 +323,60 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
     );
   };
 
-  const bottomRow = (rightNode) => {
-    const needsRollCall = (motion.result || '').toLowerCase() === 'carried';
-    const editInput = (field, placeholder) => (
-      <input
-        value={motion[field] || ''}
-        onChange={e => onUpdate(field, e.target.value)}
-        placeholder={placeholder}
-        style={{
-          fontSize: 12, fontWeight: 600,
-          border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4,
-          padding: '2px 6px', fontFamily: 'inherit', background: '#fff',
-          minWidth: 220,
-        }}
-      />
-    );
+  // Roll call shows on any non-unanimous disposition (carried or defeated).
+  const showsRollCall = (status) => {
+    const s = (status || '').toLowerCase();
+    return s === 'carried' || s === 'defeated';
+  };
+
+  const rollCallLines = (source, onFieldUpdate) => {
+    const inputStyle = {
+      fontSize: 12, fontWeight: 600,
+      border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4,
+      padding: '2px 6px', fontFamily: 'inherit', background: '#fff',
+      minWidth: 220,
+    };
+    if (isEditing) {
+      return (
+        <>
+          <div>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>IN FAVOUR: </span>
+            <input value={source.inFavour || ''} onChange={e => onFieldUpdate('inFavour', e.target.value)} placeholder="Councillor names…" style={inputStyle} />
+          </div>
+          <div style={{ marginTop: 2 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>OPPOSED: </span>
+            <input value={source.opposed || ''} onChange={e => onFieldUpdate('opposed', e.target.value)} placeholder="Councillor names…" style={inputStyle} />
+          </div>
+        </>
+      );
+    }
     return (
-      <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        alignItems: 'flex-end', gap: 12, marginTop: 10,
-      }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {needsRollCall && (
-            isEditing ? (
-              <>
-                <div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>IN FAVOUR: </span>
-                  {editInput('inFavour', 'Councillor names…')}
-                </div>
-                <div style={{ marginTop: 2 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>OPPOSED: </span>
-                  {editInput('opposed', 'Councillor names…')}
-                </div>
-              </>
-            ) : (
-              <>
-                {motion.inFavour && (
-                  <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-                    <span style={{ fontWeight: 700 }}>IN FAVOUR:</span> {motion.inFavour}
-                  </div>
-                )}
-                {motion.opposed && (
-                  <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-                    <span style={{ fontWeight: 700 }}>OPPOSED:</span> {motion.opposed}
-                  </div>
-                )}
-              </>
-            )
-          )}
-        </div>
-        <div style={{ flexShrink: 0 }}>{rightNode}</div>
-      </div>
+      <>
+        {source.inFavour && (
+          <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+            <span style={{ fontWeight: 700 }}>IN FAVOUR:</span> {source.inFavour}
+          </div>
+        )}
+        {source.opposed && (
+          <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+            <span style={{ fontWeight: 700 }}>OPPOSED:</span> {source.opposed}
+          </div>
+        )}
+      </>
     );
   };
+
+  const bottomRow = (rightNode) => (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between',
+      alignItems: 'flex-end', gap: 12, marginTop: 10,
+    }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {showsRollCall(motion.result) && rollCallLines(motion, (field, value) => onUpdate(field, value))}
+      </div>
+      <div style={{ flexShrink: 0 }}>{rightNode}</div>
+    </div>
+  );
 
   const dispositionSelect = (value, options, onChange) => (
     <select
@@ -458,13 +459,22 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
         </div>
         {movedSeconded(a.mover, a.seconder, null, null)}
         <div style={{
-          display: 'flex', justifyContent: 'flex-end', marginTop: 10,
+          display: 'flex', justifyContent: 'space-between',
+          alignItems: 'flex-end', gap: 12, marginTop: 10,
         }}>
-          {dispositionBox(
-            (a.status || 'carried').toLowerCase(),
-            resultOptions,
-            v => onUpdate('amendment', { ...a, status: v }),
-          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {showsRollCall(a.status) && rollCallLines(
+              a,
+              (field, value) => onUpdate('amendment', { ...a, [field]: value }),
+            )}
+          </div>
+          <div style={{ flexShrink: 0 }}>
+            {dispositionBox(
+              (a.status || 'carried').toLowerCase(),
+              resultOptions,
+              v => onUpdate('amendment', { ...a, status: v }),
+            )}
+          </div>
         </div>
       </div>
 
