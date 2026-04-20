@@ -324,12 +324,6 @@ function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber })
     );
   };
 
-  // Roll call shows on any non-unanimous disposition (carried or defeated).
-  const showsRollCall = (status) => {
-    const s = (status || '').toLowerCase();
-    return s === 'carried' || s === 'defeated';
-  };
-
   const rollCallLines = (source, onFieldUpdate) => {
     const inputStyle = {
       fontSize: 12, fontWeight: 600,
@@ -337,32 +331,35 @@ function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber })
       padding: '2px 6px', fontFamily: 'inherit', background: '#fff',
       minWidth: 220,
     };
+    const fields = [
+      { key: 'inFavor', label: 'IN FAVOR' },
+      { key: 'opposed', label: 'OPPOSED' },
+      { key: 'absent',  label: 'ABSENT' },
+    ];
     if (isEditing) {
       return (
         <>
-          <div>
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>IN FAVOUR: </span>
-            <input value={source.inFavour || ''} onChange={e => onFieldUpdate('inFavour', e.target.value)} placeholder="Councillor names…" style={inputStyle} />
-          </div>
-          <div style={{ marginTop: 2 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>OPPOSED: </span>
-            <input value={source.opposed || ''} onChange={e => onFieldUpdate('opposed', e.target.value)} placeholder="Councillor names…" style={inputStyle} />
-          </div>
+          {fields.map(({ key, label }, i) => (
+            <div key={key} style={i === 0 ? undefined : { marginTop: 2 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>{label}: </span>
+              <input
+                value={source[key] || ''}
+                onChange={e => onFieldUpdate(key, e.target.value)}
+                placeholder="Councillor names…"
+                style={inputStyle}
+              />
+            </div>
+          ))}
         </>
       );
     }
     return (
       <>
-        {source.inFavour && (
-          <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-            <span style={{ fontWeight: 700 }}>IN FAVOUR:</span> {source.inFavour}
+        {fields.map(({ key, label }) => source[key] ? (
+          <div key={key} style={{ fontSize: 13, color: COLORS.bodyText }}>
+            <span style={{ fontWeight: 700 }}>{label}:</span> {source[key]}
           </div>
-        )}
-        {source.opposed && (
-          <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-            <span style={{ fontWeight: 700 }}>OPPOSED:</span> {source.opposed}
-          </div>
-        )}
+        ) : null)}
       </>
     );
   };
@@ -373,7 +370,7 @@ function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber })
       alignItems: 'flex-end', gap: 12, marginTop: 10,
     }}>
       <div style={{ flex: 1, minWidth: 0 }}>
-        {showsRollCall(motion.result) && rollCallLines(motion, (field, value) => onUpdate(field, value))}
+        {rollCallLines(motion, (field, value) => onUpdate(field, value))}
       </div>
       <div style={{ flexShrink: 0 }}>{rightNode}</div>
     </div>
@@ -489,7 +486,7 @@ function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber })
           alignItems: 'flex-end', gap: 12, marginTop: 10,
         }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            {showsRollCall(a.status) && rollCallLines(
+            {rollCallLines(
               a,
               (field, value) => onUpdate('amendment', { ...a, [field]: value }),
             )}
