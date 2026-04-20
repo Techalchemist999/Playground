@@ -236,133 +236,188 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
   );
 }
 
-// ─── Motion Card — PC Minutes Standard ─────────────────────────────
+// ─── Motion Card — Nested But Flat ─────────────────────────────
+// Renders an amendment flow as three sibling cards:
+//   1) MOTION (original)  2) AMENDMENT (indented, L-connector)  3) MOTION — vote (snaps back)
+// When there's no amendment, renders a single flat card.
 function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
   const resultOptions = ['carried', 'carried unanimously', 'defeated', 'tabled', 'pending'];
   const resultLabel = (motion.result || 'pending').toUpperCase();
+  const a = motion.amendment;
+  const hasAmendment = !!a;
+  const amendmentCarried = hasAmendment && a.status === 'carried';
+  const aStatusText = hasAmendment ? (a.status || a.result || '').toUpperCase() : '';
 
-  const displayResult = motion.amendment?.status === 'carried'
-    ? `${resultLabel} (AS AMENDED)` : resultLabel;
+  const cardBase = {
+    background: '#fff',
+    border: `1px solid ${COLORS.cardBorder}`,
+    borderRadius: 10,
+    padding: '12px 14px',
+    marginTop: 10,
+  };
+  const cardAmend = {
+    ...cardBase,
+    marginLeft: 24,
+    borderLeft: '3px solid #f59e0b',
+    background: '#fffdf7',
+    position: 'relative',
+  };
+  const topLabel = (color) => ({
+    fontSize: 10.5, fontWeight: 800, letterSpacing: '.6px', textTransform: 'uppercase',
+    color, marginBottom: 6,
+  });
+  const sectionLabel = { fontSize: 13, fontWeight: 700, color: COLORS.headingText, marginBottom: 4 };
+  const bodyText = { fontSize: 13, lineHeight: 1.7, color: COLORS.bodyText, marginBottom: 6 };
 
-  return (
-    <div style={{ marginTop: 10, marginBottom: 6 }}>
-      <div>
-      {/* Resolution number */}
-      {resolutionNumber && (
-        <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
-          {resolutionNumber}
-        </div>
-      )}
+  const textField = (value, onChange) => (
+    <textarea
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      style={{
+        width: '100%', fontSize: 13, lineHeight: 1.7, color: COLORS.bodyText,
+        border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+        padding: '8px 10px', fontFamily: 'inherit', background: '#f8fafc',
+        resize: 'vertical', minHeight: 50,
+      }}
+    />
+  );
 
-      {/* MOTION: label */}
-      <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.headingText, marginBottom: 4 }}>
-        MOTION:
-      </div>
-
-      {/* Motion text */}
+  const movedSeconded = (mover, seconder, onMover, onSeconder) => (
+    <div style={{ marginTop: 6 }}>
       {isEditing ? (
-        <textarea
-          value={motion.text}
-          onChange={e => onUpdate('text', e.target.value)}
-          style={{
-            width: '100%', fontSize: 13, lineHeight: 1.7, color: COLORS.bodyText,
-            border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
-            padding: '8px 10px', fontFamily: 'inherit', background: '#f8fafc',
-            resize: 'vertical', minHeight: 50,
-          }}
-        />
+        <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>
+          <div style={{ flex: 1 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>MOVED BY: </span>
+            <input value={mover || ''} onChange={e => onMover && onMover(e.target.value)} disabled={!onMover}
+              style={{ fontSize: 12, fontWeight: 600, border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4, padding: '2px 6px', fontFamily: 'inherit', background: '#fff' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>SECONDED BY: </span>
+            <input value={seconder || ''} onChange={e => onSeconder && onSeconder(e.target.value)} disabled={!onSeconder}
+              style={{ fontSize: 12, fontWeight: 600, border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4, padding: '2px 6px', fontFamily: 'inherit', background: '#fff' }} />
+          </div>
+        </div>
       ) : (
-        <div style={{ fontSize: 13, lineHeight: 1.7, color: COLORS.bodyText, marginBottom: 6 }}>
-          {motion.text}
+        <>
+          <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+            <span style={{ fontWeight: 700 }}>MOVED BY:</span> {mover}
+          </div>
+          <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+            <span style={{ fontWeight: 700 }}>SECONDED BY:</span> {seconder}
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  const resultBlock = (
+    <div style={{ marginTop: 6 }}>
+      {isEditing ? (
+        <select
+          value={motion.result}
+          onChange={e => onUpdate('result', e.target.value)}
+          style={{
+            padding: '4px 10px', fontSize: 12, fontWeight: 700,
+            background: '#fff', border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+            fontFamily: 'inherit', color: COLORS.headingText,
+          }}
+        >
+          {resultOptions.map(opt => <option key={opt} value={opt}>{opt.toUpperCase()}</option>)}
+        </select>
+      ) : (
+        <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.headingText }}>
+          {resultLabel}
         </div>
       )}
-
-      {/* MOVED BY / SECONDED BY */}
-      <div style={{ marginTop: 6 }}>
-        {isEditing ? (
-          <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>
-            <div style={{ flex: 1 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>MOVED BY: </span>
-              <input value={motion.mover} onChange={e => onUpdate('mover', e.target.value)}
-                style={{ fontSize: 12, fontWeight: 600, border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4, padding: '2px 6px', fontFamily: 'inherit', background: '#fff' }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>SECONDED BY: </span>
-              <input value={motion.seconder} onChange={e => onUpdate('seconder', e.target.value)}
-                style={{ fontSize: 12, fontWeight: 600, border: `1px solid ${COLORS.primaryBorder}`, borderRadius: 4, padding: '2px 6px', fontFamily: 'inherit', background: '#fff' }} />
-            </div>
-          </div>
-        ) : (
-          <>
-            <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-              <span style={{ fontWeight: 700 }}>MOVED BY:</span> {motion.mover}
-            </div>
-            <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-              <span style={{ fontWeight: 700 }}>SECONDED BY:</span> {motion.seconder}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Amendment block */}
-      {motion.amendment && (() => {
-        const a = motion.amendment;
-        const aResult = (a.status || a.result || '').toUpperCase();
-        return (
-          <div style={{
-            margin: '8px 0', padding: '8px 14px',
-            background: a.status === 'defeated' ? '#fef2f2' : '#f0fdf4',
-            border: `1px solid ${a.status === 'defeated' ? '#fee2e2' : '#dcfce7'}`,
-            borderRadius: 6,
-          }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.headingText, marginBottom: 4 }}>
-              AMENDMENT:
-            </div>
-            <div style={{
-              fontSize: 13, lineHeight: 1.7, color: COLORS.bodyText, marginBottom: 4,
-              textDecoration: a.status === 'defeated' ? 'line-through' : 'none',
-            }}>
-              THAT the main motion be amended by {a.text}
-            </div>
-            <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-              <span style={{ fontWeight: 700 }}>MOVED BY:</span> {a.mover}
-            </div>
-            <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-              <span style={{ fontWeight: 700 }}>SECONDED BY:</span> {a.seconder}
-            </div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: a.status === 'defeated' ? '#dc2626' : '#16a34a', marginTop: 4 }}>
-              AMENDMENT {aResult}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Result */}
-      <div style={{ marginTop: 4 }}>
-        {isEditing ? (
-          <select
-            value={motion.result}
-            onChange={e => onUpdate('result', e.target.value)}
-            style={{
-              padding: '4px 10px', fontSize: 12, fontWeight: 700,
-              background: '#fff', border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
-              fontFamily: 'inherit', color: COLORS.headingText,
-            }}
-          >
-            {resultOptions.map(opt => <option key={opt} value={opt}>{opt.toUpperCase()}</option>)}
-          </select>
-        ) : (
-          <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.headingText }}>
-            {displayResult}
-          </div>
-        )}
-      </div>
-      {/* OPPOSED line (if not unanimous and carried) */}
       {motion.opposed && !isEditing && (
         <div style={{ fontSize: 13, color: COLORS.bodyText }}>
           <span style={{ fontWeight: 700 }}>OPPOSED:</span> {motion.opposed}
         </div>
       )}
+    </div>
+  );
+
+  // ─── No amendment: single flat card ───
+  if (!hasAmendment) {
+    return (
+      <div style={{ marginTop: 10, marginBottom: 6 }}>
+        <div style={cardBase}>
+          {resolutionNumber && (
+            <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
+              {resolutionNumber}
+            </div>
+          )}
+          <div style={topLabel('#0f172a')}>MOTION</div>
+          <div style={sectionLabel}>MOTION:</div>
+          {isEditing
+            ? textField(motion.text, v => onUpdate('text', v))
+            : <div style={bodyText}>{motion.text}</div>}
+          {movedSeconded(
+            motion.mover, motion.seconder,
+            v => onUpdate('mover', v), v => onUpdate('seconder', v),
+          )}
+          {resultBlock}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Amendment flow: three sibling cards ───
+  const finalLabelText = amendmentCarried ? 'Main motion as amended — vote' : 'Main motion — vote';
+  const finalSectionLabel = amendmentCarried ? 'MOTION (AS AMENDED):' : 'MOTION:';
+
+  return (
+    <div style={{ marginTop: 10, marginBottom: 6 }}>
+      {/* Card 1: Main motion */}
+      <div style={cardBase}>
+        <div style={topLabel('#0f172a')}>MOTION</div>
+        <div style={sectionLabel}>MOTION:</div>
+        {isEditing
+          ? textField(motion.text, v => onUpdate('text', v))
+          : <div style={bodyText}>{motion.text}</div>}
+        {movedSeconded(
+          motion.mover, motion.seconder,
+          v => onUpdate('mover', v), v => onUpdate('seconder', v),
+        )}
+      </div>
+
+      {/* Card 2: Amendment — indented, orange, L-connector */}
+      <div style={cardAmend}>
+        {/* L-connector */}
+        <div style={{
+          position: 'absolute', left: -12, top: 20,
+          width: 9, height: 9,
+          borderLeft: '2px solid #cbd5e1',
+          borderBottom: '2px solid #cbd5e1',
+        }} />
+        <div style={topLabel('#92400e')}>Amendment on the floor</div>
+        <div style={sectionLabel}>AMENDMENT:</div>
+        <div style={{
+          ...bodyText,
+          textDecoration: a.status === 'defeated' ? 'line-through' : 'none',
+        }}>
+          THAT the main motion be amended by {a.text}
+        </div>
+        {movedSeconded(a.mover, a.seconder, null, null)}
+        <div style={{
+          fontSize: 13, fontWeight: 700, marginTop: 6,
+          color: a.status === 'defeated' ? '#dc2626' : '#16a34a',
+        }}>
+          AMENDMENT {aStatusText}
+        </div>
+      </div>
+
+      {/* Card 3: Main motion — vote (snaps back to outer indent) */}
+      <div style={cardBase}>
+        {resolutionNumber && (
+          <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
+            {resolutionNumber}
+          </div>
+        )}
+        <div style={topLabel('#166534')}>{finalLabelText}</div>
+        <div style={sectionLabel}>{finalSectionLabel}</div>
+        <div style={bodyText}>{motion.text}</div>
+        {resultBlock}
       </div>
     </div>
   );
