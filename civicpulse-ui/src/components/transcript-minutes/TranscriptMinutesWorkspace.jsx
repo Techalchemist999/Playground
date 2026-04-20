@@ -306,31 +306,54 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
     </div>
   );
 
-  const resultBlock = (
-    <div style={{ marginTop: 6 }}>
-      {isEditing ? (
-        <select
-          value={motion.result}
-          onChange={e => onUpdate('result', e.target.value)}
-          style={{
-            padding: '4px 10px', fontSize: 12, fontWeight: 700,
-            background: '#fff', border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
-            fontFamily: 'inherit', color: COLORS.headingText,
-          }}
-        >
-          {resultOptions.map(opt => <option key={opt} value={opt}>{opt.toUpperCase()}</option>)}
-        </select>
-      ) : (
-        <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.headingText }}>
-          {resultLabel}
-        </div>
-      )}
-      {motion.opposed && !isEditing && (
-        <div style={{ fontSize: 13, color: COLORS.bodyText }}>
-          <span style={{ fontWeight: 700 }}>OPPOSED:</span> {motion.opposed}
-        </div>
-      )}
+  const dispositionPill = (text) => {
+    const t = (text || '').toLowerCase();
+    const palette = t.includes('carried') ? { bg: '#dcfce7', fg: '#166534' }
+      : t.includes('defeated') ? { bg: '#fee2e2', fg: '#991b1b' }
+      : t.includes('tabled') ? { bg: '#fef3c7', fg: '#92400e' }
+      : { bg: '#f1f5f9', fg: '#475569' };
+    return (
+      <span style={{
+        fontSize: 11, fontWeight: 800, letterSpacing: '.6px',
+        padding: '4px 10px', borderRadius: 999,
+        background: palette.bg, color: palette.fg,
+        textTransform: 'uppercase', whiteSpace: 'nowrap',
+      }}>
+        {(text || 'pending').toUpperCase()}
+      </span>
+    );
+  };
+
+  const bottomRow = (rightNode) => (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between',
+      alignItems: 'flex-end', gap: 12, marginTop: 10,
+    }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {motion.opposed && !isEditing && (
+          <div style={{ fontSize: 13, color: COLORS.bodyText }}>
+            <span style={{ fontWeight: 700 }}>OPPOSED:</span> {motion.opposed}
+          </div>
+        )}
+      </div>
+      <div style={{ flexShrink: 0 }}>{rightNode}</div>
     </div>
+  );
+
+  const resultBlock = bottomRow(
+    isEditing ? (
+      <select
+        value={motion.result}
+        onChange={e => onUpdate('result', e.target.value)}
+        style={{
+          padding: '4px 10px', fontSize: 12, fontWeight: 700,
+          background: '#fff', border: `1.5px solid ${COLORS.primaryBorder}`, borderRadius: 6,
+          fontFamily: 'inherit', color: COLORS.headingText,
+        }}
+      >
+        {resultOptions.map(opt => <option key={opt} value={opt}>{opt.toUpperCase()}</option>)}
+      </select>
+    ) : dispositionPill(resultLabel)
   );
 
   // ─── No amendment: single flat card ───
@@ -392,10 +415,9 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
         </div>
         {movedSeconded(a.mover, a.seconder, null, null)}
         <div style={{
-          fontSize: 13, fontWeight: 700, marginTop: 6,
-          color: a.status === 'defeated' ? '#dc2626' : '#16a34a',
+          display: 'flex', justifyContent: 'flex-end', marginTop: 10,
         }}>
-          AMENDMENT {aStatusText}
+          {dispositionPill(`AMENDMENT ${aStatusText}`)}
         </div>
       </div>
 
