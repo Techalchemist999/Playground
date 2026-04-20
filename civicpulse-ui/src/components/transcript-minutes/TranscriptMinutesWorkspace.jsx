@@ -494,7 +494,7 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
 }
 
 // ─── Sub-Item Card — nested container with optional discussion ─────────────────────────────
-function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, onUpdateContent, renderMotionsForSub }) {
+function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, onUpdateContent, onAddMotion, renderMotionsForSub }) {
   const contentHasText = !!(sub.content && sub.content.trim());
   const [opened, setOpened] = useState(false);
   const editRef = useRef(null);
@@ -608,12 +608,36 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
 
       {/* Sub-item motions */}
       {renderMotionsForSub(subIndex)}
+
+      {/* + Motion button — bottom-right, edit mode only */}
+      {isEditing && onAddMotion && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+          <button
+            onClick={() => onAddMotion(subIndex)}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              padding: '6px 12px',
+              fontSize: 11, fontWeight: 600,
+              color: COLORS.secondaryText, background: '#fff',
+              border: `1.5px dashed ${COLORS.primaryBorder}`,
+              borderRadius: 6, cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Motion
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
 // ─── Minutes Section ─────────────────────────────
-function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onUpdateSubItem, onUpdateSubItemContent, onUpdateSubItemTitle, resolutionMap }) {
+function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onUpdateSubItem, onUpdateSubItemContent, onUpdateSubItemTitle, onAddSubItemMotion, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const numberedTitle = sectionIndex != null
@@ -707,6 +731,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
               isEditing={isEditing}
               onUpdateTitle={onUpdateSubItemTitle}
               onUpdateContent={onUpdateSubItemContent}
+              onAddMotion={onAddSubItemMotion}
               renderMotionsForSub={(subIndex) =>
                 renderMotions(sub.motions || [], (mi, field, value) => onUpdateSubItem(subIndex, mi, field, value), `sub-${subIndex}`)
               }
@@ -1156,6 +1181,31 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
     setIsDirty(true);
   }, []);
 
+  const addSubItemMotion = useCallback((sectionId, subIndex) => {
+    setData(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => {
+        if (s.id !== sectionId) return s;
+        return {
+          ...s,
+          subItems: (s.subItems || []).map((sub, si) => {
+            if (si !== subIndex) return sub;
+            const newMotion = {
+              id: `motion-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+              text: '',
+              mover: '',
+              seconder: '',
+              result: 'carried unanimously',
+              amendment: null,
+            };
+            return { ...sub, motions: [...(sub.motions || []), newMotion] };
+          }),
+        };
+      }),
+    }));
+    setIsDirty(true);
+  }, []);
+
   const [approval, setApproval] = useState({
     chairperson: data?.metadata?.chair || 'Mayor Danielle Veach',
     officer: 'Duncan Malkinson',
@@ -1340,6 +1390,7 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
                 onUpdateSubItem={(si, mi, field, value) => updateSubItemMotion(section.id, si, mi, field, value)}
                 onUpdateSubItemContent={(si, content) => updateSubItemContent(section.id, si, content)}
                 onUpdateSubItemTitle={(si, title) => updateSubItemTitle(section.id, si, title)}
+                onAddSubItemMotion={si => addSubItemMotion(section.id, si)}
                 resolutionMap={resolutionMap}
               />
             ))}
