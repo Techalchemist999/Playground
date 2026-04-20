@@ -240,7 +240,8 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
 // Renders an amendment flow as three sibling cards:
 //   1) MOTION (original)  2) AMENDMENT (indented, L-connector)  3) MOTION — vote (snaps back)
 // When there's no amendment, renders a single flat card.
-function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber }) {
+function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReorder, resolutionNumber }) {
+  const [isDragTarget, setIsDragTarget] = useState(false);
   const resultOptions = ['carried', 'carried unanimously', 'defeated', 'tabled', 'withdrawn'];
   const resultLabel = (motion.result || 'pending').toUpperCase();
   const a = motion.amendment;
@@ -393,6 +394,36 @@ function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber })
     isEditing ? dispositionSelect(value, options, onChange) : dispositionPill(value)
   );
 
+  const dragHandle = (isEditing && onReorder) ? (
+    <span
+      draggable
+      onDragStart={e => {
+        e.dataTransfer.setData('text/plain', `motion:${motionIndex}`);
+        e.dataTransfer.effectAllowed = 'move';
+      }}
+      title="Drag to reorder motion"
+      aria-label="Drag to reorder motion"
+      style={{
+        position: 'absolute', top: 6, left: 6,
+        width: 22, height: 22,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: COLORS.mutedText, cursor: 'grab',
+        userSelect: 'none',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.color = COLORS.headingText; }}
+      onMouseLeave={e => { e.currentTarget.style.color = COLORS.mutedText; }}
+    >
+      <svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor">
+        <circle cx="6" cy="5" r="1.4" />
+        <circle cx="6" cy="10" r="1.4" />
+        <circle cx="6" cy="15" r="1.4" />
+        <circle cx="14" cy="5" r="1.4" />
+        <circle cx="14" cy="10" r="1.4" />
+        <circle cx="14" cy="15" r="1.4" />
+      </svg>
+    </span>
+  ) : null;
+
   const deleteButton = (isEditing && onDelete) ? (
     <button
       onClick={onDelete}
@@ -420,11 +451,37 @@ function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber })
     dispositionBox(motion.result, resultOptions, v => onUpdate('result', v))
   );
 
+  const wrapperDropProps = (isEditing && onReorder) ? {
+    onDragOver: e => {
+      if (!e.dataTransfer.types.includes('text/plain')) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (!isDragTarget) setIsDragTarget(true);
+    },
+    onDragLeave: () => { if (isDragTarget) setIsDragTarget(false); },
+    onDrop: e => {
+      e.preventDefault();
+      setIsDragTarget(false);
+      const payload = e.dataTransfer.getData('text/plain');
+      if (!payload.startsWith('motion:')) return;
+      const from = parseInt(payload.slice('motion:'.length), 10);
+      if (!Number.isNaN(from) && from !== motionIndex) onReorder(from, motionIndex);
+    },
+  } : {};
+
+  const wrapperStyle = {
+    marginTop: 10, marginBottom: 6,
+    ...(isDragTarget ? {
+      outline: '2px solid #3b82f6', outlineOffset: 2, borderRadius: 10,
+    } : {}),
+  };
+
   // ─── No amendment: single flat card ───
   if (!hasAmendment) {
     return (
-      <div style={{ marginTop: 10, marginBottom: 6 }}>
+      <div style={wrapperStyle} {...wrapperDropProps}>
         <div style={cardBase}>
+          {dragHandle}
           {deleteButton}
           {resolutionNumber && (
             <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
@@ -449,9 +506,10 @@ function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber })
   const finalSectionLabel = amendmentCarried ? 'MOTION (AS AMENDED):' : 'MOTION:';
 
   return (
-    <div style={{ marginTop: 10, marginBottom: 6 }}>
+    <div style={wrapperStyle} {...wrapperDropProps}>
       {/* Card 1: Main motion */}
       <div style={cardBase}>
+        {dragHandle}
         {deleteButton}
         <div style={sectionLabel}>MOTION:</div>
         {isEditing
@@ -555,6 +613,7 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
     <div
       onDragOver={e => {
         if (!isEditing || !onReorder) return;
+        if (!e.dataTransfer.types.includes('text/plain')) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
         if (!isDragTarget) setIsDragTarget(true);
@@ -564,7 +623,9 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
         if (!isEditing || !onReorder) return;
         e.preventDefault();
         setIsDragTarget(false);
-        const from = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const payload = e.dataTransfer.getData('text/plain');
+        if (!payload.startsWith('sub:')) return;
+        const from = parseInt(payload.slice('sub:'.length), 10);
         if (!Number.isNaN(from) && from !== subIndex) onReorder(from, subIndex);
       }}
       style={{
@@ -604,7 +665,7 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
             <span
               draggable={!!onReorder}
               onDragStart={e => {
-                e.dataTransfer.setData('text/plain', String(subIndex));
+                e.dataTransfer.setData('text/plain', `sub:${subIndex}`);
                 e.dataTransfer.effectAllowed = 'move';
               }}
               onClick={beginNumberEdit}
@@ -728,7 +789,7 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
 }
 
 // ─── Minutes Section ─────────────────────────────
-function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onRemoveMotion, onUpdateSubItem, onRemoveSubItemMotion, onUpdateSubItemContent, onUpdateSubItemTitle, onAddSubItemMotion, onReorderSubItem, resolutionMap }) {
+function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onRemoveMotion, onReorderMotion, onUpdateSubItem, onRemoveSubItemMotion, onReorderSubItemMotion, onUpdateSubItemContent, onUpdateSubItemTitle, onAddSubItemMotion, onReorderSubItem, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const numberedTitle = sectionIndex != null
@@ -740,14 +801,16 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
     + (section.subItems || []).reduce((sum, si) => sum + (si.motions?.length || 0), 0);
 
   // Render a list of motions (used for both direct motions and sub-item motions)
-  const renderMotions = (motions, onUpdate, onDelete, keyPrefix) =>
+  const renderMotions = (motions, onUpdate, onDelete, onReorder, keyPrefix) =>
     motions.map((motion, mi) => (
       <MotionCard
         key={`${keyPrefix}-${motion.id}`}
         motion={motion}
+        motionIndex={mi}
         isEditing={isEditing}
         onUpdate={(field, value) => onUpdate(mi, field, value)}
         onDelete={onDelete ? () => onDelete(mi) : undefined}
+        onReorder={onReorder}
         resolutionNumber={resolutionMap?.[motion.id]}
       />
     ));
@@ -814,6 +877,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
             section.motions || [],
             (mi, field, value) => onUpdateMotion(mi, field, value),
             onRemoveMotion ? (mi) => onRemoveMotion(mi) : undefined,
+            onReorderMotion,
             'direct'
           )}
 
@@ -835,6 +899,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
                   sub.motions || [],
                   (mi, field, value) => onUpdateSubItem(subIndex, mi, field, value),
                   onRemoveSubItemMotion ? (mi) => onRemoveSubItemMotion(subIndex, mi) : undefined,
+                  onReorderSubItemMotion ? (from, to) => onReorderSubItemMotion(subIndex, from, to) : undefined,
                   `sub-${subIndex}`
                 )
               }
@@ -1284,6 +1349,44 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
     setIsDirty(true);
   }, []);
 
+  const reorderMotion = useCallback((sectionId, fromIndex, toIndex) => {
+    setData(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => {
+        if (s.id !== sectionId) return s;
+        const items = [...(s.motions || [])];
+        if (fromIndex < 0 || fromIndex >= items.length) return s;
+        const [moved] = items.splice(fromIndex, 1);
+        const target = Math.max(0, Math.min(items.length, toIndex));
+        items.splice(target, 0, moved);
+        return { ...s, motions: items };
+      }),
+    }));
+    setIsDirty(true);
+  }, []);
+
+  const reorderSubItemMotion = useCallback((sectionId, subIndex, fromIndex, toIndex) => {
+    setData(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => {
+        if (s.id !== sectionId) return s;
+        return {
+          ...s,
+          subItems: (s.subItems || []).map((sub, si) => {
+            if (si !== subIndex) return sub;
+            const items = [...(sub.motions || [])];
+            if (fromIndex < 0 || fromIndex >= items.length) return sub;
+            const [moved] = items.splice(fromIndex, 1);
+            const target = Math.max(0, Math.min(items.length, toIndex));
+            items.splice(target, 0, moved);
+            return { ...sub, motions: items };
+          }),
+        };
+      }),
+    }));
+    setIsDirty(true);
+  }, []);
+
   const reorderSubItem = useCallback((sectionId, fromIndex, toIndex) => {
     setData(prev => ({
       ...prev,
@@ -1536,10 +1639,12 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
                 onUpdateMotion={(mi, field, value) => updateMotion(section.id, mi, field, value)}
                 onUpdateSubItem={(si, mi, field, value) => updateSubItemMotion(section.id, si, mi, field, value)}
                 onRemoveSubItemMotion={(si, mi) => removeSubItemMotion(section.id, si, mi)}
+                onReorderSubItemMotion={(si, from, to) => reorderSubItemMotion(section.id, si, from, to)}
                 onUpdateSubItemContent={(si, content) => updateSubItemContent(section.id, si, content)}
                 onUpdateSubItemTitle={(si, title) => updateSubItemTitle(section.id, si, title)}
                 onAddSubItemMotion={si => addSubItemMotion(section.id, si)}
                 onRemoveMotion={mi => removeMotion(section.id, mi)}
+                onReorderMotion={(from, to) => reorderMotion(section.id, from, to)}
                 onReorderSubItem={(from, to) => reorderSubItem(section.id, from, to)}
                 resolutionMap={resolutionMap}
               />
