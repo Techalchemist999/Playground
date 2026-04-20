@@ -240,7 +240,7 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
 // Renders an amendment flow as three sibling cards:
 //   1) MOTION (original)  2) AMENDMENT (indented, L-connector)  3) MOTION — vote (snaps back)
 // When there's no amendment, renders a single flat card.
-function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
+function MotionCard({ motion, isEditing, onUpdate, onDelete, resolutionNumber }) {
   const resultOptions = ['carried', 'carried unanimously', 'defeated', 'tabled', 'withdrawn'];
   const resultLabel = (motion.result || 'pending').toUpperCase();
   const a = motion.amendment;
@@ -253,6 +253,7 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
     borderRadius: 10,
     padding: '12px 14px',
     marginTop: 10,
+    position: 'relative',
   };
   const cardAmend = {
     ...cardBase,
@@ -396,6 +397,29 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
     isEditing ? dispositionSelect(value, options, onChange) : dispositionPill(value)
   );
 
+  const deleteButton = (isEditing && onDelete) ? (
+    <button
+      onClick={onDelete}
+      aria-label="Delete motion"
+      title="Delete motion"
+      style={{
+        position: 'absolute', top: 6, right: 6,
+        width: 22, height: 22, borderRadius: '50%',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'transparent', border: 'none',
+        color: COLORS.mutedText, cursor: 'pointer',
+        padding: 0, fontFamily: 'inherit',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = COLORS.dangerRed; }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = COLORS.mutedText; }}
+    >
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  ) : null;
+
   const resultBlock = bottomRow(
     dispositionBox(motion.result, resultOptions, v => onUpdate('result', v))
   );
@@ -405,6 +429,7 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
     return (
       <div style={{ marginTop: 10, marginBottom: 6 }}>
         <div style={cardBase}>
+          {deleteButton}
           {resolutionNumber && (
             <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
               {resolutionNumber}
@@ -431,6 +456,7 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
     <div style={{ marginTop: 10, marginBottom: 6 }}>
       {/* Card 1: Main motion */}
       <div style={cardBase}>
+        {deleteButton}
         <div style={sectionLabel}>MOTION:</div>
         {isEditing
           ? textField(motion.text, v => onUpdate('text', v))
@@ -637,7 +663,7 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
 }
 
 // ─── Minutes Section ─────────────────────────────
-function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onUpdateSubItem, onUpdateSubItemContent, onUpdateSubItemTitle, onAddSubItemMotion, resolutionMap }) {
+function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onRemoveMotion, onUpdateSubItem, onRemoveSubItemMotion, onUpdateSubItemContent, onUpdateSubItemTitle, onAddSubItemMotion, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const numberedTitle = sectionIndex != null
@@ -649,13 +675,14 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
     + (section.subItems || []).reduce((sum, si) => sum + (si.motions?.length || 0), 0);
 
   // Render a list of motions (used for both direct motions and sub-item motions)
-  const renderMotions = (motions, onUpdate, keyPrefix) =>
+  const renderMotions = (motions, onUpdate, onDelete, keyPrefix) =>
     motions.map((motion, mi) => (
       <MotionCard
         key={`${keyPrefix}-${motion.id}`}
         motion={motion}
         isEditing={isEditing}
         onUpdate={(field, value) => onUpdate(mi, field, value)}
+        onDelete={onDelete ? () => onDelete(mi) : undefined}
         resolutionNumber={resolutionMap?.[motion.id]}
       />
     ));
@@ -718,7 +745,12 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
             )
           )}
           {/* Direct motions (no sub-item, e.g. "3. ADOPTION OF AGENDA" → MOTION:) */}
-          {renderMotions(section.motions || [], (mi, field, value) => onUpdateMotion(mi, field, value), 'direct')}
+          {renderMotions(
+            section.motions || [],
+            (mi, field, value) => onUpdateMotion(mi, field, value),
+            onRemoveMotion ? (mi) => onRemoveMotion(mi) : undefined,
+            'direct'
+          )}
 
           {/* Sub-items — nested container: each sub-item is a bordered card
               containing its title, optional discussion box, and motions */}
@@ -733,7 +765,12 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
               onUpdateContent={onUpdateSubItemContent}
               onAddMotion={onAddSubItemMotion}
               renderMotionsForSub={(subIndex) =>
-                renderMotions(sub.motions || [], (mi, field, value) => onUpdateSubItem(subIndex, mi, field, value), `sub-${subIndex}`)
+                renderMotions(
+                  sub.motions || [],
+                  (mi, field, value) => onUpdateSubItem(subIndex, mi, field, value),
+                  onRemoveSubItemMotion ? (mi) => onRemoveSubItemMotion(subIndex, mi) : undefined,
+                  `sub-${subIndex}`
+                )
               }
             />
           ))}
@@ -1181,6 +1218,34 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
     setIsDirty(true);
   }, []);
 
+  const removeMotion = useCallback((sectionId, motionIndex) => {
+    setData(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => {
+        if (s.id !== sectionId) return s;
+        return { ...s, motions: (s.motions || []).filter((_, i) => i !== motionIndex) };
+      }),
+    }));
+    setIsDirty(true);
+  }, []);
+
+  const removeSubItemMotion = useCallback((sectionId, subIndex, motionIndex) => {
+    setData(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => {
+        if (s.id !== sectionId) return s;
+        return {
+          ...s,
+          subItems: (s.subItems || []).map((sub, si) => {
+            if (si !== subIndex) return sub;
+            return { ...sub, motions: (sub.motions || []).filter((_, i) => i !== motionIndex) };
+          }),
+        };
+      }),
+    }));
+    setIsDirty(true);
+  }, []);
+
   const addSubItemMotion = useCallback((sectionId, subIndex) => {
     setData(prev => ({
       ...prev,
@@ -1388,9 +1453,11 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
                 onUpdateContent={html => updateSectionContent(section.id, html)}
                 onUpdateMotion={(mi, field, value) => updateMotion(section.id, mi, field, value)}
                 onUpdateSubItem={(si, mi, field, value) => updateSubItemMotion(section.id, si, mi, field, value)}
+                onRemoveSubItemMotion={(si, mi) => removeSubItemMotion(section.id, si, mi)}
                 onUpdateSubItemContent={(si, content) => updateSubItemContent(section.id, si, content)}
                 onUpdateSubItemTitle={(si, title) => updateSubItemTitle(section.id, si, title)}
                 onAddSubItemMotion={si => addSubItemMotion(section.id, si)}
+                onRemoveMotion={mi => removeMotion(section.id, mi)}
                 resolutionMap={resolutionMap}
               />
             ))}
