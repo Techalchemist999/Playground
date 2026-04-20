@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Section / Sub-item / Discussion / Motion — 10 Design Vibes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f1f5f9; font-family: 'Inter', sans-serif; color: #0f172a; }
+  body { padding: 24px 20px 80px; }
+
+  .page-header { max-width: 1360px; margin: 0 auto 28px; }
+  .page-header h1 {
+    font-size: 28px; font-weight: 900; letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #0f172a, #3b82f6, #ec4899);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .page-header p { color: #64748b; font-size: 13px; margin-top: 6px; max-width: 780px; line-height: 1.55; }
+
+  .legend {
+    display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .legend-chip {
+    font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+  }
+  .legend-chip.sec  { background: #dbeafe; color: #1e40af; }
+  .legend-chip.sub  { background: #e0e7ff; color: #4338ca; }
+  .legend-chip.disc { background: #dcfce7; color: #166534; }
+  .legend-chip.mot  { background: #fef3c7; color: #92400e; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+    gap: 24px; max-width: 1360px; margin: 0 auto;
+  }
+
+  .design {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+    overflow: hidden; box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+    display: flex; flex-direction: column;
+  }
+  .design-header {
+    padding: 14px 18px; border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; gap: 12px;
+    background: #fafbfc;
+  }
+  .design-header .num {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: #0f172a; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }
+  .design-header h2 { font-size: 15px; font-weight: 800; color: #0f172a; flex: 1; }
+  .design-note { padding: 10px 18px; font-size: 11px; color: #64748b; line-height: 1.5; border-bottom: 1px solid #f1f5f9; background: #fff; }
+  .design-stage { padding: 24px; background: #f8fafc; min-height: 440px; }
+
+  /* ─── Common bits used inside designs ─── */
+  .motion-demo {
+    font-size: 12px; line-height: 1.7;
+  }
+  .motion-demo .m-label { font-weight: 700; font-size: 11px; letter-spacing: .3px; color: #0f172a; }
+  .motion-demo .m-meta  { color: #475569; font-size: 11.5px; }
+  .motion-demo .m-result { font-weight: 800; font-size: 11px; color: #16a34a; letter-spacing: .4px; }
+
+  .add-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 12px; font-size: 11px; font-weight: 600;
+    border-radius: 8px; cursor: pointer;
+    background: #fff; border: 1.5px dashed #cbd5e1; color: #64748b;
+    transition: all .15s;
+  }
+  .add-btn:hover { border-color: #3b82f6; color: #3b82f6; background: #eff6ff; }
+  .add-btn svg { width: 11px; height: 11px; }
+
+  /* ═════════════════ Design 1 — Stacked White Cards ═════════════════ */
+  .d1-section {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 10px;
+    border-left: 4px solid #3b82f6;
+    font-size: 13px; font-weight: 800; color: #0f172a;
+  }
+  .d1-sub {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 10px 14px; margin: 0 0 8px 20px;
+    border-left: 3px solid #818cf8;
+    font-size: 12.5px; font-weight: 700; color: #1e293b;
+  }
+  .d1-disc {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 12px 14px; margin: 0 0 8px 40px;
+    font-size: 12px; color: #475569; font-style: italic; line-height: 1.7;
+    border-left: 3px solid #22c55e;
+  }
+  .d1-add { margin: 0 0 8px 40px; }
+  .d1-motion {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 12px 14px; margin: 0 0 8px 40px;
+    border-left: 3px solid #f59e0b;
+  }
+
+  /* ═════════════════ Design 2 — Indented Tree Rail ═════════════════ */
+  .d2-wrap { position: relative; padding-left: 0; }
+  .d2-section {
+    font-size: 13px; font-weight: 800; color: #0f172a;
+    padding: 10px 0 10px 16px; border-left: 3px solid #0f172a;
+  }
+  .d2-rail { border-left: 2px solid #cbd5e1; margin-left: 16px; padding-left: 20px; position: relative; }
+  .d2-sub {
+    font-size: 12.5px; font-weight: 700; color: #1e293b;
+    padding: 10px 0; position: relative;
+  }
+  .d2-sub::before {
+    content: ''; position: absolute; left: -22px; top: 18px;
+    width: 14px; height: 2px; background: #cbd5e1;
+  }
+  .d2-disc {
+    margin-left: 20px;
+    padding: 10px 12px; background: #f0fdf4; border: 1px solid #dcfce7; border-radius: 8px;
+    font-size: 12px; color: #14532d; font-style: italic; line-height: 1.7;
+    margin-bottom: 8px;
+  }
+  .d2-add-wrap { margin-left: 20px; margin-bottom: 8px; }
+  .d2-motion {
+    margin-left: 20px;
+    padding: 10px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+  }
+
+  /* ═════════════════ Design 3 — Color-Coded Tiers ═════════════════ */
+  .d3-section {
+    background: linear-gradient(135deg, #3b82f6, #1e40af); color: #fff;
+    padding: 12px 16px; border-radius: 10px 10px 0 0;
+    font-size: 13px; font-weight: 800; letter-spacing: .3px;
+  }
+  .d3-sub {
+    background: #e0e7ff; color: #3730a3;
+    padding: 10px 16px; border-left: 4px solid #6366f1;
+    font-size: 12.5px; font-weight: 700;
+  }
+  .d3-disc {
+    background: #ecfdf5; color: #065f46;
+    padding: 12px 16px; border-left: 4px solid #10b981;
+    font-size: 12px; font-style: italic; line-height: 1.7;
+  }
+  .d3-add-wrap {
+    background: #f8fafc; padding: 8px 16px; border-left: 4px solid #cbd5e1;
+  }
+  .d3-motion {
+    background: #fffbeb; color: #713f12;
+    padding: 12px 16px; border-left: 4px solid #f59e0b;
+    border-radius: 0 0 10px 10px;
+  }
+
+  /* ═════════════════ Design 4 — Timeline Dots ═════════════════ */
+  .d4-wrap { position: relative; padding-left: 26px; }
+  .d4-wrap::before {
+    content: ''; position: absolute; left: 9px; top: 14px; bottom: 14px;
+    width: 2px; background: linear-gradient(180deg, #3b82f6, #8b5cf6, #22c55e, #f59e0b);
+    border-radius: 2px;
+  }
+  .d4-row { position: relative; padding: 8px 0; }
+  .d4-row::before {
+    content: ''; position: absolute; left: -23px; top: 13px;
+    width: 12px; height: 12px; border-radius: 50%; background: #fff;
+    border: 3px solid var(--c, #3b82f6);
+  }
+  .d4-section { --c: #3b82f6; font-size: 13px; font-weight: 800; color: #1e40af; padding: 6px 0; }
+  .d4-sub { --c: #8b5cf6; font-size: 12.5px; font-weight: 700; color: #6d28d9; padding: 6px 0; }
+  .d4-disc {
+    --c: #22c55e;
+    padding: 10px 14px; background: #fff; border: 1px solid #dcfce7; border-radius: 10px;
+    font-size: 12px; color: #14532d; font-style: italic; line-height: 1.7;
+  }
+  .d4-add-row { --c: #cbd5e1; padding: 6px 0; }
+  .d4-motion {
+    --c: #f59e0b;
+    padding: 10px 14px; background: #fff; border: 1px solid #fde68a; border-radius: 10px;
+  }
+
+  /* ═════════════════ Design 5 — Nested Containers ═════════════════ */
+  .d5-section {
+    border: 2px solid #0f172a; border-radius: 14px; padding: 14px;
+    background: #fff;
+  }
+  .d5-section-title { font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 12px; }
+  .d5-sub {
+    border: 1.5px solid #6366f1; border-radius: 10px; padding: 10px 12px;
+    background: #f8fafc; margin-bottom: 10px;
+  }
+  .d5-sub-title { font-size: 12.5px; font-weight: 700; color: #3730a3; margin-bottom: 8px; }
+  .d5-disc {
+    background: #fff; border: 1px dashed #86efac; border-radius: 8px;
+    padding: 10px; font-size: 12px; color: #166534; font-style: italic; line-height: 1.7;
+    margin-bottom: 8px;
+  }
+  .d5-motion {
+    background: #fff; border: 1px solid #fde68a; border-radius: 8px;
+    padding: 10px;
+  }
+
+  /* ═════════════════ Design 6 — Glass / Frosted ═════════════════ */
+  .d6-stage {
+    background: linear-gradient(135deg, #c7d2fe, #fbcfe8, #a7f3d0);
+    padding: 24px; min-height: 440px;
+  }
+  .d6-section {
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 16px; padding: 12px 16px; margin-bottom: 10px;
+    font-size: 13px; font-weight: 800; color: #0f172a;
+    box-shadow: 0 4px 16px rgba(15,23,42,0.08);
+  }
+  .d6-sub {
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 14px; padding: 10px 14px; margin: 0 0 8px 20px;
+    font-size: 12.5px; font-weight: 700; color: #1e293b;
+  }
+  .d6-disc {
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 14px; padding: 12px 14px; margin: 0 0 8px 40px;
+    font-size: 12px; color: #1e293b; font-style: italic; line-height: 1.7;
+  }
+  .d6-add { margin: 0 0 8px 40px; }
+  .d6-add-btn {
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.4); border: 1.5px dashed rgba(15,23,42,0.3);
+    color: #334155;
+  }
+  .d6-motion {
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(255,251,235,0.7); border: 1px solid rgba(253,230,138,0.8);
+    border-radius: 14px; padding: 12px 14px; margin: 0 0 8px 40px;
+  }
+
+  /* ═════════════════ Design 7 — Edge Ribbons ═════════════════ */
+  .d7-row { display: flex; margin-bottom: 8px; }
+  .d7-ribbon {
+    width: 80px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    color: #fff; border-radius: 8px 0 0 8px;
+    writing-mode: vertical-rl; transform: rotate(180deg);
+    padding: 8px 0;
+  }
+  .d7-ribbon.sec  { background: #1e40af; }
+  .d7-ribbon.sub  { background: #6366f1; }
+  .d7-ribbon.disc { background: #16a34a; }
+  .d7-ribbon.mot  { background: #d97706; }
+  .d7-body {
+    flex: 1; padding: 12px 16px; background: #fff;
+    border: 1px solid #e2e8f0; border-left: none; border-radius: 0 8px 8px 0;
+    font-size: 12px; line-height: 1.7;
+  }
+  .d7-body.section { font-size: 13px; font-weight: 800; color: #1e40af; }
+  .d7-body.sub { font-size: 12.5px; font-weight: 700; color: #4338ca; }
+  .d7-body.disc { color: #166534; font-style: italic; }
+  .d7-body.add { color: #64748b; }
+
+  /* ═════════════════ Design 8 — Minimal Typographic ═════════════════ */
+  .d8-stage { background: #fff; }
+  .d8-section {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: #64748b;
+    border-bottom: 2px solid #0f172a; padding-bottom: 6px; margin-bottom: 12px;
+  }
+  .d8-section strong { color: #0f172a; font-size: 14px; letter-spacing: 1px; }
+  .d8-sub {
+    font-size: 13px; font-weight: 700; color: #0f172a;
+    padding-left: 20px; margin: 10px 0 6px; position: relative;
+  }
+  .d8-sub::before {
+    content: ''; position: absolute; left: 0; top: 9px; width: 12px; height: 2px; background: #0f172a;
+  }
+  .d8-disc {
+    padding-left: 32px; font-size: 12.5px; color: #475569;
+    line-height: 1.8; font-style: italic; margin-bottom: 8px;
+    border-left: 2px solid #e2e8f0;
+  }
+  .d8-add { padding-left: 32px; margin-bottom: 8px; }
+  .d8-add-btn { border: none; background: none; color: #94a3b8; font-size: 11px; cursor: pointer; padding: 0; }
+  .d8-add-btn:hover { color: #3b82f6; }
+  .d8-motion {
+    padding-left: 32px; font-size: 12.5px; color: #0f172a;
+    line-height: 1.8; margin-bottom: 8px;
+    border-left: 2px solid #f59e0b;
+  }
+
+  /* ═════════════════ Design 9 — Pill Labels + Cards ═════════════════ */
+  .d9-section { margin-bottom: 14px; }
+  .d9-pill {
+    display: inline-block; padding: 4px 10px; font-size: 10px; font-weight: 800;
+    letter-spacing: .5px; text-transform: uppercase; border-radius: 999px;
+    margin-bottom: 6px;
+  }
+  .d9-pill.sec  { background: #0f172a; color: #fff; }
+  .d9-pill.sub  { background: #6366f1; color: #fff; }
+  .d9-pill.disc { background: #22c55e; color: #fff; }
+  .d9-pill.mot  { background: #f59e0b; color: #fff; }
+  .d9-card {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 12px 14px; font-size: 12px; line-height: 1.7; color: #334155;
+  }
+  .d9-card.title { font-size: 13px; font-weight: 800; color: #0f172a; }
+  .d9-card.sub   { font-size: 12.5px; font-weight: 700; color: #1e293b; margin-left: 16px; }
+  .d9-card.disc  { color: #166534; font-style: italic; margin-left: 32px; }
+  .d9-card.add-ghost { margin-left: 32px; background: transparent; border-style: dashed; }
+  .d9-card.motion { margin-left: 32px; }
+  .d9-label-wrap { margin-left: 16px; }
+  .d9-label-wrap.deep { margin-left: 32px; }
+
+  /* ═════════════════ Design 10 — Accordion Cards ═════════════════ */
+  .d10-section {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+    overflow: hidden; box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+  }
+  .d10-section-head {
+    padding: 14px 18px; background: #0f172a; color: #fff;
+    font-size: 13px; font-weight: 800;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .d10-section-head .caret { font-size: 11px; opacity: .7; }
+  .d10-sub-head {
+    padding: 11px 18px; background: #eef2ff; color: #3730a3;
+    font-size: 12.5px; font-weight: 700;
+    border-bottom: 1px solid #e0e7ff;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .d10-sub-head .dot { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; }
+  .d10-disc {
+    padding: 14px 18px; background: #fff;
+    font-size: 12px; color: #334155; font-style: italic; line-height: 1.75;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .d10-disc .tag {
+    display: inline-block; font-size: 9px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: #16a34a; background: #dcfce7; padding: 2px 7px; border-radius: 999px;
+    margin-bottom: 6px; font-style: normal;
+  }
+  .d10-add-row {
+    padding: 10px 18px; background: #fafbfc;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .d10-motion {
+    padding: 14px 18px; background: #fffbeb;
+    border-top: 2px solid #fde68a;
+  }
+  .d10-motion .tag {
+    display: inline-block; font-size: 9px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: #92400e; background: #fef3c7; padding: 2px 7px; border-radius: 999px;
+    margin-bottom: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Section / Sub-item / Discussion / Motion — 10 Design Vibes</h1>
+  <p>Exploring how to present the four-level hierarchy for each agenda section: <strong>Header</strong> (e.g. "4. ADOPTION OF MINUTES") → <strong>Sub-header</strong> (e.g. "4.1 Minutes of November 12, 2025") → <strong>Discussion box</strong> (optional, can be added) → <strong>Motion</strong>.</p>
+  <div class="legend">
+    <span class="legend-chip sec">Section Header</span>
+    <span class="legend-chip sub">Sub-header</span>
+    <span class="legend-chip disc">Discussion (optional)</span>
+    <span class="legend-chip mot">Motion</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- ═══════ 1 ═══════ -->
+  <div class="design">
+    <div class="design-header">
+      <div class="num">1</div>
+      <h2>Stacked White Cards</h2>
+    </div>
+    <div class="design-note">Each level is its own white card. Left-edge accent colour cues the hierarchy. Discussion is optional — "+ Add Discussion" button appears between sub-header and motion when empty.</div>
+    <div class="design-stage">
+      <div class="d1-section">4. ADOPTION OF MINUTES</div>
+      <div class="d1-sub">4.1 Minutes of November 12, 2025 Special Council Meeting</div>
+      <div class="d1-disc">Councillor Smith noted two typos on page 3. The corrections were accepted without objection.</div>
+      <div class="d1-motion">
+        <div class="motion-demo">
+          <div class="m-label">MOTION:</div>
+          <div>THAT the minutes of the November 12, 2025 Special Council Meeting be approved as amended.</div>
+          <div class="m-meta"><strong>MOVED BY:</strong> Cllr Johnson · <strong>SECONDED BY:</strong> Cllr Patel</div>
+          <div class="m-result">CARRIED UNANIMOUSLY</div>
+        </div>
+      </div>
+      <div class="d1-sub">4.2 Minutes of November 19, 2025 Committee of the Whole</div>
+      <div class="d1-add"><button class="add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Discussion</button></div>
+      <div class="d1-motion">
+        <div class="motion-demo">
+          <div class="m-label">MOTION:</div>
+          <div>THAT the minutes of the November 19, 2025 Committee of the Whole be approved as circulated.</div>
+          <div class="m-meta"><strong>MOVED BY:</strong> Cllr Lee · <strong>SECONDED BY:</strong> Cllr Okafor</div>
+          <div class="m-result">CARRIED</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 2 ═══════ -->
+  <div class="design">
+    <div class="design-header">
+      <div class="num">2</div>
+      <h2>Indented Tree Rail</h2>
+    </div>
+    <div class="design-note">Vertical rail with L-branches connects sub-items to their parent section. Discussion & motion boxes hang off the rail — spatial hierarchy is unmistakable.</div>
+    <div class="design-stage">
+      <div class="d2-wrap">
+        <div class="d2-section">4. ADOPTION OF MINUTES</div>
+        <div class="d2-rail">
+          <div class="d2-sub">4.1 Minutes of November 12, 2025 Special Council Meeting</div>
+          <div class="d2-disc">Councillor Smith noted two typos on page 3. Corrections accepted without objection.</div>
+          <div class="d2-motion">
+            <div class="motion-demo">
+              <div class="m-label">MOTION:</div>
+              <div>THAT the minutes of the November 12, 2025 Special Council Meeting be approved as amended.</div>
+              <div class="m-meta"><strong>MOVED:</strong> Johnson · <strong>SECONDED:</strong> Patel</div>
+              <div class="m-result">CARRIED UNANIMOUSLY</div>
+            </div>
+          </div>
+
+          <div class="d2-sub">4.2 Minutes of November 19, 2025 Committee of the Whole</div>
+          <div class="d2-add-wrap"><button class="add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Discussion</button></div>
+          <div class="d2-motion">
+            <div class="motion-demo">
+              <div class="m-label">MOTION:</div>
+              <div>THAT the minutes of the November 19, 2025 Committee of the Whole be approved as circulated.</div>
+              <div class="m-meta"><strong>MOVED:</strong> Lee · <strong>SECONDED:</strong> Okafor</div>
+              <div class="m-result">CARRIED</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 3 ═══════ -->
+  <div class="design">
+    <div class="design-header">
+      <div class="num">3</div>
+      <h2>Color-Coded Tiers</h2>
+    </div>
+    <div class="design-note">Each tier has its own dominant background colour — at a glance you know you're looking at a sub-header vs. discussion vs. motion. Bold but readable.</div>
+    <div class="design-stage">
+      <div class="d3-section">4. ADOPTION OF MINUTES</div>
+      <div class="d3-sub">4.1 Minutes of November 12, 2025 Special Council Meeting</div>
+      <div class="d3-disc">Councillor Smith noted two typos on page 3. The corrections were accepted without objection.</div>
+      <div class="d3-motion">
+        <div class="motion-demo">
+          <div class="m-label">MOTION:</div>
+          <div>THAT the minutes of the November 12, 2025 Special Council Meeting be approved as amended.</div>
+          <div class="m-meta"><strong>MOVED:</strong> Johnson · <strong>SECONDED:</strong> Patel</div>
+          <div class="m-result" style="color:#92400e">CARRIED UNANIMOUSLY</div>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="d3-sub">4.2 Minutes of November 19, 2025 Committee of the Whole</div>
+      <div class="d3-add-wrap"><button class="add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Discussion</button></div>
+      <div class="d3-motion">
+        <div class="motion-demo">
+          <div class="m-label">MOTION:</div>
+          <div>THAT the minutes of the November 19, 2025 Committee of the Whole be approved as circulated.</div>
+          <div class="m-meta"><strong>MOVED:</strong> Lee · <strong>SECONDED:</strong> Okafor</div>
+          <div class="m-result" style="color:#92400e">CARRIED</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 4 ═══════ -->
+  <div class="design">
+    <div class="design-header">
+      <div class="num">4</div>
+      <h2>Timeline Dots</h2>
+    </div>
+    <div class="design-note">A gradient rail runs top-to-bottom; each item pins to a dot whose colour matches its role. Reads like a meeting's chronology while keeping hierarchy clear.</div>
+    <div class="design-stage">
+      <div class="d4-wrap">
+        <div class="d4-row d4-section">4. ADOPTION OF MINUTES</div>
+        <div class="d4-row d4-sub">4.1 Minutes of November 12, 2025 Special Council Meeting</div>
+        <div class="d4-row d4-disc">Councillor Smith noted two typos on page 3. Corrections accepted without objection.</div>
+        <div class="d4-row d4-motion">
+          <div class="motion-demo">
+            <div class="m-label">MOTION:</div>
+            <div>THAT the minutes of the November 12 Special Council Meeting be approved as amended.</div>
+            <div class="m-meta"><strong>MOVED:</strong> Johnson · <strong>SECONDED:</strong> Patel</div>
+            <div class="m-result">CARRIED UNANIMOUSLY</div>
+          </div>
+        </div>
+        <div class="d4-row d4-sub">4.2 Minutes of November 19, 2025 Committee of the Whole</div>
+        <div class="d4-row d4-add-row"><button class="add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Discussion</button></div>
+        <div class="d4-row d4-motion">
+          <div class="motion-demo">
+            <div class="m-label">MOTION:</div>
+            <div>THAT the minutes of the November 19 Committee of the Whole be approved as circulated.</div>
+            <div class="m-meta"><strong>MOVED:</strong> Lee · <strong>SECONDED:</strong> Okafor</div>
+            <div class="m-result">CARRIED</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 5 ═══════ -->
+  <div class="design">
+    <div class="design-header">
+      <div class="num">5</div>
+      <h2>Nested Containers</h2>
+    </div>
+    <div class="design-note">Like Russian dolls — a bordered section contains bordered sub-items that contain their discussion & motion. Very clear parent/child structure.</div>
+    <div class="design-stage">
+      <div class="d5-section">
+        <div class="d5-section-title">4. ADOPTION OF MINUTES</div>
+
+        <div class="d5-sub">
+          <div class="d5-sub-title">4.1 Minutes of November 12, 2025 Special Council Meeting</div>
+          <div class="d5-disc">Councillor Smith noted two typos on page 3. Corrections accepted without objection.</div>
+          <div class="d5-motion">
+            <div class="motion-demo">
+              <div class="m-label">MOTION:</div>
+              <div>THAT the minutes of the Nov 12 Special Council Meeting be approved as amended.</div>
+              <div class="m-meta"><strong>MOVED:</strong> Johnson · <strong>SECONDED:</strong> Patel</div>
+              <div class="m-result">CARRIED UNANIMOUSLY</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d5-sub">
+          <div class="d5-sub-title">4.2 Minutes of November 19, 2025 Committee of the Whole</div>
+          <div style="margin-bottom:8px"><button class="add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Discussion</button></div>
+          <div class="d5-motion">
+            <div class="motion-demo">
+              <div class="m-label">MOTION:</div>
+              <div>THAT the minutes of the Nov 19 Committee of the Whole be approved as circulated.</div>
+              <div class="m-meta"><strong>MOVED:</strong> Lee · <strong>SECONDED:</strong> Okafor</div>
+              <div class="m-result">CARRIED</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 6 ═══════ -->
+  <div class="design">
+    <div class="design-header">
+      <div class="num">6</div>
+      <h2>Glass / Frosted</h2>
+    </div>
+    <div class="design-note">Frosted-glass cards over a soft gradient wash. Modern & airy — hierarchy shown through indent + subtle transparency differences.</div>
+    <div class="design-stage d6-stage">
+      <div class="d6-section">4. ADOPTION OF MINUTES</div>
+      <div class="d6-sub">4.1 Minutes of November 12, 2025 Special Council Meeting</div>
+      <div class="d6-disc">Councillor Smith noted two typos on page 3. The corrections were accepted without objection.</div>
+      <div class="d6-motion">
+        <div class="motion-demo">
+          <div class="m-label">MOTION:</div>
+          <div>THAT the minutes of the November 12 meeting be approved as amended.</div>
+          <div class="m-meta"><strong>MOVED:</strong> Johnson · <strong>SECONDED:</strong> Patel</div>
+          <div class="m-result">CARRIED UNANIMOUSLY</div>
+        </div>
+      </div>
+      <div class="d6-sub">4.2 Minutes of November 19, 2025 Committee of the Whole</div>
+      <div class="d6-add"><button class="add-btn d6-add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Discussion</button></div>
+      <div class="d6-motion">
+        <div class="motion-demo">
+          <div class="m-label">MOTION:</div>
+          <div>THAT the minutes of the November 19 meeting be approved as circulated.</div>
+          <div class="m-meta"><strong>MOVED:</strong> Lee · <strong>SECONDED:</strong> Okafor</div>
+          <div class="m-result">CARRIED</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 7 ═══════ -->
+  <div class="design">
+    <div class="design-header">
+      <div class="num">7</div>
+      <h2>Edge Ribbons</h2>
+    </div>
+    <div class="design-note">Coloured vertical ribbons on the left label each row (SECTION / SUB / DISCUSSION / MOTION). Scannable at high speed — the ribbon tells you the role before you read.</div>
+    <div class="design-stage">
+      <div class="d7-row"><div class="d7-ribbon sec">Section</div><div class="d7-body section">4. ADOPTION OF MINUTES</div></div>
+      <div class="d7-row"><div class="d7-ribbon sub">Sub</div><div class="d7-body sub">4.1 Minutes of November 12, 2025 Special Council Meeting</div></div>
+      <div class="d7-row"><div class="d7-ribbon disc">Disc</div><div class="d7-body disc">Councillor Smith noted two typos on page 3. Corrections accepted without objection.</div></div>
+      <div class="d7-row"><div class="d7-ribbon mot">Motion</div><div class="d7-body">
+        <div class="motion-demo">
+          <div class="m-label">MOTION:</div>
+          <div>THAT the minutes of the Nov 12 meeting be approved as amended.</div>
+          <div class="m-meta"><strong>MOVED:</strong> Johnson · <strong>SECONDED:</strong> Patel</div>
+          <div class="m-result">CARRIED UNANIMOUSLY</div>
+        </div>
+      </div></div>
+      <div class="d7-row"><div class="d7-ribbon sub">Sub</div><div class="d7-body sub">4.2 Minutes of November 19, 2025 Committee of the Whole</div></div>
+      <div class="d7-row"><div class="d7-ribbon" style="background:#cbd5e1;color:#475569">Add</div><div class="d7-body add"><button class="add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Discussion</button></div></div>
+      <div class="d7-row"><div class="d7-ribbon mot">Motion</div><div class="d7-body">
+        <div class="motion-demo">
+          <div class="m-label">MOTION:</div>
+          <div>THAT the minutes of the Nov 19 meeting be approved as circulated.</div>
+          <div class="m-meta"><strong>MOVED:</strong> Lee · <strong>SECONDED:</strong> Okafor</div>
+          <div class="m-result">CARRIED</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ═══════ 8 ═══════ -->
+  <div class="design">
+    <div class="design-header">
+      <div class="num">8</div>
+      <h2>Minimal Typographic</h2>
+    </div>
+    <div class="design-note">No boxes. Hierarchy is entirely typography, indentation, and a hairline rule. Feels like a printed document — closest to final minutes aesthetic.</div>
+    <div class="design-stage d8-stage">
+      <div class="d8-section"><strong>4.</strong> &nbsp; Adoption of Minutes</div>
+      <div class="d8-sub">4.1 &nbsp; Minutes of November 12, 2025 Special Council Meeting</div>
+      <div class="d8-disc">Councillor Smith noted two typos on page 3. The corrections were accepted without objection.</div>
+      <div class="d8-motion">
+        <div class="motion-demo">
+          <div class="m-label">MOTION:</div>
+          <div>THAT the minutes of the November 12 Special Council Meeting be approved as amended.</div>
+          <div class="m-meta"><strong>MOVED:</strong> Johnson · <strong>SECONDED:</strong> Patel</div>
+          <div class="m-result">CARRIED UNANIMOUSLY</div>
+        </div>
+      </div>
+      <div class="d8-sub">4.2 &nbsp; Minutes of November 19, 2025 Committee of the Whole</div>
+      <div class="d8-add"><button class="d8-add-btn">+ Add discussion</button></div>
+      <div class="d8-motion">
+        <div class="motion-demo">
+          <div class="m-label">MOTION:</div>
+          <div>THAT the minutes of the November 19 Committee of the Whole be approved as circulated.</div>
+          <div class="m-meta"><strong>MOVED:</strong> Lee · <strong>SECONDED:</strong> Okafor</div>
+          <div class="m-result">CARRIED</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 9 ═══════ -->
+  <div class="design">
+    <div class="design-header">
+      <div class="num">9</div>
+      <h2>Pill Labels + Cards</h2>
+    </div>
+    <div class="design-note">Every level is prefaced by a small role pill (SECTION, SUB, DISCUSSION, MOTION). The card underneath stays neutral — perfect for busy agendas with many motions.</div>
+    <div class="design-stage">
+      <div class="d9-section">
+        <div class="d9-pill sec">Section</div>
+        <div class="d9-card title">4. Adoption of Minutes</div>
+      </div>
+
+      <div class="d9-label-wrap">
+        <div class="d9-pill sub">Sub</div>
+        <div class="d9-card sub">4.1 Minutes of November 12, 2025 Special Council Meeting</div>
+      </div>
+      <div class="d9-label-wrap deep" style="margin-top:10px">
+        <div class="d9-pill disc">Discussion</div>
+        <div class="d9-card disc">Councillor Smith noted two typos on page 3. Corrections accepted without objection.</div>
+      </div>
+      <div class="d9-label-wrap deep" style="margin-top:10px">
+        <div class="d9-pill mot">Motion</div>
+        <div class="d9-card motion">
+          <div class="motion-demo">
+            <div class="m-label">MOTION:</div>
+            <div>THAT the minutes of the Nov 12 meeting be approved as amended.</div>
+            <div class="m-meta"><strong>MOVED:</strong> Johnson · <strong>SECONDED:</strong> Patel</div>
+            <div class="m-result">CARRIED UNANIMOUSLY</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d9-label-wrap" style="margin-top:14px">
+        <div class="d9-pill sub">Sub</div>
+        <div class="d9-card sub">4.2 Minutes of November 19, 2025 Committee of the Whole</div>
+      </div>
+      <div class="d9-label-wrap deep" style="margin-top:10px">
+        <div class="d9-card add-ghost">
+          <button class="add-btn" style="border:none;background:transparent;padding:0;color:#64748b">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Discussion
+          </button>
+        </div>
+      </div>
+      <div class="d9-label-wrap deep" style="margin-top:10px">
+        <div class="d9-pill mot">Motion</div>
+        <div class="d9-card motion">
+          <div class="motion-demo">
+            <div class="m-label">MOTION:</div>
+            <div>THAT the minutes of the Nov 19 meeting be approved as circulated.</div>
+            <div class="m-meta"><strong>MOVED:</strong> Lee · <strong>SECONDED:</strong> Okafor</div>
+            <div class="m-result">CARRIED</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 10 ═══════ -->
+  <div class="design">
+    <div class="design-header">
+      <div class="num">10</div>
+      <h2>Accordion Cards</h2>
+    </div>
+    <div class="design-note">Everything for one section lives in a single card with stacked bands of colour. Tidy, self-contained — each sub-item is its own little capsule with discussion/motion inside.</div>
+    <div class="design-stage">
+
+      <div class="d10-section" style="margin-bottom:14px">
+        <div class="d10-section-head"><span>4. ADOPTION OF MINUTES</span><span class="caret">▼</span></div>
+        <div class="d10-sub-head"><span class="dot"></span>4.1 Minutes of November 12, 2025 Special Council Meeting</div>
+        <div class="d10-disc">
+          <div class="tag">Discussion</div>
+          <div>Councillor Smith noted two typos on page 3. The corrections were accepted without objection.</div>
+        </div>
+        <div class="d10-motion">
+          <div class="tag">Motion</div>
+          <div class="motion-demo">
+            <div>THAT the minutes of the November 12 Special Council Meeting be approved as amended.</div>
+            <div class="m-meta"><strong>MOVED:</strong> Johnson · <strong>SECONDED:</strong> Patel</div>
+            <div class="m-result" style="color:#92400e">CARRIED UNANIMOUSLY</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d10-section">
+        <div class="d10-sub-head"><span class="dot"></span>4.2 Minutes of November 19, 2025 Committee of the Whole</div>
+        <div class="d10-add-row">
+          <button class="add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Discussion</button>
+        </div>
+        <div class="d10-motion">
+          <div class="tag">Motion</div>
+          <div class="motion-demo">
+            <div>THAT the minutes of the November 19 Committee of the Whole be approved as circulated.</div>
+            <div class="m-meta"><strong>MOVED:</strong> Lee · <strong>SECONDED:</strong> Okafor</div>
+            <div class="m-result" style="color:#92400e">CARRIED</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -369,7 +369,7 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
 }
 
 // ─── Minutes Section ─────────────────────────────
-function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onUpdateSubItem, resolutionMap }) {
+function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onUpdateSubItem, onUpdateSubItemContent, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const numberedTitle = sectionIndex != null
@@ -392,8 +392,11 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
       />
     ));
 
+  const hasContent = section.content && stripHtml(section.content).trim();
+
   return (
     <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+      {/* Section header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         style={{
@@ -420,10 +423,12 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
+
+      {/* Body — everything nested inside the single outer white card */}
       {isOpen && (
         <div style={{ padding: '16px 20px' }}>
-          {/* Section-level discussion text (italicized) */}
-          {section.content && stripHtml(section.content).trim() && (
+          {/* Section-level discussion text */}
+          {hasContent && (
             isEditing ? (
               <div
                 contentEditable
@@ -432,46 +437,100 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
                 dangerouslySetInnerHTML={{ __html: section.content }}
                 style={{
                   fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, outline: 'none',
-                  minHeight: 30, padding: 8, borderRadius: 6,
+                  minHeight: 30, padding: 10, borderRadius: 6,
                   border: `1px dashed ${COLORS.primaryBorder}`, background: '#fafbfc',
-                  marginBottom: 8,
+                  marginBottom: 12,
                 }}
               />
             ) : (
               <div
                 dangerouslySetInnerHTML={{ __html: section.content }}
-                style={{ fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, fontStyle: 'italic', marginBottom: 8 }}
+                style={{ fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, fontStyle: 'italic', marginBottom: 12 }}
               />
             )
           )}
-
           {/* Direct motions (no sub-item, e.g. "3. ADOPTION OF AGENDA" → MOTION:) */}
           {renderMotions(section.motions || [], (mi, field, value) => onUpdateMotion(mi, field, value), 'direct')}
 
-          {/* Sub-items (e.g. "4.1 November 12, 2025 Special Council Meeting Minutes") */}
-          {(section.subItems || []).map((sub, si) => (
-            <div key={sub.id} style={{ marginTop: 12 }}>
-              {/* Sub-item heading: "4.1 Title" */}
-              <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.headingText, paddingLeft: 10, marginBottom: 4 }}>
-                {sectionIndex}.{si + 1} {sub.title}
-              </div>
-
-              {/* Sub-item discussion text (italicized) */}
-              {sub.content && sub.content.trim() && (
+          {/* Sub-items — nested container: each sub-item is a bordered card
+              containing its title, optional discussion box, and motions */}
+          {(section.subItems || []).map((sub, si) => {
+            const hasSubContent = sub.content && sub.content.trim();
+            return (
+              <div key={sub.id} style={{
+                marginTop: 14,
+                background: '#fafbfc',
+                border: `1px solid ${COLORS.cardBorder}`,
+                borderLeft: `3px solid ${COLORS.primary}`,
+                borderRadius: 10,
+                padding: 14,
+              }}>
+                {/* Sub-item title */}
                 <div style={{
-                  fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, fontStyle: 'italic',
-                  paddingLeft: 30, marginBottom: 4,
+                  fontSize: 13, fontWeight: 700, color: COLORS.headingText,
+                  marginBottom: 10,
                 }}>
-                  {sub.content}
+                  {sectionIndex}.{si + 1} {sub.title}
                 </div>
-              )}
 
-              {/* Sub-item motions (indented further) */}
-              <div style={{ paddingLeft: 20 }}>
+                {/* Discussion box — editable dashed box, or "+ Add Discussion" when empty */}
+                {hasSubContent ? (
+                  isEditing ? (
+                    <div
+                      contentEditable
+                      suppressContentEditableWarning
+                      onBlur={e => onUpdateSubItemContent(si, e.currentTarget.textContent)}
+                      style={{
+                        fontSize: 12.5, color: COLORS.bodyText, lineHeight: 1.7,
+                        fontStyle: 'italic', outline: 'none',
+                        padding: 10, borderRadius: 6,
+                        border: `1px dashed ${COLORS.primaryBorder}`,
+                        background: '#fff',
+                        minHeight: 30, marginBottom: 10,
+                      }}
+                    >
+                      {sub.content}
+                    </div>
+                  ) : (
+                    <div style={{
+                      fontSize: 12.5, color: COLORS.bodyText, lineHeight: 1.7,
+                      fontStyle: 'italic',
+                      padding: 10, borderRadius: 6,
+                      border: `1px solid ${COLORS.subtleBorder}`,
+                      background: '#fff',
+                      marginBottom: 10,
+                    }}>
+                      {sub.content}
+                    </div>
+                  )
+                ) : (
+                  isEditing && (
+                    <button
+                      onClick={() => onUpdateSubItemContent(si, ' ')}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 5,
+                        padding: '6px 12px', marginBottom: 10,
+                        fontSize: 11, fontWeight: 600,
+                        color: COLORS.secondaryText, background: '#fff',
+                        border: `1.5px dashed ${COLORS.primaryBorder}`,
+                        borderRadius: 6, cursor: 'pointer',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                      Add Discussion
+                    </button>
+                  )
+                )}
+
+                {/* Sub-item motions */}
                 {renderMotions(sub.motions || [], (mi, field, value) => onUpdateSubItem(si, mi, field, value), `sub-${si}`)}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -864,6 +923,22 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
     setIsDirty(true);
   }, []);
 
+  const updateSubItemContent = useCallback((sectionId, subIndex, content) => {
+    setData(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => {
+        if (s.id !== sectionId) return s;
+        return {
+          ...s,
+          subItems: (s.subItems || []).map((sub, si) =>
+            si === subIndex ? { ...sub, content } : sub
+          ),
+        };
+      }),
+    }));
+    setIsDirty(true);
+  }, []);
+
   const updateSubItemMotion = useCallback((sectionId, subIndex, motionIndex, field, value) => {
     setData(prev => ({
       ...prev,
@@ -1066,6 +1141,7 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
                 onUpdateContent={html => updateSectionContent(section.id, html)}
                 onUpdateMotion={(mi, field, value) => updateMotion(section.id, mi, field, value)}
                 onUpdateSubItem={(si, mi, field, value) => updateSubItemMotion(section.id, si, mi, field, value)}
+                onUpdateSubItemContent={(si, content) => updateSubItemContent(section.id, si, content)}
                 resolutionMap={resolutionMap}
               />
             ))}
