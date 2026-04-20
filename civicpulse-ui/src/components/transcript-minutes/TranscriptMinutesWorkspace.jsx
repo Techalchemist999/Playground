@@ -252,7 +252,7 @@ const subsidiaryCardLabel = (type) =>
 // Renders a motion with an optional subsidiary (nested procedural motion) as three sibling cards:
 //   1) MOTION (original)  2) SUBSIDIARY (indented, L-connector)  3) MOTION — vote (snaps back)
 // When there's no subsidiary, renders a single flat card plus a "+ Nested motion" dropdown.
-function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReorder, resolutionNumber }) {
+function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReorder, onAddSibling, resolutionNumber }) {
   const [isDragTarget, setIsDragTarget] = useState(false);
   const resultOptions = ['carried', 'carried unanimously', 'defeated', 'tabled', 'withdrawn'];
   const resultLabel = (motion.result || 'pending').toUpperCase();
@@ -475,17 +475,23 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
     } : {}),
   };
 
-  const addSubsidiaryMenu = (isEditing) ? (
+  // Single combined "+ Motion…" dropdown — offers "New motion" (sibling) and the
+  // nested subsidiary types in one menu.
+  const addMotionMenu = (isEditing && (onAddSibling || !hasSubsidiary)) ? (
     <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
       <select
         value=""
         onChange={e => {
-          const type = e.target.value;
-          if (!type) return;
-          onUpdate('subsidiary', {
-            type, text: '', mover: '', seconder: '',
-            status: 'carried', inFavor: '', opposed: '', absent: '',
-          });
+          const choice = e.target.value;
+          if (!choice) return;
+          if (choice === 'sibling') {
+            onAddSibling && onAddSibling();
+          } else {
+            onUpdate('subsidiary', {
+              type: choice, text: '', mover: '', seconder: '',
+              status: 'carried', inFavor: '', opposed: '', absent: '',
+            });
+          }
           e.target.value = '';
         }}
         style={{
@@ -495,10 +501,15 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
           borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit',
         }}
       >
-        <option value="" disabled>+ Nested motion…</option>
-        {SUBSIDIARY_TYPES.map(t => (
-          <option key={t.key} value={t.key}>{t.menu}</option>
-        ))}
+        <option value="" disabled>+ Motion…</option>
+        {onAddSibling && <option value="sibling">New motion</option>}
+        {!hasSubsidiary && (
+          <optgroup label="Nested motion">
+            {SUBSIDIARY_TYPES.map(t => (
+              <option key={t.key} value={t.key}>{t.menu}</option>
+            ))}
+          </optgroup>
+        )}
       </select>
     </div>
   ) : null;
@@ -524,7 +535,7 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
           )}
           {resultBlock}
         </div>
-        {addSubsidiaryMenu}
+        {addMotionMenu}
       </div>
     );
   }
@@ -646,6 +657,7 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
         <div style={bodyText}>{motion.text}</div>
         {resultBlock}
       </div>
+      {addMotionMenu}
     </div>
   );
 }
@@ -852,8 +864,9 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
       {/* Sub-item motions */}
       {renderMotionsForSub(subIndex)}
 
-      {/* + Motion button — bottom-right, edit mode only */}
-      {isEditing && onAddMotion && (
+      {/* + Motion button — only shown when this sub-item has NO motions yet;
+          once any motion exists, each motion's own "+ Motion…" dropdown takes over. */}
+      {isEditing && onAddMotion && (sub.motions || []).length === 0 && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
           <button
             onClick={() => onAddMotion(subIndex)}
@@ -892,7 +905,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
     + (section.subItems || []).reduce((sum, si) => sum + (si.motions?.length || 0), 0);
 
   // Render a list of motions (used for both direct motions and sub-item motions)
-  const renderMotions = (motions, onUpdate, onDelete, onReorder, keyPrefix) =>
+  const renderMotions = (motions, onUpdate, onDelete, onReorder, onAddSibling, keyPrefix) =>
     motions.map((motion, mi) => (
       <MotionCard
         key={`${keyPrefix}-${motion.id}`}
@@ -902,6 +915,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
         onUpdate={(field, value) => onUpdate(mi, field, value)}
         onDelete={onDelete ? () => onDelete(mi) : undefined}
         onReorder={onReorder}
+        onAddSibling={onAddSibling}
         resolutionNumber={resolutionMap?.[motion.id]}
       />
     ));
@@ -969,6 +983,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
             (mi, field, value) => onUpdateMotion(mi, field, value),
             onRemoveMotion ? (mi) => onRemoveMotion(mi) : undefined,
             onReorderMotion,
+            undefined,
             'direct'
           )}
 
@@ -992,6 +1007,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
                   (mi, field, value) => onUpdateSubItem(subIndex, mi, field, value),
                   onRemoveSubItemMotion ? (mi) => onRemoveSubItemMotion(subIndex, mi) : undefined,
                   onReorderSubItemMotion ? (from, to) => onReorderSubItemMotion(subIndex, from, to) : undefined,
+                  onAddSubItemMotion ? () => onAddSubItemMotion(subIndex) : undefined,
                   `sub-${subIndex}`
                 )
               }
