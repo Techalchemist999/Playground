@@ -241,7 +241,7 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
 //   1) MOTION (original)  2) AMENDMENT (indented, L-connector)  3) MOTION — vote (snaps back)
 // When there's no amendment, renders a single flat card.
 function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
-  const resultOptions = ['carried', 'carried unanimously', 'defeated', 'tabled', 'pending'];
+  const resultOptions = ['carried', 'carried unanimously', 'defeated', 'tabled', 'withdrawn'];
   const resultLabel = (motion.result || 'pending').toUpperCase();
   const a = motion.amendment;
   const hasAmendment = !!a;
@@ -423,8 +423,8 @@ function MotionCard({ motion, isEditing, onUpdate, resolutionNumber }) {
           display: 'flex', justifyContent: 'flex-end', marginTop: 10,
         }}>
           {dispositionBox(
-            (a.status || 'pending').toLowerCase(),
-            ['carried', 'defeated', 'pending'],
+            (a.status || 'carried').toLowerCase(),
+            resultOptions,
             v => onUpdate('amendment', { ...a, status: v }),
           )}
         </div>
