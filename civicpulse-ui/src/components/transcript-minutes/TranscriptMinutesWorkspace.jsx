@@ -558,7 +558,7 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
 }
 
 // ─── Sub-Item Card — nested container with optional discussion ─────────────────────────────
-function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, onUpdateContent, onAddMotion, onReorder, renderMotionsForSub }) {
+function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, onUpdateContent, onUpdateNumber, onAddMotion, onReorder, renderMotionsForSub }) {
   const contentHasText = !!(sub.content && sub.content.trim());
   const [opened, setOpened] = useState(false);
   const editRef = useRef(null);
@@ -575,7 +575,8 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
     });
   };
 
-  const numberPrefix = `${sectionIndex}.${subIndex + 1}`;
+  const autoNumber = `${sectionIndex}.${subIndex + 1}`;
+  const numberPrefix = sub.manualNumber || autoNumber;
 
   const beginNumberEdit = () => {
     setNumberDraft(numberPrefix);
@@ -584,13 +585,13 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
 
   const commitNumberEdit = () => {
     setIsEditingNumber(false);
-    if (!onReorder) return;
-    const match = /(\d+)(?:\.(\d+))?/.exec(numberDraft.trim());
-    if (!match) return;
-    const raw = match[2] ? parseInt(match[2], 10) : parseInt(match[1], 10);
-    if (!Number.isFinite(raw) || raw < 1) return;
-    const target = raw - 1;
-    if (target !== subIndex) onReorder(subIndex, target);
+    if (!onUpdateNumber) return;
+    const typed = numberDraft.trim();
+    // Empty → clear override (back to auto).
+    if (!typed) { onUpdateNumber(subIndex, null); return; }
+    // Same as auto → clear override so renumbering stays automatic.
+    if (typed === autoNumber) { onUpdateNumber(subIndex, null); return; }
+    onUpdateNumber(subIndex, typed);
   };
 
   const INTERACTIVE_TAGS = new Set(['input', 'textarea', 'select', 'button', 'option']);
@@ -786,7 +787,7 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
 }
 
 // ─── Minutes Section ─────────────────────────────
-function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onRemoveMotion, onReorderMotion, onUpdateSubItem, onRemoveSubItemMotion, onReorderSubItemMotion, onUpdateSubItemContent, onUpdateSubItemTitle, onAddSubItemMotion, onReorderSubItem, resolutionMap }) {
+function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onRemoveMotion, onReorderMotion, onUpdateSubItem, onRemoveSubItemMotion, onReorderSubItemMotion, onUpdateSubItemContent, onUpdateSubItemTitle, onUpdateSubItemNumber, onAddSubItemMotion, onReorderSubItem, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const numberedTitle = sectionIndex != null
@@ -889,6 +890,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
               isEditing={isEditing}
               onUpdateTitle={onUpdateSubItemTitle}
               onUpdateContent={onUpdateSubItemContent}
+              onUpdateNumber={onUpdateSubItemNumber}
               onAddMotion={onAddSubItemMotion}
               onReorder={onReorderSubItem}
               renderMotionsForSub={(subIndex) =>
@@ -1384,6 +1386,22 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
     setIsDirty(true);
   }, []);
 
+  const updateSubItemNumber = useCallback((sectionId, subIndex, manualNumber) => {
+    setData(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => {
+        if (s.id !== sectionId) return s;
+        return {
+          ...s,
+          subItems: (s.subItems || []).map((sub, si) =>
+            si === subIndex ? { ...sub, manualNumber: manualNumber || null } : sub
+          ),
+        };
+      }),
+    }));
+    setIsDirty(true);
+  }, []);
+
   const reorderSubItem = useCallback((sectionId, fromIndex, toIndex) => {
     setData(prev => ({
       ...prev,
@@ -1639,6 +1657,7 @@ export default function TranscriptMinutesWorkspace({ session, bgTheme, bgThemes,
                 onReorderSubItemMotion={(si, from, to) => reorderSubItemMotion(section.id, si, from, to)}
                 onUpdateSubItemContent={(si, content) => updateSubItemContent(section.id, si, content)}
                 onUpdateSubItemTitle={(si, title) => updateSubItemTitle(section.id, si, title)}
+                onUpdateSubItemNumber={(si, num) => updateSubItemNumber(section.id, si, num)}
                 onAddSubItemMotion={si => addSubItemMotion(section.id, si)}
                 onRemoveMotion={mi => removeMotion(section.id, mi)}
                 onReorderMotion={(from, to) => reorderMotion(section.id, from, to)}
