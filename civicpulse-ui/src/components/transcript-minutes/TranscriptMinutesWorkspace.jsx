@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { COLORS, SPACING, CATEGORY_COLORS } from '../../styles/tokens';
 import { gradientButtonStyle, outlineButtonStyle, cardStyle } from '../../styles/shared';
 import { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, convertInchesToTwip } from 'docx';
@@ -19,37 +19,67 @@ function stripHtml(html) {
 function SummarizeButton({ editRef, onReplace }) {
   const [busy, setBusy] = useState(false);
   const seedRef = useRef(0);
-  // Selection captured on mousedown — browsers often clear a contentEditable
-  // selection the instant you mousedown on an element outside it, even with
-  // preventDefault, so we snapshot the range before the click happens.
-  const savedSelectionRef = useRef(null);
+  // We track selections as CHARACTER OFFSETS in textContent, not DOM Ranges,
+  // because React's dangerouslySetInnerHTML re-render invalidates Range nodes.
+  // { originalText, startOffset, currentEndOffset } — currentEndOffset grows/shrinks
+  // as we replace with each new summary so repeat clicks still hit the right span.
+  const savedRef = useRef(null);
+
+  // Convert a (node, offset) inside `root` into an absolute char offset in root.textContent.
+  const getTextOffset = (root, node, offset) => {
+    if (!root.contains(node)) return -1;
+    if (node === root) {
+      // Offset is a child-index — collapse prior children to a character count.
+      let total = 0;
+      for (let i = 0; i < offset && i < node.childNodes.length; i++) {
+        total += node.childNodes[i].textContent?.length || 0;
+      }
+      return total;
+    }
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let n;
+    let total = 0;
+    while ((n = walker.nextNode())) {
+      if (n === node) return total + offset;
+      total += n.textContent.length;
+    }
+    return total;
+  };
+
+  // Track the most recent non-collapsed selection inside our editor.
+  useEffect(() => {
+    const handler = () => {
+      const box = editRef.current;
+      if (!box) return;
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      if (range.collapsed) return;
+      if (!box.contains(range.startContainer) || !box.contains(range.endContainer)) return;
+      const text = sel.toString();
+      if (!text.trim()) return;
+      const startOffset = getTextOffset(box, range.startContainer, range.startOffset);
+      const endOffset = getTextOffset(box, range.endContainer, range.endOffset);
+      if (startOffset < 0 || endOffset < 0 || endOffset <= startOffset) return;
+      savedRef.current = { originalText: text, startOffset, currentEndOffset: endOffset };
+    };
+    document.addEventListener('selectionchange', handler);
+    return () => document.removeEventListener('selectionchange', handler);
+  }, [editRef]);
 
   const handleMouseDown = (e) => {
     e.preventDefault();  // don't steal focus from the contentEditable
-    savedSelectionRef.current = null;
-    const box = editRef.current;
-    const sel = window.getSelection();
-    if (!box || !sel || sel.rangeCount === 0) return;
-    const range = sel.getRangeAt(0);
-    if (range.collapsed) return;
-    // Only use the selection if it's actually inside our editor.
-    if (!box.contains(range.startContainer) || !box.contains(range.endContainer)) return;
-    const selText = sel.toString();
-    if (!selText.trim()) return;
-    savedSelectionRef.current = { text: selText, range: range.cloneRange() };
   };
 
   const handleClick = async () => {
     const box = editRef.current;
     if (!box) return;
 
-    const saved = savedSelectionRef.current;
-    savedSelectionRef.current = null;
-
-    let sourceText, targetRange = null;
-    if (saved && saved.text.trim()) {
-      sourceText = saved.text;
-      targetRange = saved.range;
+    const saved = savedRef.current;
+    let sourceText, replaceRange = null;
+    if (saved && saved.originalText.trim()) {
+      sourceText = saved.originalText;
+      replaceRange = [saved.startOffset, saved.currentEndOffset];
     } else {
       sourceText = box.textContent || '';
     }
@@ -62,18 +92,23 @@ function SummarizeButton({ editRef, onReplace }) {
       setBusy(true);
       const summary = await summarizeText(sourceText, { seed });
       if (!summary) return;
-      if (targetRange) {
-        try {
-          targetRange.deleteContents();
-          targetRange.insertNode(document.createTextNode(summary));
-        } catch {
-          // Range became invalid somehow — fall back to whole-box replace.
-          box.textContent = summary;
-        }
+
+      if (replaceRange) {
+        const current = box.textContent || '';
+        const [start, end] = replaceRange;
+        const safeStart = Math.max(0, Math.min(current.length, start));
+        const safeEnd = Math.max(safeStart, Math.min(current.length, end));
+        const newText = current.slice(0, safeStart) + summary + current.slice(safeEnd);
+        savedRef.current = {
+          originalText: saved.originalText,
+          startOffset: safeStart,
+          currentEndOffset: safeStart + summary.length,
+        };
+        onReplace(newText);
       } else {
-        box.textContent = summary;
+        savedRef.current = null;
+        onReplace(summary);
       }
-      onReplace(box.textContent);
     } finally {
       setBusy(false);
     }
