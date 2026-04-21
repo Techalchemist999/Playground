@@ -82,8 +82,8 @@ export type Recusal = {
 export type Amendment = {
 	id: Uid;
 	text: SpanText;
-	mover: PersonName;                   // [REDLINE] see Motioners note below
-	seconder: PersonName;
+	mover: PersonRef;
+	seconder: PersonRef;
 	status: MinutesDisposition;          // [REDLINE] same casing question as Disposition
 	resolutionNumber?: DocumentNumber;   // populated when numbering mode is "start-at" or "continue-from-last"
 	inFavor: PersonRef[];
@@ -113,8 +113,8 @@ export type SubsidiaryType =
 export type Subsidiary = {
 	type: SubsidiaryType;
 	text: SpanText;
-	mover: PersonName;                   // [REDLINE] see Motioners note below
-	seconder: PersonName;
+	mover: PersonRef;
+	seconder: PersonRef;
 	status: MinutesDisposition;          // [REDLINE] same casing question as Disposition
 	resolutionNumber?: DocumentNumber;   // populated when numbering mode is "start-at" or "continue-from-last"
 	inFavor: PersonRef[];
@@ -132,8 +132,8 @@ export type MotionId = string;            // [REDLINE] reuse Traces' `Uid`?
 export type Motion = {
 	id: MotionId;
 	text: SpanText;
-	mover: PersonName;
-	seconder: PersonName;
+	mover: PersonRef;
+	seconder: PersonRef;
 	result: MinutesDisposition;
 	resolutionNumber?: DocumentNumber;   // populated when numbering mode is "start-at" or "continue-from-last"
 	inFavor: PersonRef[];
@@ -144,10 +144,6 @@ export type Motion = {
 	amendments: Amendment[];             // 0 or more; each has its own vote
 	subsidiaries: Subsidiary[];          // 0 or more non-amendment procedural motions (refer, table, etc.)
 };
-// [REDLINE] Motioners shape:
-//   Traces has `Motioners = { movedBy: PersonRef, secondedBy: PersonRef }`.
-//   Our UI stores plain `mover` / `seconder` as PersonName strings.
-//   Should Motion here adopt Traces' `movedBy` / `secondedBy` + PersonRef?
 
 
 // ─── Sub-Item  (e.g. "4.1 Main Street Beautification") ───────
