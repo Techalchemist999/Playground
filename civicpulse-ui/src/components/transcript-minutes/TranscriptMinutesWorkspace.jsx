@@ -107,6 +107,7 @@ function MetadataHeader({ metadata, isEditing, onUpdate }) {
 // ─── Roll Call Section ─────────────────────────────
 function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
   const [isOpen, setIsOpen] = useState(true);
+  const [dropGroup, setDropGroup] = useState(null);
 
   // Group attendees: Present (non-staff, present), Absent (non-staff, absent), Staff
   const staffRoles = ['Staff', 'CAO', 'Clerk'];
@@ -114,16 +115,68 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
   const absent = rollCall.map((a, i) => ({ ...a, _i: i })).filter(a => !a.present && !staffRoles.includes(a.role));
   const staff = rollCall.map((a, i) => ({ ...a, _i: i })).filter(a => staffRoles.includes(a.role));
 
+  const INTERACTIVE_TAGS = new Set(['input', 'textarea', 'select', 'button', 'option']);
+  const isInteractiveTarget = (el) => {
+    if (!el) return false;
+    const tag = el.tagName?.toLowerCase();
+    if (INTERACTIVE_TAGS.has(tag)) return true;
+    if (el.isContentEditable) return true;
+    return false;
+  };
+
+  const groupDropProps = (groupName) => ({
+    onDragOver: (e) => {
+      if (!isEditing) return;
+      if (!e.dataTransfer.types.includes('text/plain')) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (dropGroup !== groupName) setDropGroup(groupName);
+    },
+    onDragLeave: () => { if (dropGroup === groupName) setDropGroup(null); },
+    onDrop: (e) => {
+      if (!isEditing) return;
+      e.preventDefault();
+      setDropGroup(null);
+      const payload = e.dataTransfer.getData('text/plain');
+      if (!payload.startsWith('att:')) return;
+      const idx = parseInt(payload.slice('att:'.length), 10);
+      if (Number.isNaN(idx)) return;
+      const attendee = rollCall[idx];
+      if (!attendee) return;
+      if (groupName === 'present' && (!attendee.present || staffRoles.includes(attendee.role))) {
+        const patch = { present: true };
+        if (staffRoles.includes(attendee.role)) patch.role = 'Councillor';
+        onUpdate(idx, patch);
+      } else if (groupName === 'absent' && (attendee.present || staffRoles.includes(attendee.role))) {
+        const patch = { present: false };
+        if (staffRoles.includes(attendee.role)) patch.role = 'Councillor';
+        onUpdate(idx, patch);
+      } else if (groupName === 'staff' && !staffRoles.includes(attendee.role)) {
+        onUpdate(idx, { role: 'Staff', present: true });
+      }
+    },
+  });
+
   const renderAttendee = (attendee) => {
     const i = attendee._i;
     return (
-      <div key={i} style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        padding: isEditing ? '6px 12px' : '2px 0',
-        background: isEditing ? '#f8fafc' : 'transparent',
-        border: isEditing ? `1px solid ${COLORS.subtleBorder}` : 'none',
-        borderRadius: 8,
-      }}>
+      <div
+        key={i}
+        draggable={isEditing}
+        onDragStart={e => {
+          if (!isEditing) return;
+          if (isInteractiveTarget(e.target)) { e.preventDefault(); return; }
+          e.dataTransfer.setData('text/plain', `att:${i}`);
+          e.dataTransfer.effectAllowed = 'move';
+        }}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: isEditing ? '6px 12px' : '2px 0',
+          background: isEditing ? '#f8fafc' : 'transparent',
+          border: isEditing ? `1px solid ${COLORS.subtleBorder}` : 'none',
+          borderRadius: 8,
+          cursor: isEditing ? 'grab' : 'default',
+        }}>
         {isEditing && (
           <button
             onClick={() => onUpdate(i, { present: !attendee.present })}
@@ -204,21 +257,55 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
         <div style={{ padding: '8px 20px 16px' }}>
           {/* Present */}
           <div style={groupLabelStyle}>Present:</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: isEditing ? 6 : 2 }}>
+          <div
+            {...groupDropProps('present')}
+            style={{
+              display: 'flex', flexDirection: 'column', gap: isEditing ? 6 : 2,
+              minHeight: isEditing ? 28 : undefined,
+              padding: isEditing ? 4 : 0,
+              borderRadius: 8,
+              border: dropGroup === 'present' ? '2px dashed #3b82f6' : (isEditing ? '2px dashed transparent' : 'none'),
+              background: dropGroup === 'present' ? '#eff6ff' : 'transparent',
+              transition: 'background .1s, border-color .1s',
+            }}
+          >
             {present.map(renderAttendee)}
             {present.length === 0 && <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>None</div>}
           </div>
 
           {/* Absent */}
           <div style={groupLabelStyle}>Absent:</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: isEditing ? 6 : 2 }}>
+          <div
+            {...groupDropProps('absent')}
+            style={{
+              display: 'flex', flexDirection: 'column', gap: isEditing ? 6 : 2,
+              minHeight: isEditing ? 28 : undefined,
+              padding: isEditing ? 4 : 0,
+              borderRadius: 8,
+              border: dropGroup === 'absent' ? '2px dashed #3b82f6' : (isEditing ? '2px dashed transparent' : 'none'),
+              background: dropGroup === 'absent' ? '#eff6ff' : 'transparent',
+              transition: 'background .1s, border-color .1s',
+            }}
+          >
             {absent.map(renderAttendee)}
             {absent.length === 0 && !isEditing && <div style={{ fontSize: 12, color: '#94a3b8' }}>—</div>}
+            {absent.length === 0 && isEditing && <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>Drop here to mark absent</div>}
           </div>
 
           {/* Staff */}
           <div style={groupLabelStyle}>Staff:</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: isEditing ? 6 : 2 }}>
+          <div
+            {...groupDropProps('staff')}
+            style={{
+              display: 'flex', flexDirection: 'column', gap: isEditing ? 6 : 2,
+              minHeight: isEditing ? 28 : undefined,
+              padding: isEditing ? 4 : 0,
+              borderRadius: 8,
+              border: dropGroup === 'staff' ? '2px dashed #3b82f6' : (isEditing ? '2px dashed transparent' : 'none'),
+              background: dropGroup === 'staff' ? '#eff6ff' : 'transparent',
+              transition: 'background .1s, border-color .1s',
+            }}
+          >
             {staff.map(renderAttendee)}
             {staff.length === 0 && <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>None</div>}
           </div>
