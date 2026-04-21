@@ -59,6 +59,7 @@ function SummarizeButton({ editRef, onReplace }) {
 
   return (
     <button
+      onMouseDown={e => e.preventDefault()}
       onClick={handleClick}
       disabled={busy}
       title="Summarize / rephrase (highlight to target a section; click again to regenerate)"
@@ -247,7 +248,6 @@ function RollCallSection({ rollCall, isEditing, onUpdate, onAdd, onRemove }) {
           background: isEditing ? '#f8fafc' : 'transparent',
           border: isEditing ? `1px solid ${COLORS.subtleBorder}` : 'none',
           borderRadius: 8,
-          cursor: isEditing ? 'grab' : 'default',
         }}>
         {isEditing && (
           <button
@@ -628,7 +628,6 @@ function MotionCard({ motion, motionIndex, isEditing, onUpdate, onDelete, onReor
 
   const wrapperStyle = {
     marginTop: 10, marginBottom: 6,
-    ...(isEditing && onReorder ? { cursor: 'grab' } : {}),
     ...(isDragTarget ? {
       outline: '2px solid #3b82f6', outlineOffset: 2, borderRadius: 10,
     } : {}),
@@ -903,7 +902,6 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
         borderRadius: 10,
         padding: 14,
         transition: 'background .1s, border-color .1s',
-        ...(isEditing && onReorder ? { cursor: 'grab' } : {}),
       }}>
       {/* Sub-item title — editable in edit mode */}
       {isEditing ? (
