@@ -19,22 +19,40 @@ function stripHtml(html) {
 function SummarizeButton({ editRef, onReplace }) {
   const [busy, setBusy] = useState(false);
   const seedRef = useRef(0);
+  // Selection captured on mousedown — browsers often clear a contentEditable
+  // selection the instant you mousedown on an element outside it, even with
+  // preventDefault, so we snapshot the range before the click happens.
+  const savedSelectionRef = useRef(null);
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();  // don't steal focus from the contentEditable
+    savedSelectionRef.current = null;
+    const box = editRef.current;
+    const sel = window.getSelection();
+    if (!box || !sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+    // Only use the selection if it's actually inside our editor.
+    if (!box.contains(range.startContainer) || !box.contains(range.endContainer)) return;
+    const selText = sel.toString();
+    if (!selText.trim()) return;
+    savedSelectionRef.current = { text: selText, range: range.cloneRange() };
+  };
 
   const handleClick = async () => {
     const box = editRef.current;
     if (!box) return;
-    const sel = window.getSelection();
-    let sourceText = '';
-    let range = null;
 
-    if (sel && sel.rangeCount > 0 && box.contains(sel.anchorNode)) {
-      const selText = sel.toString();
-      if (selText.trim()) {
-        sourceText = selText;
-        range = sel.getRangeAt(0);
-      }
+    const saved = savedSelectionRef.current;
+    savedSelectionRef.current = null;
+
+    let sourceText, targetRange = null;
+    if (saved && saved.text.trim()) {
+      sourceText = saved.text;
+      targetRange = saved.range;
+    } else {
+      sourceText = box.textContent || '';
     }
-    if (!sourceText) sourceText = box.textContent || '';
     if (!sourceText.trim()) return;
 
     const seed = seedRef.current;
@@ -44,10 +62,14 @@ function SummarizeButton({ editRef, onReplace }) {
       setBusy(true);
       const summary = await summarizeText(sourceText, { seed });
       if (!summary) return;
-      if (range) {
-        range.deleteContents();
-        range.insertNode(document.createTextNode(summary));
-        sel.removeAllRanges();
+      if (targetRange) {
+        try {
+          targetRange.deleteContents();
+          targetRange.insertNode(document.createTextNode(summary));
+        } catch {
+          // Range became invalid somehow — fall back to whole-box replace.
+          box.textContent = summary;
+        }
       } else {
         box.textContent = summary;
       }
@@ -59,10 +81,10 @@ function SummarizeButton({ editRef, onReplace }) {
 
   return (
     <button
-      onMouseDown={e => e.preventDefault()}
+      onMouseDown={handleMouseDown}
       onClick={handleClick}
       disabled={busy}
-      title="Summarize / rephrase (highlight to target a section; click again to regenerate)"
+      title="Summarize / rephrase (highlight text first to target just that section; click again to regenerate)"
       style={{
         position: 'absolute', right: 6, bottom: 6,
         display: 'inline-flex', alignItems: 'center', gap: 4,
