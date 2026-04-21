@@ -121,21 +121,18 @@ function SummarizeButton({ editRef, onReplace }) {
       disabled={busy}
       title="Summarize / rephrase (highlight text first to target just that section; click again to regenerate)"
       style={{
-        position: 'absolute', right: 6, bottom: 6,
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        padding: '3px 8px', fontSize: 10, fontWeight: 700,
-        color: busy ? COLORS.mutedText : COLORS.secondaryText,
+        position: 'absolute', right: 4, bottom: 4,
+        width: 22, height: 22,
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        padding: 0, fontSize: 12, lineHeight: 1,
         background: '#fff',
         border: `1px solid ${COLORS.primaryBorder}`,
-        borderRadius: 999, cursor: busy ? 'wait' : 'pointer',
+        borderRadius: '50%', cursor: busy ? 'wait' : 'pointer',
         fontFamily: 'inherit',
-        opacity: busy ? 0.7 : 1,
+        opacity: busy ? 0.6 : 1,
       }}
-      onMouseEnter={e => { if (!busy) e.currentTarget.style.color = COLORS.headingText; }}
-      onMouseLeave={e => { if (!busy) e.currentTarget.style.color = COLORS.secondaryText; }}
     >
-      <span style={{ fontSize: 11 }}>✨</span>
-      {busy ? 'Rephrasing…' : 'Summarize'}
+      {busy ? '…' : '🪄'}
     </button>
   );
 }
@@ -1038,6 +1035,7 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
                 fontSize: 12.5, color: COLORS.bodyText, lineHeight: 1.7,
                 fontStyle: 'italic', outline: 'none',
                 padding: 10, paddingBottom: 28, borderRadius: 6,
+                /* space reserved for the 🪄 button at bottom-right */
                 border: `1px dashed ${COLORS.primaryBorder}`,
                 background: '#fff',
                 minHeight: 36,
@@ -1195,6 +1193,7 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
                   style={{
                     fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, outline: 'none',
                     minHeight: 30, padding: 10, paddingBottom: 28, borderRadius: 6,
+                /* space reserved for the 🪄 button at bottom-right */
                     border: `1px dashed ${COLORS.primaryBorder}`, background: '#fafbfc',
                   }}
                 />
