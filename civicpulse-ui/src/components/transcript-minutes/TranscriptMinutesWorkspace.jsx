@@ -3,11 +3,83 @@ import { COLORS, SPACING, CATEGORY_COLORS } from '../../styles/tokens';
 import { gradientButtonStyle, outlineButtonStyle, cardStyle } from '../../styles/shared';
 import { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, convertInchesToTwip } from 'docx';
 import { saveAs } from 'file-saver';
+import { summarizeText } from '../../utils/summarize';
 
 function stripHtml(html) {
   const div = document.createElement('div');
   div.innerHTML = html || '';
   return div.textContent || '';
+}
+
+// ─── Summarize / Rephrase button ─────────────────────────────
+// Appears at the bottom-right of a filled discussion box in edit mode.
+// Click once: summarizes either the current text selection inside the box,
+// or the whole box if nothing is selected. Each subsequent click uses a
+// higher `seed` so the LLM returns a fresh variant.
+function SummarizeButton({ editRef, onReplace }) {
+  const [busy, setBusy] = useState(false);
+  const seedRef = useRef(0);
+
+  const handleClick = async () => {
+    const box = editRef.current;
+    if (!box) return;
+    const sel = window.getSelection();
+    let sourceText = '';
+    let range = null;
+
+    if (sel && sel.rangeCount > 0 && box.contains(sel.anchorNode)) {
+      const selText = sel.toString();
+      if (selText.trim()) {
+        sourceText = selText;
+        range = sel.getRangeAt(0);
+      }
+    }
+    if (!sourceText) sourceText = box.textContent || '';
+    if (!sourceText.trim()) return;
+
+    const seed = seedRef.current;
+    seedRef.current += 1;
+
+    try {
+      setBusy(true);
+      const summary = await summarizeText(sourceText, { seed });
+      if (!summary) return;
+      if (range) {
+        range.deleteContents();
+        range.insertNode(document.createTextNode(summary));
+        sel.removeAllRanges();
+      } else {
+        box.textContent = summary;
+      }
+      onReplace(box.textContent);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={busy}
+      title="Summarize / rephrase (highlight to target a section; click again to regenerate)"
+      style={{
+        position: 'absolute', right: 6, bottom: 6,
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        padding: '3px 8px', fontSize: 10, fontWeight: 700,
+        color: busy ? COLORS.mutedText : COLORS.secondaryText,
+        background: '#fff',
+        border: `1px solid ${COLORS.primaryBorder}`,
+        borderRadius: 999, cursor: busy ? 'wait' : 'pointer',
+        fontFamily: 'inherit',
+        opacity: busy ? 0.7 : 1,
+      }}
+      onMouseEnter={e => { if (!busy) e.currentTarget.style.color = COLORS.headingText; }}
+      onMouseLeave={e => { if (!busy) e.currentTarget.style.color = COLORS.secondaryText; }}
+    >
+      <span style={{ fontSize: 11 }}>✨</span>
+      {busy ? 'Rephrasing…' : 'Summarize'}
+    </button>
+  );
 }
 
 // ─── Metadata Header ─────────────────────────────
@@ -757,6 +829,7 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
   const [isEditingNumber, setIsEditingNumber] = useState(false);
   const [numberDraft, setNumberDraft] = useState('');
   const [isDragTarget, setIsDragTarget] = useState(false);
+  const [editorHasText, setEditorHasText] = useState(contentHasText);
 
   const showBox = contentHasText || opened;
 
@@ -898,21 +971,30 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
           Shows "+ Add Discussion" in edit mode when no discussion yet. */}
       {isEditing ? (
         showBox ? (
-          <div
-            ref={editRef}
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={e => onUpdateContent(subIndex, e.currentTarget.textContent)}
-            dangerouslySetInnerHTML={{ __html: sub.content || '' }}
-            style={{
-              fontSize: 12.5, color: COLORS.bodyText, lineHeight: 1.7,
-              fontStyle: 'italic', outline: 'none',
-              padding: 10, borderRadius: 6,
-              border: `1px dashed ${COLORS.primaryBorder}`,
-              background: '#fff',
-              minHeight: 36, marginBottom: 10,
-            }}
-          />
+          <div style={{ position: 'relative', marginBottom: 10 }}>
+            <div
+              ref={editRef}
+              contentEditable
+              suppressContentEditableWarning
+              onInput={e => setEditorHasText(!!e.currentTarget.textContent.trim())}
+              onBlur={e => onUpdateContent(subIndex, e.currentTarget.textContent)}
+              dangerouslySetInnerHTML={{ __html: sub.content || '' }}
+              style={{
+                fontSize: 12.5, color: COLORS.bodyText, lineHeight: 1.7,
+                fontStyle: 'italic', outline: 'none',
+                padding: 10, paddingBottom: 28, borderRadius: 6,
+                border: `1px dashed ${COLORS.primaryBorder}`,
+                background: '#fff',
+                minHeight: 36,
+              }}
+            />
+            {editorHasText && (
+              <SummarizeButton
+                editRef={editRef}
+                onReplace={(t) => onUpdateContent(subIndex, t)}
+              />
+            )}
+          </div>
         ) : (
           <button
             onClick={handleAdd}
@@ -982,6 +1064,8 @@ function SubItemCard({ sub, sectionIndex, subIndex, isEditing, onUpdateTitle, on
 // ─── Minutes Section ─────────────────────────────
 function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onUpdateMotion, onRemoveMotion, onReorderMotion, onUpdateSubItem, onRemoveSubItemMotion, onReorderSubItemMotion, onUpdateSubItemContent, onUpdateSubItemTitle, onUpdateSubItemNumber, onAddSubItemMotion, onReorderSubItem, resolutionMap }) {
   const [isOpen, setIsOpen] = useState(true);
+  const sectionEditRef = useRef(null);
+  const [sectionEditorHasText, setSectionEditorHasText] = useState(false);
 
   const numberedTitle = sectionIndex != null
     ? `${sectionIndex}. ${(section.title || '').toUpperCase()}`
@@ -1045,18 +1129,27 @@ function MinutesSection({ section, sectionIndex, isEditing, onUpdateContent, onU
           {/* Section-level discussion text */}
           {hasContent && (
             isEditing ? (
-              <div
-                contentEditable
-                suppressContentEditableWarning
-                onBlur={e => onUpdateContent(e.currentTarget.innerHTML)}
-                dangerouslySetInnerHTML={{ __html: section.content }}
-                style={{
-                  fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, outline: 'none',
-                  minHeight: 30, padding: 10, borderRadius: 6,
-                  border: `1px dashed ${COLORS.primaryBorder}`, background: '#fafbfc',
-                  marginBottom: 12,
-                }}
-              />
+              <div style={{ position: 'relative', marginBottom: 12 }}>
+                <div
+                  ref={sectionEditRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  onInput={e => setSectionEditorHasText(!!e.currentTarget.textContent.trim())}
+                  onBlur={e => onUpdateContent(e.currentTarget.innerHTML)}
+                  dangerouslySetInnerHTML={{ __html: section.content }}
+                  style={{
+                    fontSize: 13, color: COLORS.bodyText, lineHeight: 1.8, outline: 'none',
+                    minHeight: 30, padding: 10, paddingBottom: 28, borderRadius: 6,
+                    border: `1px dashed ${COLORS.primaryBorder}`, background: '#fafbfc',
+                  }}
+                />
+                {(sectionEditorHasText || !!stripHtml(section.content).trim()) && (
+                  <SummarizeButton
+                    editRef={sectionEditRef}
+                    onReplace={(t) => onUpdateContent(t)}
+                  />
+                )}
+              </div>
             ) : (
               <div
                 dangerouslySetInnerHTML={{ __html: section.content }}
