@@ -52,20 +52,19 @@ export type Attendee = {
 
 // ─── Disposition ──────────────────────────────────────────────
 
-export type MinutesDisposition =
+export type Disposition =
 	| "carried"
 	| "carried unanimously"
 	| "defeated"
 	| "tabled"
 	| "withdrawn";
-// [REDLINE] Traces' Disposition is PascalCase and has two extra values:
-//   "Carried" | "CarriedUnanimously" | "Defeated" | "Withdrawn"
-//   | "DiedNoSecond" | "ProcedurallyHandled"
-// Neither of the extras is tracked in the minutes-gen UI today.
-// Also: Traces has a separate `SubDisposition` ("Referred" | "Postponed" |
-// "Deferred" | "Rescinded" | "Reconsidered" | "Tabled") — note "Tabled" lives
-// there, not in Disposition. Recommend aligning casing; decide whether
-// `tabled` here should move to a SubDisposition.
+
+export type SubDisposition =
+	| "referred"
+	| "postponed"
+	| "deferred"
+	| "rescinded"
+	| "reconsidered";
 
 
 // ─── Recusal (Conflict of Interest) ───────────────────────────
@@ -84,7 +83,7 @@ export type Amendment = {
 	text: SpanText;
 	mover: PersonRef;
 	seconder: PersonRef;
-	status: MinutesDisposition;          // [REDLINE] same casing question as Disposition
+	status: Disposition;
 	resolutionNumber?: DocumentNumber;   // populated when numbering mode is "start-at" or "continue-from-last"
 	inFavor: PersonRef[];
 	opposed: PersonRef[];
@@ -104,18 +103,13 @@ export type SubsidiaryType =
 	| "table"
 	| "withdraw"
 	| "previous-question";
-// [REDLINE] Related to but distinct from Traces' `SubDisposition`:
-//   SubDisposition  = what HAPPENED to a main motion procedurally
-//   SubsidiaryType  = the TYPE of the nested procedural motion itself
-// e.g. a subsidiary of type "table" that CARRIED → main motion's SubDisposition is "Tabled".
-// Options: keep two separate enums, or derive one from the other.
 
 export type Subsidiary = {
 	type: SubsidiaryType;
 	text: SpanText;
 	mover: PersonRef;
 	seconder: PersonRef;
-	status: MinutesDisposition;          // [REDLINE] same casing question as Disposition
+	status: Disposition;
 	resolutionNumber?: DocumentNumber;   // populated when numbering mode is "start-at" or "continue-from-last"
 	inFavor: PersonRef[];
 	opposed: PersonRef[];
@@ -134,7 +128,7 @@ export type Motion = {
 	text: SpanText;
 	mover: PersonRef;
 	seconder: PersonRef;
-	result: MinutesDisposition;
+	result: Disposition;
 	resolutionNumber?: DocumentNumber;   // populated when numbering mode is "start-at" or "continue-from-last"
 	inFavor: PersonRef[];
 	opposed: PersonRef[];
@@ -514,22 +508,6 @@ export type ArtifactType = ArtifactVariant["artifactType"];
 
 // ─── Enums & Literal Types ─────────────────────────────────
 
-export type Disposition =
-	| "Carried"
-	| "CarriedUnanimously"
-	| "Defeated"
-	| "Withdrawn"
-	| "DiedNoSecond"
-	| "ProcedurallyHandled";
-
-export type SubDisposition =
-	| "Referred"
-	| "Postponed"
-	| "Deferred"
-	| "Rescinded"
-	| "Reconsidered"
-	| "Tabled";
-
 
 export type BylawStatus = "InForce" | "Repealed";
 export type PolicyOrResolutionStatus = "Active" | "Repealed";
@@ -546,7 +524,6 @@ export type Minutes = {
 	opposer?: PersonRef;
 	votes?: VoteCount;
 	motionType?: MotionType;
-	attendees?: MeetingAttendees;
 };
 
 export type Motioners = {
@@ -561,11 +538,6 @@ export type MotionType =
 	| "Resolution"
 	| "ConsentAgenda";
 
-export type MeetingAttendees = {
-	present: PersonRef[];
-	absent: PersonRef[];
-	nonVoting: PersonRef[];
-};
 
 
 export type StaffReport = {
